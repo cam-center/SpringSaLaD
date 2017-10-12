@@ -9,15 +9,19 @@
 
 package langevinsetup;
 
-import helpersetup.IOHelp;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.io.*;
 import java.util.Scanner;
+
+import javax.vecmath.GMatrix;
+
+import helpersetup.IOHelp;
 
 public class Molecule {
     
     // Name of the molecule
     private String name;
+    private String filename;    
     
     // Default location is inside
     private String location = SystemGeometry.INSIDE;
@@ -57,6 +61,14 @@ public class Molecule {
         // Make the annotation
         annotation = new Annotation();
     }
+    
+    public void setFile(String s){
+    	this.filename = s;
+    }
+    public String getFilename(){
+    	return this.filename;
+    }
+    
     
     /* ****************  METHODS FOR HANDLING SITE TYPES  ****************/
     
@@ -419,7 +431,7 @@ public class Molecule {
     public boolean is3D(){
         boolean is3d = false;
         for(Site site : siteArray){
-            if(site.getX() > 1e-4){
+            if(site.getX() > 1e-6 || site.getX() < -1*(1e-6)){
                 is3d = true;
                 break;
             }
@@ -433,6 +445,46 @@ public class Molecule {
         for(Site site : siteArray){
             site.translate(dx, dy, dz);
         }
+    }
+    
+    public double getMaxX(){
+    	double m1 = Integer.MIN_VALUE; //store max value
+    	double m2 = Integer.MAX_VALUE; //store min value
+    	for(Site site : siteArray){
+            if(m1 < site.getType().getRadius() + site.getX())
+            	m1 =  site.getType().getRadius() + site.getX();
+            if(m2 > site.getX() - site.getType().getRadius())
+            	m2 = site.getX() - site.getType().getRadius();
+        }
+    	m2 = m2 * -1;
+    	
+    	return m2 > m1 ? m2 : m1;
+    }
+    public double getMaxY(){
+    	double m1 = Integer.MIN_VALUE; //store max value
+    	double m2 = Integer.MAX_VALUE; //store min value
+    	for(Site site : siteArray){
+            if(m1 < site.getType().getRadius() + site.getY())
+            	m1 =  site.getType().getRadius() + site.getY();
+            if(m2 > site.getY() - site.getType().getRadius())
+            	m2 =  site.getY() - site.getType().getRadius();
+        }
+    	m2 = m2 * -1;
+    	
+    	return m2 > m1 ? m2 : m1;
+    }
+    public double getMaxZ(){
+    	double m1 = Integer.MIN_VALUE; //store max value
+    	double m2 = Integer.MAX_VALUE; //store min value
+    	for(Site site : siteArray){
+            if(m1 < site.getType().getRadius() + site.getZ())
+            	m1 =  site.getType().getRadius() + site.getZ();
+            if(m2 > site.getZ() - site.getType().getRadius())
+            	m2 = site.getZ() - site.getType().getRadius();
+        }
+    	m2 = m2 * -1;
+    	
+    	return m2 > m1 ? m2 : m1;
     }
     
     /*****************************************************************\
@@ -465,9 +517,9 @@ public class Molecule {
             p.println(InitialCondition.RANDOM);
         } else {
             p.println(InitialCondition.SET);
-            p.println("     x: " + IOHelp.printArrayList(initialCondition.getXIC(), 3));
-            p.println("     y: " + IOHelp.printArrayList(initialCondition.getYIC(), 3));
-            p.println("     z: " + IOHelp.printArrayList(initialCondition.getZIC(), 3));
+            p.println("     x: " + IOHelp.printArrayList(initialCondition.getXIC(), 5));
+            p.println("     y: " + IOHelp.printArrayList(initialCondition.getYIC(), 5));
+            p.println("     z: " + IOHelp.printArrayList(initialCondition.getZIC(), 5));
         }
         p.println("}");
         p.println();
@@ -720,5 +772,37 @@ public class Molecule {
         return molecules;
         // </editor-fold>
     }
+
+	public static void loadMoleculesFiles(String lines, ArrayList<Molecule> g_molecules) {
+		Scanner sc = new Scanner(lines);
+        sc.useDelimiter("MOLECULE:");
+        ArrayList<String> moleculeStrings = new ArrayList<>();
+        while(sc.hasNext()){
+            moleculeStrings.add(sc.next());
+        }
+        sc.close();
+        
+        for(String data : moleculeStrings){
+        	Scanner sc2 = new Scanner(data);
+            sc2.useDelimiter(" ");
+            String molName = sc2.next();
+            String finalName = sc2.next();
+            String fName = "";
+            while(sc2.hasNext()) {
+            	fName = sc2.next();
+            	finalName = finalName + " " + fName;
+            }   
+            finalName = finalName.trim();
+            
+            for(Molecule m: g_molecules){
+            	if(m.getName().equals(molName)){
+            		m.setFile(finalName);
+            		break;
+            	}
+            }
+            
+            sc2.close();
+        }
+	}
     
 }

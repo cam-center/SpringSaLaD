@@ -156,12 +156,13 @@ public class LauncherFrame extends JFrame implements ActionListener,
         }
         
         else if(source == runSimButton){
-            if(Simulation.ENGINE_WARMED_UP){
-                runSimulation();
-            } else {
-                WarmUpWindow win = Simulation.warmUpSimulationEngine();
-                win.addWindowListener(this);
-            }
+        	runSimulation();
+//            if(Simulation.ENGINE_WARMED_UP){
+//                runSimulation();
+//            } else {
+//                WarmUpWindow win = Simulation.warmUpSimulationEngine();
+//                win.addWindowListener(this);
+//            }
         }
         
         else if(source == viewProgressButton){

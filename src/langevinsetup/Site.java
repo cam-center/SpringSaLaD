@@ -6,10 +6,13 @@
 
 package langevinsetup;
 
-import helpersetup.IOHelp;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.io.*;
+
+import helpersetup.IOHelp;
 
 public class Site {
   
@@ -290,6 +293,13 @@ public class Site {
         g.drawString("X", xint - rint, yint + rint);
     }
     
+    public boolean equals(Site s){
+    	if(this.getPosition() == s.getPosition()){
+    		return true;
+    	}
+    	return false;
+    }
+    
     /*********************************************************************\
      *                      FILE IO METHODS                              *
      * @param p                                                          *
@@ -299,7 +309,7 @@ public class Site {
         p.println("SITE " + this.getIndex() + " : " + this.location + " : Initial State '" + initialState + "'");
         p.print("          ");
         this.getType().writeType(p);
-        p.println("          " + "x " + IOHelp.DF[3].format(getX()) + " y " + IOHelp.DF[3].format(getY()) + " z " + IOHelp.DF[3].format(getZ()) + " ");
+        p.println("          " + "x " + IOHelp.DF[5].format(getX()) + " y " + IOHelp.DF[5].format(getY()) + " z " + IOHelp.DF[5].format(getZ()) + " ");
     }
     
 }

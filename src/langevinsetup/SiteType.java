@@ -174,7 +174,7 @@ public class SiteType {
     
     public void writeType(PrintWriter p){
         p.print("TYPE: Name \"" + getName() + "\"");
-        p.print(" Radius " + IOHelp.DF[3].format(getRadius()) + " D " + IOHelp.DF[3].format(getD()) + " Color " + getColorName());
+        p.print(" Radius " + IOHelp.DF[5].format(getRadius()) + " D " + IOHelp.DF[3].format(getD()) + " Color " + getColorName());
         p.print(" STATES ");
         for (State state : states) {
             p.print("\"" + state + "\"" + " ");

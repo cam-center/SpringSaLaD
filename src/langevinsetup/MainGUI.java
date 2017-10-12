@@ -6,17 +6,35 @@
 
 package langevinsetup;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.swing.Box;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.JTree;
+import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+
 import helpersetup.Fonts;
 import helpersetup.IOHelp;
 import helpersetup.PopUp;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.tree.*;
-
+import jmolintegration.Integration;
 import runlauncher.LauncherFrame;
 import runlauncher.SimulationManager;
 
@@ -251,7 +269,6 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
                 topPanel.add(p);
                 topPanel.validate();
                 topPanel.repaint();
-                
                 switchTo2D();
             }
             
@@ -319,7 +336,7 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         
         if(molecule != null){
             if(molecule.is3D()){
-                PopUp.error("The molecule is no longer 2D and must be edited in the 3D window.");
+                PopUp.information("The molecule must be edited in the 3D window.");
                 switchTo3D();
             } else {
                 bottomPanel.removeAll();
@@ -372,24 +389,67 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
             drawPanel3D.addMoleculeSelectionListener(moleculeEditor);
             moleculeEditor.addMoleculeSelectionListener(drawPanel3D);
             moleculeEditor.removeMoleculeSelectionListener(drawPanel);
+            System.out.println("Main");
+           
+            //view in jmol
+            Integration integration = new Integration(molecule.getFilename());
+            // integrate
+            drawPanel3D.setintListener(e -> {
+            	//update integration knowledge of rotation but don't notify drawpanel (false)
+            	integration.rotationOccurred(new RotationUpdateEvent(((RotationUpdateEvent) e).getM3(), false));
+            });
+            
+            integration.setdp3dListener(e -> {
+            	//TODO Fill
+            });
             
             frame.addWindowListener(new WindowAdapter(){
                 @Override
                 public void windowClosed(WindowEvent event){
                     tree.setEnabled(true);
                     edit3D.setEnabled(true);
-                    edit2D.setEnabled(true);
+                    edit2D.setEnabled(false);
+                    
+                    bottomPanel.removeAll();
+                    bottomPanel.setLayout(new BorderLayout());
+                    
+                    JPanel panel = new JPanel();
+                    panel.setBackground(Color.GRAY);
+                    bottomPanel.add(panel, "Center");
+                    
+                    bottomPanel.add(editorDimensionPanel, "South");
+                    bottomPanel.validate();
+                    bottomPanel.repaint();
+                    
+                    event.getWindow().dispose();
+                    
+                    if(!drawPanel3D.getOverlaps().isEmpty()){
+                    	HashMap<Site, Integer> overlapMap = drawPanel3D.getOverlaps();
+                    	String message = "Please re-open editor and resolve overlap:";
+                    	
+                    	for(Site s: overlapMap.keySet()) {
+                    		message = message + " Site " + s.getIndex() + "("+ overlapMap.get(s)+")";
+                    	}
+                    	PopUp.information(message);
+                    }
+                    
+                    // close jmol window
+                    integration.closeWindow();
+                    System.out.println("closed");
                 }
             });
             
             frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             frame.setLocationRelativeTo(null);
-            frame.setSize(700,400);
+            frame.setSize(700,700);
             frame.setVisible(true);
+      
+            
+            
+            
         }
         // </editor-fold>
     }
-    
       
     /**
      * This method is called from within the constructor to initialize the form.
@@ -417,7 +477,8 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         exitItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
         simulationManagerItem = new javax.swing.JMenuItem();
-
+        PDBAdderItem = new javax.swing.JMenuItem();
+        
         edit2D.setText("Edit in 2D");
         edit2D.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -484,7 +545,17 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
             }
         });
         fileMenu.add(loadItem);
-
+        
+        //
+        PDBAdderItem.setText("Add PDB from file");
+        PDBAdderItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	PDBAdderItemActionPerformed(evt);
+            }
+        });
+        fileMenu.add(PDBAdderItem);
+        //
+        
         closeItem.setText("Close");
         closeItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -512,6 +583,8 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
             }
         });
         jMenu1.add(simulationManagerItem);
+        
+        
 
         jMenuBar1.add(jMenu1);
 
@@ -619,7 +692,123 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         }
         // </editor-fold>
     }//GEN-LAST:event_loadItemActionPerformed
+    
+    private static boolean fileFormatOkay(String filename){
+		if(filename.length() > 4){
+			if(filename.charAt(filename.length()-4) == '.'){
+				String end = filename.substring(filename.length() - 3);
+				if(end.equals("pdb") || end.equals("cif")){
+					return true;
+				}
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+		return false;
+	}
+    
+    private void PDBAdderItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadItemActionPerformed
+        // <editor-fold defaultstate="collapsed" desc="Method Code">
+        JFileChooser jfc = new JFileChooser(g.getDefaultFolder());
+        int returnValue = jfc.showOpenDialog(this);
+        if(returnValue == JFileChooser.APPROVE_OPTION){
+        	//check file format is okay
+        	if(fileFormatOkay(jfc.getSelectedFile().getName())){
+        	
+	        	//Save current location (check if null first)
+	        	String parent = null;
+	        	if(g.getFile() != null && g.getFile().getParent() != null){
+	        		parent = g.getFile().getParent();
+	        	}
 
+	        	//change to new location       	
+	        	g.setFile(new File(jfc.getSelectedFile().getParentFile(), jfc.getSelectedFile().getName()));
+	            
+	        	String k= JOptionPane.showInputDialog("Please input number of sites wanted: ");
+	            int goodK = 1;
+	            boolean kIsInt = false;
+	            while(!kIsInt){
+	            	try{
+	            		goodK = Integer.parseInt(k);
+	            		kIsInt = true;
+	            	}catch (Exception e) {
+	            		k= JOptionPane.showInputDialog("Not a number. Please input number of sites wanted: ");
+	            		kIsInt = false; 
+	            	}
+	            }
+	            
+	            
+	            JTextField xField = new JTextField(5);
+	            JTextField yField = new JTextField(5);
+	            JTextField zField = new JTextField(5);
+	            boolean noMore = false;
+	            int numFixed = 0;           
+	            
+	            ArrayList<AtomPDB> fixedCenters = new ArrayList<>();
+	            
+	            while(numFixed < goodK && !noMore){
+	            	JPanel myPanel = new JPanel();
+	            	myPanel.add(new JLabel("Press \"OK\" to confirm or \"Cancel\" to finish.   "));
+	            	myPanel.add(new JLabel("x:"));
+	            	myPanel.add(xField);
+	            	myPanel.add(Box.createHorizontalStrut(15)); // a spacer
+	            	myPanel.add(new JLabel("y:"));
+	            	myPanel.add(yField);
+	            	myPanel.add(Box.createHorizontalStrut(15)); // a spacer
+	            	myPanel.add(new JLabel("z:"));
+	            	myPanel.add(zField);
+	            	
+	            	int n = JOptionPane.showConfirmDialog(null, myPanel, 
+	            			"Enter fixed site values", JOptionPane.OK_CANCEL_OPTION);
+	            	
+	            	if(n == JOptionPane.CANCEL_OPTION){
+	            		noMore = true;
+	            	}else{
+	            	//error handling if ok is hit and x,y or z is bad or missing
+	            		try{
+	            			fixedCenters.add(new AtomPDB(-1, 
+			            			Double.parseDouble(xField.getText()), 
+			            			Double.parseDouble(yField.getText()),
+			            			Double.parseDouble(zField.getText())));
+	            			
+	            			numFixed++;
+		            	}catch (Exception e) {
+		            		PopUp.information("Could not parse center, ignoring x,y,z values");          
+		            	}
+		            	
+		            	xField.setText("");
+		            	yField.setText("");
+		            	zField.setText("");	
+	            	}
+	            }
+	            
+	         	//open and process file
+	            System.out.println("--- begin molecule construction...");
+	            PDBHandler pdb = new PDBHandler(g.getFile().getParent() + File.separator + g.getFile().getName(), goodK, fixedCenters);
+	            System.out.println("--- finished.");
+	            
+	            //revert location (if not null)
+	            if(parent != null){
+	            	g.setDefaultFolder(new File(parent));
+	            }
+	            
+	            Molecule mol = pdb.getMol();
+	            mol.setFile(g.getFile().getParent() + File.separator + g.getFile().getName());
+	            g.addMolecule(mol);
+	            treePane.addMolecule(mol);
+        	}
+        	else{
+        		PopUp.error("Please load either a \"*.pdb\" or a \"*.cif\" file");
+        	}
+        }
+        // </editor-fold>
+    }//GEN-LAST:event_loadItemActionPerformed
+
+    
+    
+    
     private void closeItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeItemActionPerformed
         // <editor-fold defaultstate="collapsed" desc="Method Code">
         for(Molecule molecule : g.getMolecules()){
@@ -718,6 +907,7 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
     private javax.swing.JMenuItem saveAsItem;
     private javax.swing.JMenuItem saveItem;
     private javax.swing.JMenuItem simulationManagerItem;
+    private javax.swing.JMenuItem PDBAdderItem;
     private javax.swing.JPanel topPanel;
     private langevinsetup.SystemTree treePane;
     private javax.swing.JSplitPane verticalSplitPane;

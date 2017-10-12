@@ -39,7 +39,7 @@ public class LinkCylinder extends BranchGroup {
         
         this.link = link;
         
-        cylinder = new Cylinder(0.2f, 1f);
+        cylinder = new Cylinder(0.04f, 1f);
         cylinder.setPickable(true);
         cylinder.setCapability(Cylinder.ENABLE_PICK_REPORTING);
         cylinder.setCapability(Cylinder.ENABLE_APPEARANCE_MODIFY);

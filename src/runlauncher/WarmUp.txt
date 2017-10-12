@@ -1,0 +1,78 @@
+*** TIME INFORMATION ***
+Total time: 3.00E-3
+dt: 1.00E-8
+dt_spring: 1.00E-9
+dt_data: 1.00E0
+dt_image: 1.00E0
+
+*** SYSTEM INFORMATION ***
+L_x: 0.2
+L_y: 0.2
+L_z_out: 0.01
+L_z_in: 0.2
+Partition Nx: 10
+Partition Ny: 10
+Partition Nz: 10
+
+*** MOLECULES ***
+
+MOLECULE: "Looper" Intracellular Number 2 Site_Types 3 Total_Sites 5 Total_Links 4 is2D false
+{
+     TYPE: Name "StickyEnd" Radius 2.000 D 2.000 Color GREEN STATES "State0" 
+     TYPE: Name "Inert" Radius 2.000 D 2.000 Color LIGHT_GRAY STATES "State0" 
+     TYPE: Name "BindingSite" Radius 2.000 D 2.000 Color ORANGE STATES "State0" 
+
+     SITE 0 : Intracellular : Initial State 'State0'
+          TYPE: Name "BindingSite" Radius 2.000 D 2.000 Color ORANGE STATES "State0" 
+          x 0.000 y 4.000 z 11.300 
+     SITE 1 : Intracellular : Initial State 'State0'
+          TYPE: Name "BindingSite" Radius 2.000 D 2.000 Color ORANGE STATES "State0" 
+          x 0.000 y 4.000 z 21.300 
+     SITE 2 : Intracellular : Initial State 'State0'
+          TYPE: Name "Inert" Radius 2.000 D 2.000 Color LIGHT_GRAY STATES "State0" 
+          x 0.000 y 4.050 z 16.300 
+     SITE 3 : Intracellular : Initial State 'State0'
+          TYPE: Name "Inert" Radius 2.000 D 2.000 Color LIGHT_GRAY STATES "State0" 
+          x 0.000 y 4.000 z 26.300 
+     SITE 4 : Intracellular : Initial State 'State0'
+          TYPE: Name "StickyEnd" Radius 2.000 D 2.000 Color GREEN STATES "State0" 
+          x 0.000 y 4.000 z 31.300 
+
+     LINK: Site 0 ::: Site 2
+     LINK: Site 2 ::: Site 1
+     LINK: Site 3 ::: Site 1
+     LINK: Site 3 ::: Site 4
+}
+
+*** CREATION/DECAY REACTIONS ***
+
+'Looper' : kcreate 0.0 kdecay 0.0
+
+*** STATE TRANSITION REACTIONS ***
+
+
+*** BIMOLECULAR BINDING REACTIONS ***
+
+'Sticky End Binding'       'Looper' : 'StickyEnd' : 'State0'  +  'Looper' : 'BindingSite' : 'State0'  kon 20.0  koff 20.0  Bond_Length 1.0
+
+*** MOLECULE COUNTERS ***
+
+'Looper' : Measure None 
+
+*** STATE COUNTERS ***
+
+'Looper' : 'StickyEnd' : 'State0' : Measure None 
+'Looper' : 'Inert' : 'State0' : Measure None 
+'Looper' : 'BindingSite' : 'State0' : Measure None 
+
+*** BOND COUNTERS ***
+
+'Sticky End Binding' : Counted
+
+*** SITE PROPERTY COUNTERS ***
+
+'Looper' Site 0 :  Track Properties true
+'Looper' Site 1 :  Track Properties true
+'Looper' Site 2 :  Track Properties false
+'Looper' Site 3 :  Track Properties false
+'Looper' Site 4 :  Track Properties false

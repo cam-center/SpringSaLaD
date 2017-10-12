@@ -6,23 +6,53 @@
 
 package langevinsetup;
 
-import com.sun.j3d.utils.picking.*;
-import com.sun.j3d.utils.behaviors.vp.*;
-import com.sun.j3d.utils.universe.*;
-import com.sun.j3d.utils.geometry.*;
-import helpersetup.Colors;
-
-import javax.media.j3d.*;
-import javax.vecmath.*;
-
-import java.awt.*;
-import java.awt.event.*;
-
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GraphicsConfiguration;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.media.j3d.AmbientLight;
+import javax.media.j3d.Appearance;
+import javax.media.j3d.BoundingSphere;
+import javax.media.j3d.BranchGroup;
+import javax.media.j3d.Canvas3D;
+import javax.media.j3d.DirectionalLight;
+import javax.media.j3d.Group;
+import javax.media.j3d.Material;
+import javax.media.j3d.Transform3D;
+import javax.media.j3d.TransformGroup;
+import javax.media.j3d.View;
+import javax.vecmath.AxisAngle4d;
+import javax.vecmath.Color3f;
+import javax.vecmath.Matrix3f;
+import javax.vecmath.Point3d;
+import javax.vecmath.Vector3d;
+import javax.vecmath.Vector3f;
+
+import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
+import com.sun.j3d.utils.geometry.Box;
+import com.sun.j3d.utils.geometry.Cone;
+import com.sun.j3d.utils.geometry.Cylinder;
+import com.sun.j3d.utils.geometry.Primitive;
+import com.sun.j3d.utils.geometry.Sphere;
+import com.sun.j3d.utils.picking.PickCanvas;
+import com.sun.j3d.utils.picking.PickResult;
+import com.sun.j3d.utils.universe.SimpleUniverse;
+import com.sun.j3d.utils.universe.ViewingPlatform;
+
+import helpersetup.Colors;
+import helpersetup.PopUp;
+import javajs.util.M3;
+
 public class DrawPanel3D extends Canvas3D implements MouseListener, 
-        KeyListener, MoleculeSelectionListener {
+        KeyListener, MoleculeSelectionListener, RotateUpdateListener, MouseMotionListener {
 
     // The molecule we're showing
     private final Molecule molecule;
@@ -71,11 +101,15 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
     /* ********* Array of MoleculeSelectionListeners to notify *******/
     private final ArrayList<MoleculeSelectionListener> listeners = new ArrayList<>();
     
+    /* **** Integration **** */
+    private ActionListener intListener;
+    private boolean drag = false; //drag event
+    private Matrix3f m3 = new Matrix3f();
+    
     public DrawPanel3D(Molecule molecule){
         super(config);
         this.setPreferredSize(new Dimension(1000,500));
-        //this.molecule = molecule;
-        
+                
         this.molecule = molecule;
         if(molecule.hasAnchorSites()){
             molecule.translate(0, 0, -molecule.membranePosition());
@@ -120,7 +154,7 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
         ambientLight.setInfluencingBounds(bounds);
         rootBG.addChild(ambientLight);
         
-        setInitialPosition(new Point3d(-150, 50, 150));
+        setInitialPosition(new Point3d(0, 0, 30));
         setOrbitControls();
         
         su.addBranchGraph(rootBG);
@@ -133,20 +167,22 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
         // This panel should listen for its own events
         this.addKeyListener(this);
         this.addMouseListener(this);
-        
+        this.addMouseMotionListener(this);
+       
     }
     
     private void moleculeSetUp(){
-        for(Site site : molecule.getSiteArray()){
-            addSite(site);
-        }
+    	//TODO could sort based on perspective
         for(Link link : molecule.getLinkArray()){
             addLink(link);
         }
+        for(Site site : molecule.getSiteArray()){
+            addSite(site);
+        }
     }
     
-    private void setInitialPosition(Point3d point){
-        ViewingPlatform vp = su.getViewingPlatform();
+    void setInitialPosition(Point3d point){
+    	ViewingPlatform vp = su.getViewingPlatform();
         TransformGroup vpTG = vp.getViewPlatformTransform();
         
         Transform3D vpt3d = new Transform3D();
@@ -197,19 +233,19 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
         }
     }
     
-    private Group makeAxis(int length, Color col){
+    private Group makeAxis(double length, Color col){
         TransformGroup topTG = new TransformGroup();
         // All these will glow
         Appearance ap = new Appearance();
         ap.setMaterial(new Material(new Color3f(col), Colors.BLACK3D, new Color3f(col), Colors.BLACK3D, 40.0f));
         // Make a cylinder
-        Cylinder y_cyl = new Cylinder(0.1f, 10.0f, ap);
-        for(int i=-length/2;i<=length/2;i++){
+        Cylinder y_cyl = new Cylinder(0.02f, (float) length, ap);
+        for(double i=-length/2;i<=length/2;i++){
             Vector3d shift = new Vector3d(0,i,0);
             Transform3D t3d = new Transform3D();
             t3d.setTranslation(shift);
             TransformGroup xTG = new TransformGroup(t3d);
-            xTG.addChild(new Cone(0.2f, 0.5f, ap));
+            xTG.addChild(new Cone(0.02f, 0.05f, ap));
             topTG.addChild(xTG);
         }
         
@@ -219,22 +255,22 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
         
     }
     
-    private BranchGroup makeAxes(int length){
+    private BranchGroup makeAxes(double lengthY, double lengthX, double lengthZ){
         TransformGroup topTG = new TransformGroup();
         // Add y-axis directly
-        topTG.addChild(makeAxis(length, Color.green));
+        topTG.addChild(makeAxis(lengthY, Color.green));
         // Make and add x-axis
         Transform3D xt3d = new Transform3D();
-        xt3d.setRotation(new AxisAngle4d(z_axis, -Math.PI/2));
+        xt3d.setRotation(new AxisAngle4d(x_axis, Math.PI/2));
         TransformGroup xTG = new TransformGroup(xt3d);
-        xTG.addChild(makeAxis(length,Color.blue));
+        xTG.addChild(makeAxis(lengthZ,Color.blue));
         topTG.addChild(xTG);
         
-        // Make and add x-axis
+        // Make and add z-axis
         Transform3D zt3d = new Transform3D();
-        zt3d.setRotation(new AxisAngle4d(x_axis, Math.PI/2));
+        zt3d.setRotation(new AxisAngle4d(z_axis, -Math.PI/2));
         TransformGroup zTG = new TransformGroup(zt3d);
-        zTG.addChild(makeAxis(length,Color.orange));
+        zTG.addChild(makeAxis(lengthX,Color.magenta));
         topTG.addChild(zTG);
         
         BranchGroup tempBG = new BranchGroup();
@@ -244,7 +280,7 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
     
     public void systemSetup(){
         addMembrane(molecule.getLocation().equals(SystemGeometry.MEMBRANE));
-        rootBG.addChild(makeAxes(10));
+        rootBG.addChild(makeAxes(molecule.getMaxY() + 10, molecule.getMaxX() + 10, molecule.getMaxZ() + 10));
     }
     
     private void unHighlightSelected(){
@@ -263,7 +299,7 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
     
     /* ************ MOUSE LISTENER METHODS ******************************/
     @Override
-    public void mouseClicked(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) { }
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -277,7 +313,6 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
                 Sphere aSphere = (Sphere) p;
                 for(SiteSphere sphere : spheres){
                     if(sphere.getSphere() == aSphere){
-                        // System.out.println("Found sphere.");
                         Site site = sphere.getSite();
                         if(ctrlPressed){
                             sphere.highlight(!sphere.isHighlighted());
@@ -341,6 +376,7 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
                 clearSelectedLists();
             }
         }
+       
         notifyListeners();
     }
 
@@ -412,7 +448,7 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
         clearSelectedLists();
         selectedSites.addAll(event.getSelectedSites());
         selectedLinks.addAll(event.getSelectedLinks());
-        System.out.println("selectedSites =  " + selectedSites);
+
         for(Site site : selectedSites){
             siteToSphere.get(site).highlight(true);
         }
@@ -433,10 +469,17 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
     }
     
     private void notifyListeners(){
-        MoleculeSelectionEvent event = new MoleculeSelectionEvent(selectedSites, selectedLinks);
+        MoleculeSelectionEvent me = new MoleculeSelectionEvent(selectedSites, selectedLinks);
         for(MoleculeSelectionListener listener : listeners){
-            listener.selectionOccurred(event);
+            listener.selectionOccurred(me);
         }
+        
+        if(drag){
+        	RotationUpdateEvent re = new RotationUpdateEvent(this.m3, false); //replace 10.0 with coordinates knowledge of rotation
+        	this.intListener.actionPerformed(re);
+        	drag = false;
+        }
+        
     }
     
     /* ************* ADD AND REMOVE SITES ****************************/
@@ -460,8 +503,17 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
         linkToCylinder.put(link, cylinder);
         cylinders.add(cylinder);
         
-        rootBG.addChild(cylinder);
+        rootBG.addChild(cylinder);    
+    }
+    
+    public void removeLink(Link link){
         
+        LinkCylinder cylinder = linkToCylinder.get(link);
+        
+        linkToCylinder.remove(link);
+        cylinders.remove(cylinder);
+        
+        rootBG.removeChild(cylinder);
     }
     
     
@@ -484,9 +536,222 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
             LinkCylinder cylinder = linkToCylinder.get(link);
             cylinder.updatePosition();
         }
+           
+        notifyListeners();    
+    }
+    
+/* ************ Link/site methods for Mol *****************************/
+    
+    public void addLinkToMol(Link link){
+    	molecule.getLinkArray().add(link);
+    	this.addLink(link);
         
-        notifyListeners();
+        notifyListeners();   
+    }
+    
+    public void removeLinkToMol(Link link){
+        int index = link.getIndex();
+    	molecule.getLinkArray().remove(index);
+    	this.removeLink(link);
         
+    	if(selectedLinks.contains(link)){
+            selectedLinks.remove(link);
+        }
+    	
+        notifyListeners(); 
+    }
+    
+    public ArrayList<Site> getSelectedSites(){
+    	return selectedSites;
+    }
+    
+    public ArrayList<Link> getSelectedLinks(){
+    	return selectedLinks;
     }
 
+    public void updateRadius(ArrayList<Site> selectedSites, Double newRadius) {
+    	ArrayList<Site> temp = new ArrayList<>();
+    	for(Site s: selectedSites){
+    		for(Site m: molecule.getSiteArray()){
+    			if( m.getTypeName().equals(s.getTypeName()) )
+    				temp.add(m);
+    		}}
+
+    	for(Site s: temp){
+    		selectedSites.add(s);
+    	}
+
+    	for(Site s: selectedSites){
+    		spheres.remove(siteToSphere.get(s));
+    		rootBG.removeChild(siteToSphere.get(s));
+    		siteToSphere.remove(s);
+
+    		molecule.getSite(s.getIndex()).getType().setRadius(newRadius);
+
+    		SiteSphere sphere = new SiteSphere(s);
+    		siteToSphere.put(s, sphere);
+    		spheres.add(sphere);
+    		rootBG.addChild(sphere);
+    	}
+    		
+    	notifyListeners();
+	}
+    
+    /* ************ Rotation integration methods *****************************/
+    
+    //integration listener
+    public void setintListener(ActionListener al){
+		this.intListener = al;
+	}
+    
+    @Override
+	public void rotationOccurred(RotationUpdateEvent event) {
+    	//2
+    	// update knowledge of rotation, to be accessed in notify listeners
+    	this.m3 = event.getM3();
+		if(event.notifyPanel()){
+			notifyListeners();
+		}
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		//1
+		// get position
+    	ViewingPlatform vp = su.getViewingPlatform();
+        TransformGroup vpTG = vp.getViewPlatformTransform();
+        
+        Transform3D vpt3d = new Transform3D();
+        vpTG.getTransform(vpt3d);
+        vpt3d.get(m3); //sets m3
+		m3.transpose();
+				
+		//TODO maybe redraw the view based on order
+		//this.repaint();
+		
+		drag = true;
+		this.rotationOccurred(new RotationUpdateEvent(m3, true));	    
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+	}
+	
+	/* ************ Overlap warning methods *****************************/
+	
+	public HashMap<Site, Integer> getOverlaps(){
+		HashMap<Site, Integer> tReturn = new HashMap<Site, Integer>();
+		int size = this.molecule.getSiteArray().size();
+		
+		for(int i = 0; i < size; i++){
+			for(int j = i + 1; j < size; j++){
+				Site s1 = this.molecule.getSite(i);
+				Site s2 = this.molecule.getSite(j);
+				if(s1.getRadius() + s2.getRadius() >= distanceToEU(s1, s2)){
+					if(tReturn.containsKey(s1)) {
+						int val = tReturn.get(s1) + 1;
+						tReturn.put(s1, val);
+					}else {
+						tReturn.put(s1, 1);
+					}
+					
+					if(tReturn.containsKey(s2)) {
+						int val = tReturn.get(s2) + 1;
+						tReturn.put(s2, val);
+					}else {
+						tReturn.put(s2, 1);
+					}
+				}
+			}
+		}
+		return tReturn;
+	}
+	
+	private double distanceToEU(Site s1, Site s2){
+		return Math.sqrt(
+				Math.pow(s1.getX() - s2.getX(), 2) + 
+				Math.pow(s1.getY() - s2.getY(), 2) + 
+				Math.pow(s1.getZ() - s2.getZ(), 2)
+				);
+	}
+
+	
+	/* ************ Overlap warning methods *****************************/
+	
+	public void flip(int i){
+		for(Link l: molecule.getLinkArray()){
+			LinkCylinder cylinder = linkToCylinder.get(l);
+	        cylinders.remove(cylinder);   
+	        rootBG.removeChild(cylinder);
+		}
+		
+		if(i == 0){
+			for(Site s: molecule.getSiteArray()){
+				if(!s.getTypeName().equals(SiteType.ANCHOR)){
+					spheres.remove(siteToSphere.get(s));
+					rootBG.removeChild(siteToSphere.get(s));
+					siteToSphere.remove(s); 
+
+					s.x = s.x * -1;
+
+					SiteSphere sphere = new SiteSphere(s);
+					siteToSphere.put(s, sphere);
+					spheres.add(sphere);
+					rootBG.addChild(sphere);
+				}
+			}
+		}else if(i == 1){
+			for(Site s: molecule.getSiteArray()){
+				if(!s.getTypeName().equals(SiteType.ANCHOR)){
+					spheres.remove(siteToSphere.get(s));
+					rootBG.removeChild(siteToSphere.get(s));
+					siteToSphere.remove(s);
+
+					s.y = s.y * -1;
+
+					SiteSphere sphere = new SiteSphere(s);
+					siteToSphere.put(s, sphere);
+					spheres.add(sphere);
+					rootBG.addChild(sphere);
+				}
+			}
+		}else if(i == 2){
+			double adjZ = 0; // we will flip z about center off mass in z
+			int count = 0;
+			for(Site s: molecule.getSiteArray()){
+				if(!s.getTypeName().equals(SiteType.ANCHOR)){
+					adjZ += s.getZ();
+					count++;
+				}
+			}
+			
+			adjZ = adjZ / count;
+			
+			for(Site s: molecule.getSiteArray()){
+				spheres.remove(siteToSphere.get(s));
+	    		rootBG.removeChild(siteToSphere.get(s));
+	    		siteToSphere.remove(s);
+	    		
+	    		if(!s.getTypeName().equals(SiteType.ANCHOR)){
+					s.z = (adjZ - s.z) + adjZ;
+	    		}
+	    		
+				SiteSphere sphere = new SiteSphere(s);
+	    		siteToSphere.put(s, sphere);
+	    		spheres.add(sphere);
+	    		rootBG.addChild(sphere);
+			}
+		}
+		
+		for(Link l: molecule.getLinkArray()){	        
+	        LinkCylinder cylinder = new LinkCylinder(l);
+	        linkToCylinder.put(l, cylinder);
+	        cylinders.add(cylinder);
+	        rootBG.addChild(cylinder);
+		}
+		
+    	notifyListeners();
+	}
+	
+	
 }

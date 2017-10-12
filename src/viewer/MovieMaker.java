@@ -32,7 +32,6 @@ public class MovieMaker {
         
         int track = out.addTrack(format);
         
-
         Buffer buf = new Buffer();
         
         buf.format = new Format(VideoFormatKeys.DataClassKey, BufferedImage.class);

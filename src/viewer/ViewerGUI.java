@@ -120,7 +120,7 @@ public class ViewerGUI extends JFrame implements ActionListener,
         super(title);
         this.title = title;
         this.simulation = simulation;
-        
+        System.out.println("ViewergUI");
         buildMenuBar();
         initializeTimer();
         loadViewerFiles();

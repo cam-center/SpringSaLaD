@@ -22,6 +22,7 @@ public class Global {
     public final static String SPATIAL_INFORMATION = "SYSTEM INFORMATION";
     public final static String TIME_INFORMATION = "TIME INFORMATION";
     public final static String MOLECULES = "MOLECULES";
+    public final static String MOLECULE_FILES = "MOLECULE FILES";
     public final static String DECAY_REACTIONS = "CREATION/DECAY REACTIONS";
     public final static String TRANSITION_REACTIONS = "STATE TRANSITION REACTIONS";
     public final static String ALLOSTERIC_REACTIONS = "ALLOSTERIC REACTIONS";
@@ -685,6 +686,13 @@ public class Global {
             for(Molecule molecule : molecules){
                 molecule.writeMolecule(p);
             }
+            /* ******* WRITE THE SPECIES INFORMATION ***********/
+            p.println("*** " + MOLECULE_FILES + " ***");
+            p.println();
+            for(Molecule molecule : molecules){
+                p.println("MOLECULE: " + molecule.getName() + " " + molecule.getFilename());
+            }
+            p.println();
             
             /* ******* WRITE THE DECAY REACTIONS ***************/
             p.println("*** " + DECAY_REACTIONS + " ***");
@@ -808,6 +816,9 @@ public class Global {
                         break;
                     case MOLECULES:
                         molecules = Molecule.loadMolecules(sc.next().trim());
+                        break;
+                    case MOLECULE_FILES:
+                        Molecule.loadMoleculesFiles(sc.next().trim(), molecules);
                         break;
                     case DECAY_REACTIONS:
                         DecayReaction.loadReactions(this, new Scanner(sc.next().trim()));
