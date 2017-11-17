@@ -127,7 +127,7 @@ public class Integration implements RotateUpdateListener{
     			m3.m10, m3.m11, m3.m12,
     			m3.m20, m3.m21, m3.m22         			
     	});
-    	this.getTM().applyRotationFrom3d(mNew);
+    	this.getTM().matrixRotate.setM3(mNew);
     	vwr.refresh(2, "");
 		
 		if(event.notifyPanel()){

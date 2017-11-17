@@ -621,14 +621,40 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
                 JFileChooser jfc = new JFileChooser(g.getDefaultFolder());
                 int ret = jfc.showSaveDialog(null);
                 if(ret == JFileChooser.APPROVE_OPTION){
-                    g.setFile(IOHelp.setFileType(jfc.getSelectedFile(), "txt"));
-                    String parent = g.getFile().getParent();
+                	File named = IOHelp.setFileType(jfc.getSelectedFile(), "txt");
+                	
+                    String child = named.getName();
+                    String parent = named.getParent();
+                  
+                    JPanel myPanel = new JPanel();
+                	myPanel.add(new JLabel("Do you want to create a project folder?\n(Press no if saving an already existing model)"));
+                    int n = JOptionPane.showConfirmDialog(null, myPanel, "Create Folder Option", JOptionPane.YES_NO_OPTION);
+                	if(n == JOptionPane.YES_OPTION){	
+                		parent = parent + File.separator + child.substring(0, child.length() - 4);
+                       	new File(parent).mkdir();
+                       	File f = new File(parent + File.separator + child);
+                        g.setFile(f);
+                        
+                        File targetDir = new File(parent + File.separator + "structure_files");
+                        if (!targetDir.exists() || !targetDir.isDirectory()) {
+            				targetDir.mkdir();
+            			}
+                       	g.copyPDBtoNewLocation();
+                	} else {
+                		File f = new File(parent + File.separator + child);
+                        g.setFile(f);
+                	}
+                                                        
                     g.setDefaultFolder(new File(parent));
                     g.writeFile();
                     this.setTitle(g.getSystemName());
                     treePane.setTitle(g.getSystemName());
                 }
             } else {
+            	File targetDir = new File(g.getFile().getParent() + File.separator + "structure_files");
+                if (targetDir.exists() && targetDir.isDirectory()) {
+    				g.copyPDBtoNewLocation();
+    			}
                 g.writeFile();
             }
         }
@@ -646,8 +672,32 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
             }
             int ret = jfc.showSaveDialog(null);
             if(ret == JFileChooser.APPROVE_OPTION){
-                g.setFile(IOHelp.setFileType(jfc.getSelectedFile(), "txt"));
-                String parent = g.getFile().getParent();
+                File named = IOHelp.setFileType(jfc.getSelectedFile(), "txt");
+     
+                String child = named.getName();
+                String parent = named.getParent();
+                
+                //ask user if they want to create a model folder to store all files for the model 
+                // 	this utility should only be used the first time a model is saved
+                JPanel myPanel = new JPanel();
+            	myPanel.add(new JLabel("Do you want to create a project folder?\n(Press no if saving an already existing model)"));
+                int n = JOptionPane.showConfirmDialog(null, myPanel, "Create Folder Option", JOptionPane.YES_NO_OPTION);
+            	if(n == JOptionPane.YES_OPTION){
+            		parent = parent + File.separator + child.substring(0, child.length() - 4);
+                   	new File(parent).mkdir();
+                   	File f = new File(parent + File.separator + child);
+                    g.setFile(f);
+                    
+                    File targetDir = new File(parent + File.separator + "structure_files");
+                    if (!targetDir.exists() || !targetDir.isDirectory()) {
+        				targetDir.mkdir();
+        			}
+                   	g.copyPDBtoNewLocation();
+            	} else {
+            		File f = new File(parent + File.separator + child);
+                    g.setFile(f);
+            	}
+                                               
                 g.setDefaultFolder(new File(parent));
                 g.writeFile();
                 this.setTitle(g.getSystemName());
@@ -716,16 +766,9 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         if(returnValue == JFileChooser.APPROVE_OPTION){
         	//check file format is okay
         	if(fileFormatOkay(jfc.getSelectedFile().getName())){
-        	
-	        	//Save current location (check if null first)
-	        	String parent = null;
-	        	if(g.getFile() != null && g.getFile().getParent() != null){
-	        		parent = g.getFile().getParent();
-	        	}
-
-	        	//change to new location       	
-	        	g.setFile(new File(jfc.getSelectedFile().getParentFile(), jfc.getSelectedFile().getName()));
-	            
+        		            
+	        	File pdbFile = new File(jfc.getSelectedFile().getParentFile(), jfc.getSelectedFile().getName());
+	        	
 	        	String k= JOptionPane.showInputDialog("Please input number of sites wanted: ");
 	            int goodK = 1;
 	            boolean kIsInt = false;
@@ -786,16 +829,11 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
 	            
 	         	//open and process file
 	            System.out.println("--- begin molecule construction...");
-	            PDBHandler pdb = new PDBHandler(g.getFile().getParent() + File.separator + g.getFile().getName(), goodK, fixedCenters);
+	            PDBHandler pdb = new PDBHandler(pdbFile.toString(), goodK, fixedCenters);
 	            System.out.println("--- finished.");
-	            
-	            //revert location (if not null)
-	            if(parent != null){
-	            	g.setDefaultFolder(new File(parent));
-	            }
-	            
+	        	            
 	            Molecule mol = pdb.getMol();
-	            mol.setFile(g.getFile().getParent() + File.separator + g.getFile().getName());
+	            mol.setFile(pdbFile.getParent() + File.separator + pdbFile.getName());
 	            g.addMolecule(mol);
 	            treePane.addMolecule(mol);
         	}

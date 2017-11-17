@@ -402,7 +402,13 @@ public class Global {
         // <editor-fold defaultstate="collapsed" desc="Method Code">
         boolean allConnected = true;
         for(Molecule molecule : molecules){
-            if(!molecule.sitesConnected()){
+            if(molecule.getSiteArray().isEmpty() || molecule.getTypeArray().isEmpty()){
+            	PopUp.error("Molecule " + molecule.getName()
+                + " is not complete. Add at least 1 site and type to save.");
+            	allConnected = false;
+                break;
+            }
+            else if(!molecule.sitesConnected()){
                 PopUp.error("Some sites in molecule " + molecule.getName()
                                     + " are not connected to the others.");
                 allConnected = false;
@@ -666,6 +672,33 @@ public class Global {
     }
     
     /* *************** WRITE SYSTEM DATA TO FILE *************************/
+    public void copyPDBtoNewLocation(){
+    	for (Molecule m: molecules) {
+    		if(m.getFilename() != null) {
+    			File source = new File(m.getFilename());
+    			String name = source.getName();
+    			File targetDir = new File(file.getParent() + File.separator + "structure_files");
+    			File target = new File(file.getParent() + File.separator + "structure_files" + File.separator + name);
+   			
+    			if (targetDir.exists() && targetDir.isDirectory() && !target.exists() && !target.isDirectory()) {
+    				//if target does not exist, open writer
+    				try(PrintWriter p = new PrintWriter(new FileWriter(target), true)){
+    					//open reader of source
+    					try (BufferedReader br = new BufferedReader(new FileReader(source))) {
+    					    String line;
+    					    while ((line = br.readLine()) != null) {
+    					       p.println(line);
+    					    }
+    					}
+
+    					m.setFile(target.toString());
+    				}catch(IOException ioe){
+    		            ioe.printStackTrace(System.out);
+    		        }
+    			}
+    		}
+    	}
+    }
     
     public void writeFile(){
         // <editor-fold defaultstate="collapsed" desc="Method Code">
@@ -818,7 +851,7 @@ public class Global {
                         molecules = Molecule.loadMolecules(sc.next().trim());
                         break;
                     case MOLECULE_FILES:
-                        Molecule.loadMoleculesFiles(sc.next().trim(), molecules);
+                        Molecule.loadMoleculesFiles(this, sc.next().trim(), molecules);
                         break;
                     case DECAY_REACTIONS:
                         DecayReaction.loadReactions(this, new Scanner(sc.next().trim()));

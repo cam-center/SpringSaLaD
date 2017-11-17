@@ -9,6 +9,7 @@
 
 package langevinsetup;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -16,6 +17,7 @@ import java.util.Scanner;
 import javax.vecmath.GMatrix;
 
 import helpersetup.IOHelp;
+import helpersetup.PopUp;
 
 public class Molecule {
     
@@ -773,7 +775,7 @@ public class Molecule {
         // </editor-fold>
     }
 
-	public static void loadMoleculesFiles(String lines, ArrayList<Molecule> g_molecules) {
+	public static void loadMoleculesFiles(Global g, String lines, ArrayList<Molecule> g_molecules) {
 		Scanner sc = new Scanner(lines);
         sc.useDelimiter("MOLECULE:");
         ArrayList<String> moleculeStrings = new ArrayList<>();
@@ -796,7 +798,18 @@ public class Molecule {
             
             for(Molecule m: g_molecules){
             	if(m.getName().equals(molName)){
-            		m.setFile(finalName);
+            		//check if file exists
+            		if(new File(finalName).exists()) {
+            			m.setFile(finalName);
+            		}else {
+            			//try and find file in auto-generated folder
+            			String childname = new File(finalName).getName();
+            			if(new File(g.getFile().getParent() + File.separator + "structure_files" + File.separator + childname).exists()) {
+            				m.setFile(g.getFile().getParent() + File.separator + "structure_files" + File.separator + childname);
+            			}else {
+            				PopUp.information("Could not find pdb source file for "+ m.toString() +".\nPlease check model txt file for correct Molecule file.");
+            			}
+            		}
             		break;
             	}
             }
