@@ -26,6 +26,7 @@ import javax.media.j3d.Canvas3D;
 import javax.media.j3d.DirectionalLight;
 import javax.media.j3d.Group;
 import javax.media.j3d.Material;
+import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.View;
@@ -48,8 +49,6 @@ import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 
 import helpersetup.Colors;
-import helpersetup.PopUp;
-import javajs.util.M3;
 
 public class DrawPanel3D extends Canvas3D implements MouseListener, 
         KeyListener, MoleculeSelectionListener, RotateUpdateListener, MouseMotionListener {
@@ -172,7 +171,6 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
     }
     
     private void moleculeSetUp(){
-    	//TODO could sort based on perspective
         for(Link link : molecule.getLinkArray()){
             addLink(link);
         }
@@ -238,6 +236,11 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
         // All these will glow
         Appearance ap = new Appearance();
         ap.setMaterial(new Material(new Color3f(col), Colors.BLACK3D, new Color3f(col), Colors.BLACK3D, 40.0f));
+        
+        RenderingAttributes ra = new RenderingAttributes();
+        ra.setDepthBufferEnable(true);
+        ap.setRenderingAttributes(ra);
+        
         // Make a cylinder
         Cylinder y_cyl = new Cylinder(0.02f, (float) length, ap);
         for(double i=-length/2;i<=length/2;i++){

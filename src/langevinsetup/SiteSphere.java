@@ -11,6 +11,7 @@ import com.sun.j3d.utils.geometry.Primitive;
 import helpersetup.Colors;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Material;
+import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.Transform3D;
@@ -61,6 +62,12 @@ public class SiteSphere extends BranchGroup {
         
         normal.setMaterial(normalMaterial);
         highlight.setMaterial(highlightMaterial);
+        
+        RenderingAttributes ra = new RenderingAttributes();
+        ra.setDepthBufferEnable(true);
+        ra.setAlphaTestFunction( RenderingAttributes.GREATER_OR_EQUAL );
+        normal.setRenderingAttributes(ra);
+		highlight.setRenderingAttributes(ra);
         
         sphere.setAppearance(normal);
         highlighted = false;

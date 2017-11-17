@@ -10,6 +10,7 @@ import com.sun.j3d.utils.geometry.Cylinder;
 import helpersetup.Colors;
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Material;
+import javax.media.j3d.RenderingAttributes;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.Transform3D;
@@ -65,6 +66,12 @@ public class LinkCylinder extends BranchGroup {
         
         normal.setMaterial(normalMaterial);
         highlight.setMaterial(highlightMaterial);
+        
+        RenderingAttributes ra = new RenderingAttributes();
+        ra.setDepthBufferEnable(true);
+        ra.setAlphaTestFunction( RenderingAttributes.GREATER );
+		normal.setRenderingAttributes(ra);
+		highlight.setRenderingAttributes(ra);
         
         cylinder.setAppearance(normal);
         highlighted = false;
