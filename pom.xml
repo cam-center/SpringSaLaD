@@ -1,0 +1,138 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.springsalad</groupId>
+	<artifactId>springsalad</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.6.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>clojars</id>
+			<url>http://clojars.org/repo/</url>
+		</repository>
+	</repositories>
+
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.springsalad</groupId>
+			<artifactId>langevin</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>3.8.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.massisframework.j3d/vecmath -->
+		<dependency>
+			<groupId>com.massisframework.j3d</groupId>
+			<artifactId>vecmath</artifactId>
+			<version>1.6.0.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.massisframework.j3d/java3d-core -->
+		<dependency>
+			<groupId>com.massisframework.j3d</groupId>
+			<artifactId>java3d-core</artifactId>
+			<version>1.6.0.1</version>
+		</dependency>
+
+<!-- https://mvnrepository.com/artifact/org.jogamp.gluegen/gluegen-rt -->
+<dependency>
+    <groupId>org.jogamp.gluegen</groupId>
+    <artifactId>gluegen-rt</artifactId>
+    <version>2.3.2</version>
+</dependency>
+
+
+
+		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-linux-amd64 -->
+		<dependency>
+			<groupId>org.clojars.originalsurfmex.processing</groupId>
+			<artifactId>gluegen-rt-natives-linux-amd64</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-macosx-universal -->
+		<dependency>
+			<groupId>org.clojars.originalsurfmex.processing</groupId>
+			<artifactId>gluegen-rt-natives-macosx-universal</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-linux-armv6hf -->
+		<dependency>
+			<groupId>org.clojars.originalsurfmex.processing</groupId>
+			<artifactId>gluegen-rt-natives-linux-armv6hf</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-windows-amd64 -->
+		<dependency>
+			<groupId>org.clojars.originalsurfmex.processing</groupId>
+			<artifactId>gluegen-rt-natives-windows-amd64</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-rng-core -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-rng-core</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-rng-client-api -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-rng-client-api</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.sourceforge.jmol/jmol -->
+		<dependency>
+			<groupId>net.sourceforge.jmol</groupId>
+			<artifactId>jmol</artifactId>
+			<version>14.15.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.pojosontheweb/monte-repack -->
+		<dependency>
+			<groupId>com.pojosontheweb</groupId>
+			<artifactId>monte-repack</artifactId>
+			<version>1.0</version>
+		</dependency>
+
+
+
+	</dependencies>
+
+</project>
