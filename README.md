@@ -1,6 +1,6 @@
 
 
-## Eclipse Setup
+## Eclipse Setup for Windows
 
   * Start new Eclipse (choose new project folder when asked)
   * click upper right 'workbench'
