@@ -36,6 +36,21 @@ public class RunLauncher implements Runnable {
         String javaPath = javaHome + separator + "bin" + separator + "java";
         Class clazz = langevinnovis01.Global.class;
         ProcessBuilder builder = null;
+        
+        //
+        // to debug the solver from SpringSaLaD
+        //
+//        boolean debugSolver = true;
+//        if(totalRuns == 1 && debugSolver == true) {
+//        	String canonicalName = clazz.getCanonicalName();
+//        	String inputPath = inputFile.getAbsolutePath();
+//        	String outputPath = outputFile[0].getAbsolutePath();
+//        	
+//        	String[] args = {inputPath, Integer.toString(0), outputPath};
+//        	langevinnovis01.Global.main(args);
+//        	return;
+//        }
+        
         for(int i=0;i<totalRuns;i++){
             String intString = Integer.toString(i);
             if(classPath.contains("SpringSalad-")){
