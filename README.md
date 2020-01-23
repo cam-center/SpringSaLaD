@@ -1,4 +1,6 @@
+The SpringSaLaD documentation in Markdown format (*.md) is edited in eclipse using the WikiText plugin
 
+# SpringSaLaD is a particle-based, spatial, stochastic biochemical simulation program.
 
 ## Eclipse Setup for Windows
 
