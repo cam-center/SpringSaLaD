@@ -32,11 +32,6 @@
 
 	<dependencies>
 
-		<dependency>
-			<groupId>org.springsalad</groupId>
-			<artifactId>langevin</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -57,44 +52,33 @@
 			<groupId>com.massisframework.j3d</groupId>
 			<artifactId>java3d-core</artifactId>
 			<version>1.6.0.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jogamp.jogl</groupId>
+					<artifactId>jogl-all</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jogamp.jogl</groupId>
+					<artifactId>jogl-all-main</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.jogamp.gluegen</groupId>
+					<artifactId>gluegen</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 <!-- https://mvnrepository.com/artifact/org.jogamp.gluegen/gluegen-rt -->
-<dependency>
-    <groupId>org.jogamp.gluegen</groupId>
-    <artifactId>gluegen-rt</artifactId>
-    <version>2.3.2</version>
-</dependency>
 
 
 
 		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-linux-amd64 -->
-		<dependency>
-			<groupId>org.clojars.originalsurfmex.processing</groupId>
-			<artifactId>gluegen-rt-natives-linux-amd64</artifactId>
-			<version>2.1</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-macosx-universal -->
-		<dependency>
-			<groupId>org.clojars.originalsurfmex.processing</groupId>
-			<artifactId>gluegen-rt-natives-macosx-universal</artifactId>
-			<version>2.1</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-linux-armv6hf -->
-		<dependency>
-			<groupId>org.clojars.originalsurfmex.processing</groupId>
-			<artifactId>gluegen-rt-natives-linux-armv6hf</artifactId>
-			<version>2.1</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-windows-amd64 -->
-		<dependency>
-			<groupId>org.clojars.originalsurfmex.processing</groupId>
-			<artifactId>gluegen-rt-natives-windows-amd64</artifactId>
-			<version>2.1</version>
-		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-rng-core -->
 		<dependency>
