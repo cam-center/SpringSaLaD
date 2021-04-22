@@ -107,6 +107,14 @@ public class SiteType {
         return radius;
     }
     
+    public double getReactionRadius() {
+    	// assumes radius in nanometers
+    	// Either 1.5x radius or radius+2 nm, whichever is smaller, but not smaller than radius+0.5 nm
+    	double minRadius = Math.max(0.5+radius,  1.5*radius);
+    	double reactionRadius = Math.min(minRadius, radius+2);
+    	return reactionRadius;
+    }
+    
     public double getD(){
         return D;
     }

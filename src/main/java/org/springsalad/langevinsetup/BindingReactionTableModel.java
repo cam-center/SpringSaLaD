@@ -6,6 +6,7 @@
 
 package org.springsalad.langevinsetup;
 
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 
 public class BindingReactionTableModel extends AbstractTableModel {
@@ -71,6 +72,11 @@ public class BindingReactionTableModel extends AbstractTableModel {
                 break;
             case 1: 
                 reaction.setkon((Double)value);
+                boolean ret = reaction.checkOnRate();
+                System.out.println(ret + " ");
+                if(ret == false) {
+                	JOptionPane.showMessageDialog(null, "Kon is too large");
+                }
                 break;
             case 2:
                 reaction.setkoff((Double)value);

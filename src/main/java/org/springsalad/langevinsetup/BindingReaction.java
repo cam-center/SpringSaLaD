@@ -184,6 +184,28 @@ public class BindingReaction extends Reaction {
         // </editor-fold>
     }
     
+    /* 
+     * The maximum possible on-rate is given by kon_max = 4*pi*R*D, so we'd
+     * better have kon < 4*pi*R*D . If that isn't satisfied then nothing else will work. 
+     */
+    public boolean checkOnRate() {
+    	
+    	if(type[0] == null || type[1] == null) {
+    		return true;
+    	}
+    	
+    	double R = type[0].getReactionRadius() + type[1].getReactionRadius();	// nm
+    	double D = type[0].getD() + type[1].getD();
+    	
+        double kon_scale = 1660000.0 * kon;
+        double D_scale = D * 1000000.0;				// nm^2/s
+        
+        double rhs1 = 4.0*Math.PI*R*D_scale;
+        
+        boolean check = (kon_scale < rhs1);
+        return check;
+    }
+    
     /* ***************** LOAD SINGLE REACTION *************************/
     
     @Override
