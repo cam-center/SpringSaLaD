@@ -309,6 +309,7 @@ public class TypeCreator extends JFrame implements ActionListener {
         this.setVisible(false);
         this.dispose();
     	for(BindingReaction reaction : g.getBindingReactions()) {
+    		if (reaction.getType(0) != type && reaction.getType(1) != type) continue;
             boolean ret = reaction.checkOnRate();
             if(ret == false) {
             	JOptionPane.showMessageDialog(null, "Kon is too large for reaction '" + reaction.getName() + "'.\nPlease increase Radius or D here, or reduce Kon in the reaction.");
