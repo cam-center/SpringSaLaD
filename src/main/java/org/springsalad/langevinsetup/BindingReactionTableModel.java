@@ -75,7 +75,7 @@ public class BindingReactionTableModel extends AbstractTableModel {
                 boolean ret = reaction.checkOnRate();
                 System.out.println(ret + " ");
                 if(ret == false) {
-                	JOptionPane.showMessageDialog(null, "Kon is too large");
+                	JOptionPane.showMessageDialog(null, "Kon is too large for this reaction.\nPleace reduce Kon or increase the Radius or D of the participating Site Types.");
                 }
                 break;
             case 2:

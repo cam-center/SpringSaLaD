@@ -308,6 +308,13 @@ public class TypeCreator extends JFrame implements ActionListener {
         type.setColor((NamedColor)colorBox.getSelectedItem());
         this.setVisible(false);
         this.dispose();
+    	for(BindingReaction reaction : g.getBindingReactions()) {
+            boolean ret = reaction.checkOnRate();
+            if(ret == false) {
+            	JOptionPane.showMessageDialog(null, "Kon is too large for reaction '" + reaction.getName() + "'.\nPlease increase Radius or D here, or reduce Kon in the reaction.");
+            	break;
+            }
+    	}
         // </editor-fold>
     }
     
