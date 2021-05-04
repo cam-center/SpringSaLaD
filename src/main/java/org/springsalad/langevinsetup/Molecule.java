@@ -807,7 +807,9 @@ public class Molecule {
             			if(new File(g.getFile().getParent() + File.separator + "structure_files" + File.separator + childname).exists()) {
             				m.setFile(g.getFile().getParent() + File.separator + "structure_files" + File.separator + childname);
             			}else {
-            				PopUp.information("Could not find pdb source file for "+ m.toString() +".\nPlease check model txt file for correct Molecule file.");
+            				String msg = "Could not find pdb source file for "+ m.toString() +".\nPlease check model txt file for correct Molecule file.";
+//            				PopUp.information(msg);
+            				System.out.println(msg);
             			}
             		}
             		break;

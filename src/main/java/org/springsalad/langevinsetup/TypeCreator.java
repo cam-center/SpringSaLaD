@@ -312,7 +312,9 @@ public class TypeCreator extends JFrame implements ActionListener {
     		if (reaction.getType(0) != type && reaction.getType(1) != type) continue;
             boolean ret = reaction.checkOnRate();
             if(ret == false) {
-            	JOptionPane.showMessageDialog(null, "Kon is too large for reaction '" + reaction.getName() + "'.\nPlease increase Radius or D here, or reduce Kon in the reaction.");
+            	String msg = "Kon is too large (I.e. exceeds the diffusion limited rate) for reaction '" + reaction.getName() + "'.\n";
+            	msg += "Please consider increasing Radius or D here, or reducing Kon in the reaction.";
+            	JOptionPane.showMessageDialog(null, msg);
             	break;
             }
     	}
