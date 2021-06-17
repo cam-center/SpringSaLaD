@@ -7,6 +7,8 @@
 package org.springsalad.runlauncher;
 
 import java.util.ArrayList;
+
+import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 
 import org.springsalad.langevinsetup.BindingReaction;
@@ -102,6 +104,14 @@ public class EditBindingReactionsTableModel extends AbstractTableModel {
                 sRxn.setkon(dRxn.getkon());
             } else {
                 sRxn.setkon(Double.parseDouble(value.toString()));
+            }
+            
+            boolean ret = sRxn.checkOnRate();
+            System.out.println(ret + " ");
+            if(ret == false) {
+            	String msg = "The simulation Kon is too large (I.e. exceeds the diffusion limited rate) for this reaction.\n";
+            	msg += "Please consider reducing Kon or increasing the Radius or D of the participating Site Types.";
+            	JOptionPane.showMessageDialog(null, msg);
             }
         } else if(col == 5){
             if(value == null){
