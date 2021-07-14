@@ -108,12 +108,12 @@ public class SystemTree extends JScrollPane {
     }
     
     public DefaultMutableTreeNode getNode(String nodeString){
-        DefaultMutableTreeNode node;
-        Enumeration<DefaultMutableTreeNode> e = rootNode.breadthFirstEnumeration();
+        TreeNode node;
+        Enumeration<TreeNode> e = rootNode.breadthFirstEnumeration();
         while(e.hasMoreElements()){
             node = e.nextElement();
             if(nodeString.equals(node.toString())){
-                return node;
+                return (DefaultMutableTreeNode) node;
             }
         }
         return null;
