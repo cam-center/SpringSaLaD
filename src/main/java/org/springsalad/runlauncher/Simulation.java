@@ -17,6 +17,8 @@ import org.springsalad.dataprocessor.DataProcessor;
 import org.springsalad.helpersetup.IOHelp;
 import org.springsalad.langevinsetup.Global;
 
+import org.springsalad.clusteranalysis.DataProcessor2;
+
 public class Simulation extends Global implements ChangeListener{
     
     /* *************  STRING TO INDICATE SIMULATION DATA IN FILE ************/
@@ -78,7 +80,7 @@ public class Simulation extends Global implements ChangeListener{
         simulationName = name.substring(0,simFile.getName().length()-8);
         super.setFile(simFile);
         // Must make processor before loading the file
-        processor = new DataProcessor(simFile.getParent(), name.substring(0,name.length()-4));
+        processor = new DataProcessor2(simFile.getParent(), name.substring(0,name.length()-4));
         // set some defaults
         parallel = false;
         runNumber = 1;

@@ -51,7 +51,7 @@ public class DataProcessor {
     private String simulationName;
     
     /******  The top level folder name *************************************/
-    private String dataFolder;
+    protected String dataFolder;
     
     /**************  THE FILES FOR VARIOUS DATA **************************/
     private File moleculeDataFile = null;

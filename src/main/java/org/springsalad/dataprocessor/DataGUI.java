@@ -20,8 +20,8 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
                                                 ListSelectionListener {
     
     /* ********** COMBO BOXES FOR TOP PANEL *******************************/
-    private JComboBox dataClassBox;
-    private JComboBox dataTypeBox;
+    protected JComboBox dataClassBox;
+    protected JComboBox dataTypeBox;
     
     /* **********  DATA CLASSES AND TYPES *********************************/
     private final String [] dataClasses = {"MOLECULE COUNTS", "BOND DATA", 
@@ -29,15 +29,15 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     private final String [] dataTypes = {"AVERAGE", "HISTOGRAM", "RAW DATA"};
     
     /* **********  THE DATA PROCESSOR *************************************/
-    private final DataProcessor processor;
+    protected final DataProcessor processor;
     
     /* ****************** THE SIMULATION *********************************/
     private final Simulation simulation;
     
     /* ****************** THE LIST ***************************************/
-    private JLabel listLabel;
-    private JList<String> list;
-    private DefaultListModel<String> listModel;
+    protected JLabel listLabel;
+    protected JList<String> list;
+    protected DefaultListModel<String> listModel;
     
     /* ****************** LIST LABEL OPTIONS *****************************/
     public static final String MOLECULES = "Molecules";
@@ -47,7 +47,7 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     public static final String CLUSTERS = "Cluster Size or Total Number Bound";
     public static final String RUNNING_TIMES = "Running Times";
     
-    private String currentPick;
+    protected String currentPick;
     
     /* ****************  THE DATA HOLDERS ********************************/
     private AverageDataHolder averageMoleculeData;
@@ -81,7 +81,7 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     private JScrollPane pane;
     
     /* **************** PANELS TO SWAP OUT ********************************/
-    private final JPanel centerPanel;
+    protected final JPanel centerPanel;
     private JPanel panePanel;
     private RunningTimesTablePanel runningTimesPanel;
     private JPanel rawDataPanel;

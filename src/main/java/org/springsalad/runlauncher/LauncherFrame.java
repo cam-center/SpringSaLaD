@@ -13,6 +13,7 @@ import javax.swing.*;
 
 import org.springsalad.dataprocessor.DataGUI;
 import org.springsalad.helpersetup.PopUp;
+import org.springsalad.clusteranalysis.DataGUI2;
 
 public class LauncherFrame extends JFrame implements ActionListener,
                                                             WindowListener {
@@ -233,7 +234,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
                 if(!sim.hasResults()){
                     PopUp.warning("Simulation does not have data.");
                 } else {
-                    DataGUI dataGUI = new DataGUI(title, sim);
+                    DataGUI dataGUI = new DataGUI2(title, sim);
                 }
             } else {
                 PopUp.warning("Please select a simulation.");
