@@ -22,7 +22,7 @@ public class DataProcessor2 extends DataProcessor{
 		
 		try {
 			clusterAnalyzer = new ClusterAnalyzer(dataFolder, startIndex, endIndexInclusive);
-			clusterAnalyzer.calculateMeanAndSingleTrajectories();
+			clusterAnalyzer.calculateAndWriteClusterStats();
 		}
 		catch(IOException | IllegalArgumentException exception) {
 			ExceptionDisplayer.justDisplayException("Unable to calculate cluster stats.", exception);

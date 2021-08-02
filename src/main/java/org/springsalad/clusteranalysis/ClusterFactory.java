@@ -20,8 +20,8 @@ public class ClusterFactory {
         }
         throw new IllegalArgumentException("Unrecognized molecule type: " + molName);
     }
-    public Cluster returnedVerifiedCluster(int supposedSize){
-        Cluster c = new Cluster(moleculeNames, tmpComp);
+    public Cluster_OLD returnedVerifiedCluster(int supposedSize){
+        Cluster_OLD c = new Cluster_OLD(moleculeNames, tmpComp);
         if (c.size != supposedSize){
             throw new IllegalArgumentException("Malformed cluster: given size does not match with given composition");
         }

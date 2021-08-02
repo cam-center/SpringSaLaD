@@ -11,7 +11,7 @@ public class TrajFactory {
         this.tpFactory = tpFactory;
     }
 
-    public Trajectory manufactureTraj(int trajNum, Path inpath) throws IOException {
-        return new Trajectory(trajNum,inpath).setTPV(timePointValues).setDt(dt).initializeTPs(tpFactory);
+    public Trajectory_OLD manufactureTraj(int trajNum, Path inpath) throws IOException {
+        return new Trajectory_OLD(trajNum,inpath).setTPV(timePointValues).setDt(dt).initializeTPs(tpFactory);
     }
 }

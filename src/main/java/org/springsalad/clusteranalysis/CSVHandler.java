@@ -1,16 +1,22 @@
 package org.springsalad.clusteranalysis;
-import java.io.*;
-import java.nio.file.Files;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
 
 //must be able to recognize ints and floats, other than the default String
 public class CSVHandler {
     public static void main(String[] args) throws IOException{
+    	/*
         Path outpath = Paths.get("C:\\Users\\imt_w\\Downloads\\test3.csv");
 
         DataFrame df = new DataFrame(new String[]{"Name","Age","Height (m)"});
@@ -37,21 +43,12 @@ public class CSVHandler {
         DataFrame df4 = readCSV(Paths.get("C:\\Users\\imt_w\\Downloads\\test1.csv"),0);
         System.out.println("Read back in, headers are from file");
         System.out.println(df4);
-
-/*
-        //trying out my subclass of br
-        BufferedReader br = new MyBufferedReader(new FileReader(outpath.toString()));
-        String line;
-        while((line=br.readLine())!=null){
-            System.out.println(line);
-        }
-
-        //seeing if scanner can solve the empty-lines issue
-        Scanner scanner = new Scanner(br).useDelimiter("\\s*(\\n+|\\r+|\\n+\\r+|\\r+\\n+)\\s*");
-        while (scanner.hasNext()){
-            System.out.println(scanner.next());
-        }
- */
+        */
+    	Path path1 = Paths.get("C:\\Users\\imt_w\\Downloads\\MEAN_Run_0.0200_Size_Comp_Freq.csv");
+    	System.out.println(readCSV(path1));
+    	System.out.println(readCSV(path1, new String[] {"Size","Nck,NWASP,nephrin", "Frequency in clusters of the same size"}));
+    	Path path2 = Paths.get("C:\\Users\\imt_w\\Documents\\SpringSalad\\Clustering_tutorial_01\\Clustering_tutorial_01_SIMULATIONS\\Simulation3_SIM_FOLDER\\data\\Cluster_stat\\Histograms\\Size_Comp_Freq\\MEAN_Run\\MEAN_Run_0.0200_Size_Comp_Freq.csv");
+    	System.out.println(readCSV(path2,0));
     }
 
     //throws io exception if can't open or write
@@ -77,7 +74,8 @@ public class CSVHandler {
                 bw.append(",");
         }
         bw.newLine();
-
+        
+        //FIXME use iterators instead. so that each column can be any collection
         for (int row = 0; row < columns[0].size(); row++) {
             for (int col = 0; col < columns.length; col++) {
                 bw.append(columns[col].get(row).toString());
@@ -98,27 +96,25 @@ public class CSVHandler {
 
     // reads first line to generate headers (0 1 2 etc) then calls read CSV with string headers
     public static DataFrame readCSV(Path csvfilePath) throws IOException{ // no headers to read
-        BufferedReader br = null;
-        String firstLine = null;
+    	MyCSVReader myCSVReader= null;
+        List<String> firstLine = null;
         List<Object> parsedLine;
         DataFrame df = null;
 
-        br = new MyBufferedReader(new FileReader(csvfilePath.toString())); //possible IOE
+        myCSVReader = new MyCSVReader(new FileReader(csvfilePath.toString())); //possible IOE
 
         //boolean successful = true; //used when you don't want system exit when error occurs
         String[] generatedHeaders;
-        firstLine = br.readLine(); //possible IOE
+        firstLine = myCSVReader.readLine(); //possible IOE
 
         try {
-            br.close();
+        	myCSVReader.close();
         }
         catch (IOException w){
             w.printStackTrace();
         }
         //if (successful) {
-            parsedLine = parseCSVLineAsStrings(firstLine);
-
-            generatedHeaders = new String[parsedLine.size()];
+            generatedHeaders = new String[firstLine.size()];
             for (int i = 0; i < generatedHeaders.length; i++) {
                 generatedHeaders[i] = String.valueOf(i);
             }
@@ -129,21 +125,21 @@ public class CSVHandler {
 
     // calls on complete the reading
     public static DataFrame readCSV(Path csvfilePath, String[] headers) throws IOException{
-        BufferedReader br = null;
+    	MyCSVReader myCSVReader = null;
         DataFrame df = new DataFrame(headers);
 
-        br = new MyBufferedReader(new FileReader(csvfilePath.toString())); //possible IOE
+        myCSVReader = new MyCSVReader(new FileReader(csvfilePath.toString())); //possible IOE
 
         //boolean completeRead = true; //use this if you don't want system exit on exception
         try{
-            completeTheReading(br, df); //possible IOE
+            completeTheReading(myCSVReader, df); //possible IOE
         }
         catch (IllegalArgumentException iae){
             throw new IllegalArgumentException(iae.getMessage() + "\nFile: " + csvfilePath.toString(), iae);
         }
 
         try {
-            br.close();
+        	myCSVReader.close();
         }
         catch (IOException w){
             w.printStackTrace();
@@ -154,19 +150,19 @@ public class CSVHandler {
 
     // calls on complete the reading
     public static DataFrame readCSV(Path csvfilePath, int header) throws IOException{
-        BufferedReader br = null;
+        MyCSVReader myCSVReader = null;
         DataFrame df = null;
 
         if (header < 0){
             throw new IllegalArgumentException("Error in reading csvfile: header row cannot be negative");
         }
-        br = new MyBufferedReader(new FileReader(csvfilePath.toString())); //possible IOE
+        myCSVReader = new MyCSVReader(new FileReader(csvfilePath.toString())); //possible IOE
 
         //boolean completeRead = true;
-        String headerLine = null;
+        List<String> headerLine = null;
 
         for (int i = 0; i <= header; i++) {
-            headerLine = br.readLine(); //possible IOE
+            headerLine = myCSVReader.readLine(); //possible IOE
             if (headerLine == null) {
                 throw new IllegalArgumentException("Header row out of file row range");
             }
@@ -174,17 +170,17 @@ public class CSVHandler {
 
 
         //if (completeRead) {
-            String[] headerArray = parseCSVLineAsStrings(headerLine).stream().map(String.class::cast).toArray(String[]::new);
+            String[] headerArray = headerLine.toArray(new String[0]);
             df = new DataFrame(headerArray);
             try {
-                completeTheReading(br, df); //possible IOE
+                completeTheReading(myCSVReader, df); //possible IOE
             }
             catch (IllegalArgumentException iae){
                 throw new IllegalArgumentException(iae.getMessage() + "\nFile: " + csvfilePath.toString(), iae);
             }
         //}
         try{
-            br.close();
+            myCSVReader.close();
         }
         catch (IOException ioe){
             ioe.printStackTrace();
@@ -229,17 +225,44 @@ public class CSVHandler {
         }
         return lineList;
     }
-
-
+    
     // given the current state of the br and df
     // gives an exception when read line fails or when line is not the right length
-    private static void completeTheReading(BufferedReader br, DataFrame df) throws IOException{
+    private static void completeTheReading_OLD(BufferedReader br, DataFrame df) throws IOException{
         String line;
         List<Object> parsedLine;
         while ((line = br.readLine()) != null){
             parsedLine = parseCSVLineAsObjects(line);
             df.addRow(parsedLine.toArray(new Object[0]));
         }
+    }
+    
+    private static List<Object> parseCSVLine(List<String> line) {
+    	List<Object> ret = new ArrayList<>();
+    	for (String str: line) {
+    		Object tmp;
+    		try {
+    			tmp = Integer.valueOf(str);
+    		}
+    		catch(NumberFormatException n) {
+    			try {
+    				tmp = Double.valueOf(str);
+    			}
+    			catch(NumberFormatException n2) {
+    				tmp = str;
+    			}
+    		}
+    		ret.add(tmp);
+    	}
+    	return ret;
+    }
+    
+    private static void completeTheReading(MyCSVReader myCSVReader, DataFrame df) throws IOException {
+    	List<String> line;
+    	while ((line = myCSVReader.readLine()) != null) {
+    		List<Object> parsedLine = parseCSVLine(line);
+    		df.addRow(parsedLine.toArray());
+    	}
     }
 }
 

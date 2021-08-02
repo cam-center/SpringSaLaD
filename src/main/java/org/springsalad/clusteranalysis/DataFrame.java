@@ -1,6 +1,10 @@
 package org.springsalad.clusteranalysis;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 public class DataFrame implements Iterable<Object[]>{
     String[] headers;

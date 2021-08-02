@@ -1,6 +1,6 @@
 package org.springsalad.clusteranalysis;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.SortedMap;
 
 public class TrajStats {

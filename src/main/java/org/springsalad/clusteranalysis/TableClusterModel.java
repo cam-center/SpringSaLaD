@@ -1,16 +1,16 @@
 package org.springsalad.clusteranalysis;
 
-import javax.swing.table.AbstractTableModel;
-
-import org.springsalad.helpersetup.IOHelp;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
+import javax.swing.table.AbstractTableModel;
+
+import org.springsalad.helpersetup.IOHelp;
 
 public class TableClusterModel extends AbstractTableModel {
+	// FIXME change implementation
+	
     private final ArrayList<String> namesToShow;
     private final String[] names;
     private final DataFrame clusterDataFrame;

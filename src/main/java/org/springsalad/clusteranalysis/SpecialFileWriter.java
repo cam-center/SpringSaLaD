@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.SortedMap;
 import java.util.Map;
+import java.util.SortedMap;
 
 public class SpecialFileWriter {
-    public static void writeComposition(Path outpath, String[] moleculeNames, SortedMap<Cluster,Double> compFreqMap)
+    public static void writeComposition(Path outpath, String[] moleculeNames, SortedMap<Cluster_OLD,Double> compFreqMap)
             throws IOException {
         Path outpath1 = Paths.get(outpath.toString(), "Clusters_composition.txt");
         BufferedWriter bw = new BufferedWriter(new FileWriter(outpath1.toString()));
@@ -19,15 +19,15 @@ public class SpecialFileWriter {
         int currentSize = 0;
 
         //writing content
-        for (Map.Entry<Cluster,Double> entry: compFreqMap.entrySet()){
-            Cluster cluster = entry.getKey(); Double freq = entry.getValue();
-            if (cluster.size > currentSize){
-                currentSize = cluster.size;
+        for (Map.Entry<Cluster_OLD,Double> entry: compFreqMap.entrySet()){
+            Cluster_OLD cluster_OLD = entry.getKey(); Double freq = entry.getValue();
+            if (cluster_OLD.size > currentSize){
+                currentSize = cluster_OLD.size;
                 bw.newLine();
                 bw.newLine();
                 bw.append("  " + currentSize + "\t\t");
             }
-            bw.append(cluster.toString())
+            bw.append(cluster_OLD.toString())
                     .append(" : ")
                     .append(String.format("%.2f%%",freq*100))
                     .append("\t");

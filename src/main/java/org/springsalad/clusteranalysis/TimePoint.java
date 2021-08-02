@@ -2,7 +2,13 @@ package org.springsalad.clusteranalysis;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class TimePoint {
     /*
@@ -53,7 +59,7 @@ public class TimePoint {
 
     List<Integer> clusterSizeList;
     List<Integer> clusterSizeListWithMonomer;
-    List<Cluster> clusterCompList;
+    List<Cluster_OLD> clusterCompList;
     // need to edit this
     private void loadDataFromFile() throws IOException {
         if (clusterSizeList != null){
@@ -113,8 +119,8 @@ public class TimePoint {
         clusterSizeListWithMonomer.addAll(monomerList);
     }
 
-    public TpStats calculateClusterStats(){
-        TpStats tpStats = new TpStats();
+    public TPStats_OLD calculateClusterStats(){
+        TPStats_OLD tpStats = new TPStats_OLD();
 
         //Acs
         int totNumMolecules = 0;
@@ -131,7 +137,7 @@ public class TimePoint {
             size = entry.getKey(); count = entry.getValue();
             fotm.put(size, (double)size*count/totNumMolecules);
         }
-        tpStats.foTM = fotm;
+        tpStats.sizeFotmMap = fotm;
 
         //ACO
         double fraction;
@@ -158,7 +164,7 @@ public class TimePoint {
         return (withMonomer) ? clusterSizeListWithMonomer : clusterSizeList;
     }
 
-    public List<Cluster> getClusterCompList(){
+    public List<Cluster_OLD> getClusterCompList(){
         return clusterCompList;
     }
 }

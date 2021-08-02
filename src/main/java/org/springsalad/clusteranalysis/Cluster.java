@@ -1,71 +1,54 @@
 package org.springsalad.clusteranalysis;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+
+import java.util.Iterator;
 import java.util.List;
 
-public class Cluster implements Comparable<Cluster>{
-    /*
-    public static void main(String[] args){
-        Cluster.molecules = new String[]{"Nck", "NWASP", "nephrin"};
-
-        //checking one constructor
-        Cluster.startCluster();
-        Cluster.addToCluster("Nck",1);
-        Cluster.addToCluster("nephrin",1);
-        Cluster.addToCluster("Nck",1);
-        Cluster.addToCluster("Nck",1);
-        Cluster.addToCluster("NWASP",1);
-        Cluster c1 = Cluster.returnedVerifiedCluster(5);
-        System.out.println(Arrays.toString(molecules));
-        System.out.println(c1);
-
-        // checking the other
-        Cluster c2 = new Cluster(new int[]{1,3,1});
-        System.out.println(c2 + ", of size " + c2.size);
-
-        List<Cluster> listc = new ArrayList<>();
-        listc.add(c1);
-        listc.add(c2);
-        Collections.sort(listc);
-        System.out.println(listc);
-    }
-    */
-    String[] molecules;
-
-    int[] composition;
+class Cluster implements Comparable<Cluster> {
+	List<String> molNames;
+    List<Integer> composition;
     int size;
 
-    //use factory instead
-    Cluster(String[] molecules, int[] comp){
-        /*if (molecules == null)
-            throw new IllegalStateException("Trying to create a cluster before setting the molecule types");
-        if (comp.length != molecules.length){
+    Cluster(List<String> molNames, List<Integer> composition){
+        if (composition.size() != molNames.size()){
             throw new IllegalArgumentException("Cannot understand the cluster composition given");
-        }*/
-        composition = comp;
+        }
+        this.molNames = molNames;
+        this.composition = composition;
         size = 0;
-        for (int count: comp){
+        for (int count: composition){
+        	if (count < 0) {
+        		throw new IllegalArgumentException("Cannot have a negative number of a certain molecule");
+        	}
             size += count;
         }
     }
 
     public int compareTo(Cluster c){
-        for (int i = 0; i < composition.length; i++){
-            if (composition[i] != c.composition[i]){
-                return (composition[i] < c.composition[i]) ? -1 : 1;
-            }
+        int sizeDiff = this.size - c.size;
+        if (sizeDiff != 0) {
+        	return sizeDiff;
         }
-        return 0;
+        Iterator<Integer> thisIterator = this.composition.iterator();
+        Iterator<Integer> cIterator = c.composition.iterator();
+        while (thisIterator.hasNext() && cIterator.hasNext()) {
+        	int componentDiff = thisIterator.next() - cIterator.next();
+        	if (componentDiff != 0) {
+        		return componentDiff;
+        	}
+        }
+        return this.composition.size() - c.composition.size();
     }
 
+    //surrounded with quotes
     @Override
     public String toString(){
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < composition.length-1; i++){
-            sb.append(composition[i]).append(",");
+        StringBuilder sb = new StringBuilder("\"");
+        for (int i = 0; i < composition.size(); i++){
+            sb.append(composition.get(i));
+            if (i != composition.size() -1 ) {
+            	sb.append(",");
+            }
         }
-        sb.append(composition[composition.length-1]);
-        return sb.toString();
+        return sb.append("\"").toString();
     }
 }

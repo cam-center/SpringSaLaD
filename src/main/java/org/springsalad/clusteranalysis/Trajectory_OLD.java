@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Trajectory {
+public class Trajectory_OLD {
     /*
     public static void main(String[] args){
         TimePoint.moleculesNames = new String[]{"Nck", "NWASP", "nephrin"};
@@ -22,22 +22,22 @@ public class Trajectory {
     //<editor-fold, defaultstate = "collapsed", desc = "supposedly 'private' constructor and builder setters">
     int trajNum;
     Path inpath;
-    Trajectory (int trajNum, Path inpath){
+    Trajectory_OLD (int trajNum, Path inpath){
         this.trajNum = trajNum;
         this.inpath = Paths.get(inpath.toString(),"data", "Run"+trajNum);
     }
     double dt;
-    public Trajectory setDt(double dt){
+    public Trajectory_OLD setDt(double dt){
         this.dt = dt;
         return this;
     }
     Double[] timePointValues;
-    public Trajectory setTPV (Double[] timePointValues){
+    public Trajectory_OLD setTPV (Double[] timePointValues){
         this.timePointValues = timePointValues;
         return this;
     }
     TimePoint[] timePoints;
-    Trajectory initializeTPs(TPFactory tpFactory) throws IOException {
+    Trajectory_OLD initializeTPs(TPFactory tpFactory) throws IOException {
         timePoints = new TimePoint[timePointValues.length];
         for (int i = 0; i < timePoints.length; i++){
             timePoints[i] = tpFactory.manufactureTP(timePointValues[i], inpath);
@@ -49,12 +49,12 @@ public class Trajectory {
 
     public TrajStats gatherClusterStats(){
         TrajStats trajStats = new TrajStats();
-        TpStats tpStats;
+        TPStats_OLD tpStats;
         for (TimePoint timePoint: timePoints){
             tpStats = timePoint.calculateClusterStats();
             trajStats.acsList.add(tpStats.acs);
             trajStats.acoList.add(tpStats.aco);
-            trajStats.fotmList.add(tpStats.foTM);
+            trajStats.fotmList.add(tpStats.sizeFotmMap);
         }
         return trajStats;
     }
@@ -68,8 +68,8 @@ public class Trajectory {
         return clusterSizeList;
     }
 
-    public List<Cluster> gatherClusterCompList(double[] SSTimePoints){
-        List<Cluster> clusterCompList = new ArrayList<>();
+    public List<Cluster_OLD> gatherClusterCompList(double[] SSTimePoints){
+        List<Cluster_OLD> clusterCompList = new ArrayList<>();
         for (double sstp: SSTimePoints) {
             int tpIndex = Arrays.binarySearch(timePointValues, sstp,(a,b) -> (a-b>dt*1E-10) ? 1 : (b-a>dt*1E-10)?-1:0);
             clusterCompList.addAll(timePoints[tpIndex].getClusterCompList());

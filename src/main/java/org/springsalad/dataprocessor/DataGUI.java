@@ -26,13 +26,13 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     /* **********  DATA CLASSES AND TYPES *********************************/
     private final String [] dataClasses = {"MOLECULE COUNTS", "BOND DATA", 
                                     "STATE DATA", "SITE DATA", "CLUSTER DATA", "RUNNING TIMES"};
-    private final String [] dataTypes = {"AVERAGE", "HISTOGRAM", "RAW DATA"};
+    public static final String [] dataTypes = {"AVERAGE", "HISTOGRAM", "RAW DATA"};
     
     /* **********  THE DATA PROCESSOR *************************************/
     protected final DataProcessor processor;
     
     /* ****************** THE SIMULATION *********************************/
-    private final Simulation simulation;
+    protected final Simulation simulation;
     
     /* ****************** THE LIST ***************************************/
     protected JLabel listLabel;
@@ -408,6 +408,9 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
             Object source = event.getSource();
             if(source == dataClassBox){
                 dataTypeBox.setEnabled(true);
+                if (dataTypeBox.getItemCount()==2) {
+                	dataTypeBox.addItem(dataTypes[2]);
+                }
                 switch(dataClassBox.getSelectedIndex()){
                     case 0:
                         currentPick = MOLECULES;
