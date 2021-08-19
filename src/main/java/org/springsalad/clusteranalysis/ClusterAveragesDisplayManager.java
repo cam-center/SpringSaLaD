@@ -1,5 +1,6 @@
 package org.springsalad.clusteranalysis;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,14 +36,11 @@ class ClusterAveragesDisplayManager implements DataDisplayManager {
 									double firstTimePoint, double lastTimePointInclusive, double timeStep) {
 		int numOfTP = (int)((lastTimePointInclusive - firstTimePoint)/timeStep) + 1;
 		
-		Path clusterAveragesFolder = Paths.get(dataFolder, DataDestination.AvgFolderEXTENSION);
-
 		// read and store data		
 		NavigableMap<String, DataFrame> dataFrameMap = new TreeMap<>();
 		
-		// FIXME handle exceptions properly, throw them upwards, display them to user
-		Path meanFilePath = Paths.get(clusterAveragesFolder.toString(), ClusterStatsProducer.MEAN_RUN_STR + "_" + DataDestination.averagesFileName);
 		try {
+			Path meanFilePath = PathCreator.trajectoryTimeSeriesPath(dataFolder, ClusterStatsProducer.MEAN_RUN_STR);
 			DataFrame tmp = CSVHandler.readCSV(meanFilePath, 0);
 			if (tmp.getSeries(0).size() == numOfTP) {
 				dataFrameMap.put(ClusterStatsProducer.MEAN_RUN_STR, tmp);
@@ -51,12 +49,12 @@ class ClusterAveragesDisplayManager implements DataDisplayManager {
 				throw new IOException("File does not have the number of timepoints specified in the sim file: \n" + meanFilePath);
 			}
 		}
-		catch (IOException | IllegalArgumentException e) { //notify user
-			dataFrameMap.put(ClusterStatsProducer.MEAN_RUN_STR, null);
+		catch (IOException | UnexpectedFileContentException e) { //notify user
+			dataFrameMap.put(ClusterStatsProducer.MEAN_RUN_STR, convertCSVReadParseExceptionToDataFrame(e));
 		}
 		
-		Path overallFilePath = Paths.get(clusterAveragesFolder.toString(), ClusterStatsProducer.OVERALL_RUN_STR + "_" + DataDestination.averagesFileName);
 		try {
+			Path overallFilePath = PathCreator.trajectoryTimeSeriesPath(dataFolder, ClusterStatsProducer.OVERALL_RUN_STR);
 			DataFrame tmp = CSVHandler.readCSV(overallFilePath, 0);
 			if (tmp.getSeries(0).size() == numOfTP) {
 				dataFrameMap.put(ClusterStatsProducer.OVERALL_RUN_STR, tmp);
@@ -65,14 +63,15 @@ class ClusterAveragesDisplayManager implements DataDisplayManager {
 				throw new IOException("File does not have the number of timepoints specified in the sim file: \n" + overallFilePath);
 			}
 		}
-		catch (IOException | IllegalArgumentException e) {
-			dataFrameMap.put(ClusterStatsProducer.OVERALL_RUN_STR, null);
+		catch (IOException | UnexpectedFileContentException e) {
+			dataFrameMap.put(ClusterStatsProducer.OVERALL_RUN_STR, convertCSVReadParseExceptionToDataFrame(e));
 		}
 		
 		for (int i = firstRunNum; i<= lastRunNumInclusive; i++) {
 			String runStr = String.format(ClusterStatsProducer.SINGLE_RUN_STR, i);
-			Path filePath = Paths.get(clusterAveragesFolder.toString(), runStr + "_" + DataDestination.averagesFileName);
+
 			try {
+				Path filePath = PathCreator.trajectoryTimeSeriesPath(dataFolder, runStr);
 				DataFrame tmp = CSVHandler.readCSV(filePath, 0);
 				if (tmp.getSeries(0).size() == numOfTP) {
 					dataFrameMap.put(runStr, tmp);
@@ -82,8 +81,8 @@ class ClusterAveragesDisplayManager implements DataDisplayManager {
 				}
 
 			}
-			catch (IOException | IllegalArgumentException e) {
-				dataFrameMap.put(runStr, null);
+			catch (IOException | UnexpectedFileContentException e) {
+				dataFrameMap.put(runStr, convertCSVReadParseExceptionToDataFrame(e));
 			}
 		}
 		
@@ -118,6 +117,27 @@ class ClusterAveragesDisplayManager implements DataDisplayManager {
 		mainPanel.add(jScrollPane);
 	}
 
+	@Override
+	public DataFrame convertCSVReadParseExceptionToDataFrame(Exception exception) {
+		List<Object> col0 = new ArrayList<>();
+		col0.add("");
+		col0.add("");
+		
+		List<Object> col1 = new ArrayList<>();
+		col1.add("Cannot read or parse stats file");
+		col1.add(DataDisplayManager.describeReadParseException(exception));
+				
+		List<Object> col2 = new ArrayList<>();
+		col2.add("");
+		col2.add("");
+		
+		List<Object> col3 = new ArrayList<>();
+		col3.add("");
+		col3.add("");
+		
+		return new DataFrame(new String[] {"","","",""}, col0, col1, col2, col3);
+	}
+	
 	@Override
 	public void configureList(JLabel listLabel, JList<String> list, DefaultListModel listModel) {
 		listLabel.setText("Runs");

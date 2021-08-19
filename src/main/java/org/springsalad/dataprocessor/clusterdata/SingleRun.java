@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.io.*;
 import java.util.Arrays;
 
+@Deprecated
 public class SingleRun {
 
     private final ArrayList<ClusterSnapShot> clusterSnapShots;

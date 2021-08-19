@@ -48,14 +48,12 @@ public class DataFrame implements Iterable<Object[]>{
     }
 
     public void addRow(Object[] row) {
-        //assert row.length == frame.length;
         if (row.length != frame.length){
-            throw new IllegalArgumentException("Row to add does not match dataframe row length");
+            throw new IllegalShapeException("DataFrame rows are not of the same length.");
         }
         for (int i = 0; i<row.length; i++){
-            //assert frame[i].size() <= 0 || frame[i].get(0).getClass() == row[i].getClass();
             if (frame[i].size() > 0 && frame[i].get(0).getClass() != row[i].getClass()){
-                throw new IllegalArgumentException("Element type mismatch while trying to add a row to dataframe");
+                throw new TypeMismatchException("Element type mismatch while trying to add a row to dataframe.");
             }
             frame[i].add(row[i]);
             columnLength[i] = Math.max(columnLength[i], row[i].toString().length());
@@ -91,11 +89,11 @@ public class DataFrame implements Iterable<Object[]>{
     public DataFrame(String[] headers, List<Object>... frame){
         this.headers = headers;
         if (frame.length != headers.length){
-            throw new IllegalArgumentException("DataFrame cannot be created: headers and columns do not match");
+            throw new IllegalShapeException("DataFrame headers and columns have incompatible dimensions.");
         }
         for (int col = 1; col<frame.length; col++){
             if (frame[col].size() != frame[col-1].size()){
-                throw new IllegalArgumentException("DataFrame cannot be created: columns not of the same length");
+                throw new IllegalShapeException("DataFrame columns not of the same length.");
             }
         }
         this.frame = frame;
@@ -156,5 +154,38 @@ public class DataFrame implements Iterable<Object[]>{
         ret.append("}");
         return ret.toString();
     }
+
+    public static class IllegalShapeException extends RuntimeException{
+		private static final long serialVersionUID = -2207485930383146933L;
+		public IllegalShapeException() {
+    		super();
+    	}
+		public IllegalShapeException(String message) {
+		    super(message);
+		}
+		public IllegalShapeException(String message, Throwable cause) {
+			super(message, cause);
+		}
+		public IllegalShapeException(Throwable cause) {
+			super(cause);
+		}
+    }
+    
+    public static class TypeMismatchException extends RuntimeException{
+		private static final long serialVersionUID = -2130421850009537977L;
+		public TypeMismatchException() {
+    		super();
+    	}
+		public TypeMismatchException(String message) {
+		    super(message);
+		}
+		public TypeMismatchException(String message, Throwable cause) {
+			super(message, cause);
+		}
+		public TypeMismatchException(Throwable cause) {
+			super(cause);
+		}
+    }
+
 }
 

@@ -5,13 +5,14 @@ import java.util.List;
 
 class TimeSeriesHolder {
 	final String runStr;
-	// FIXME make sure to pass in unmodifiable lists
 	private int currentListIndex;
 	
 	final List<Double> timeInSeconds;
 	final List<Double> acsList;
 	final List<Double> sdList;
 	final List<Double> acoList;
+	
+	static final String[] outputHeaders = new String[] {"Time (s)", "ACS", "SD", "ACO"}; 
 
     TimeSeriesHolder(String runStr, List<Double> timeInSeconds){
     	this.runStr = runStr;
@@ -23,11 +24,14 @@ class TimeSeriesHolder {
     }
 
     void addAveragesToLists(TPStats tpStats){
-    	// FIXME use doubles comparator
     	assert tpStats.tpv == timeInSeconds.get(currentListIndex);
     	acsList.add(tpStats.acs);
     	sdList.add(tpStats.sd);
     	acoList.add(tpStats.aco);
     	currentListIndex++;
+    }
+    
+    void writeTo(DataDestination dataDestination) {
+    	dataDestination.writeTrajectoryTimeSeries(runStr, outputHeaders, timeInSeconds, acsList, sdList, acoList);
     }
 }

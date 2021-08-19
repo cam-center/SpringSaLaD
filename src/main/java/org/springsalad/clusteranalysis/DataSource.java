@@ -19,25 +19,30 @@ class DataSource {
 	private final String clusterInputFileFormat;
 	
 	private final List<String> molNames;
+	private final String molNamesStr;
 	
-	// FIXME make unmodifiable
-	// FIXME maybe use arrays instead?
 	public final List<Integer> runNumberList;
 	public final List<Double> timePointValueList;
 	
-	// FIXME make unmodifiable
 	public final List<Iterable<RunTimePointSample>> byTimeThenByRun;
 	public final List<Iterable<RunTimePointSample>> byRunThenByTime;
 	
-	DataSource (String dataFolder, List<String> molNames,
+	private final FileOperationExceptionLogger logger;
+	
+	DataSource (FileOperationExceptionLogger logger,
+			String dataFolder, List<String> molNames,
 			double startTime, double endTimeInclusive, double timeStep,
 			int firstRunIndex, int lastRunIndexInclusive) {
-
+		this.logger = logger;
+		
 		this.dataFolder = dataFolder;
 		nf = Math.max(0,BigDecimal.valueOf(timeStep).stripTrailingZeros().scale());
 		clusterInputFileFormat = "Run%d\\Clusters_Time_%."+nf+"f.csv";
 		
 		this.molNames = molNames;
+		StringBuilder moleculeTypeHeaderSB = molNames.stream().collect(StringBuilder::new, (sb,str)->sb.append(str).append(","), StringBuilder::append);
+		moleculeTypeHeaderSB.insert(0,"\"").replace(moleculeTypeHeaderSB.length()-1, moleculeTypeHeaderSB.length(), "\"");
+		molNamesStr = moleculeTypeHeaderSB.toString();
 		
 		long totRunNum = lastRunIndexInclusive - firstRunIndex + 1;
 		runNumberList = IntStream.iterate(firstRunIndex, i -> i + 1).limit(totRunNum).boxed().collect(toList());
@@ -48,15 +53,103 @@ class DataSource {
 		byRunThenByTime = runNumberList.stream().map(run -> new SingleRunAllTimeIterable(run)).collect(toList());
 	}
 	
+	// if data comes from somewhere else, extract an abstract datasource class with this method as the only abstract method
+	protected RunTimePointSample getRunTimePointSample(int run, double tpv) {
+		String relativeFilePathStr = String.format(clusterInputFileFormat, run, tpv);
+		Path path = Paths.get(dataFolder, relativeFilePathStr);
+		try {			
+			DataFrame rawFileDF = CSVHandler.readCSV(path);
+			RunTimePointSample rtps = parseRawFileDF(run, tpv, rawFileDF);
+			return rtps;
+		}
+		catch(IOException | UnexpectedFileContentException exception) {
+			logger.logFileReadParseException(relativeFilePathStr, exception);
+			return new FaultyRunTimePointSample(String.format(ClusterStatsProducer.SINGLE_RUN_STR, run), 
+												tpv, String.format("%."+nf+"f",tpv), molNamesStr, exception);
+		}
+		catch (ClassCastException exception) {
+        	Exception e = new UnexpectedFileContentException("File data does not match expected format of String,Integer: " + path, exception);
+        	logger.logFileReadParseException(relativeFilePathStr, e);
+        	return new FaultyRunTimePointSample(String.format(ClusterStatsProducer.SINGLE_RUN_STR, run), 
+					tpv, String.format("%."+nf+"f",tpv), molNamesStr, exception);
+        }
+		catch (ClusterBuilder.MalformedClusterException exception) {
+			Exception e =  new UnexpectedFileContentException("File contains contradicting information about clusters: " + path, exception);
+			logger.logFileReadParseException(relativeFilePathStr, e);
+			return new FaultyRunTimePointSample(String.format(ClusterStatsProducer.SINGLE_RUN_STR, run), 
+					tpv, String.format("%."+nf+"f",tpv), molNamesStr, exception);
+        }
+		catch (ClusterBuilder.IllegalMoleculeNameException exception) {
+			Exception e =  new UnexpectedFileContentException("File contains unexpected molecule name: " + path, exception);
+			logger.logFileReadParseException(relativeFilePathStr, e);
+			return new FaultyRunTimePointSample(String.format(ClusterStatsProducer.SINGLE_RUN_STR, run), 
+					tpv, String.format("%."+nf+"f",tpv), molNamesStr, exception);
+        }
+	}
+	
+	RunTimePointSample parseRawFileDF(int run, double tpv, DataFrame rawFileDF) {
+		List<Integer> clusterSizeList = new ArrayList<>();
+        List<Cluster> clusterCompList = new ArrayList<>();
+
+        Iterator<Object[]> rawFileDFIterator = rawFileDF.iterator();
+
+        //assemble clusterSizeList and clusterCompList
+        Object[] dfRow;
+        int numClusters = 0;
+        while (rawFileDFIterator.hasNext()){
+            dfRow = rawFileDFIterator.next();
+
+            String label = (String)dfRow[0];
+            if (label.equals("Total clusters")){
+                numClusters = (Integer)dfRow[1];
+            }
+            if (label.equals("Size")) {
+                int size = (Integer) dfRow[1];
+                clusterSizeList.add(size);
+                ClusterBuilder clusterBuilder = new ClusterBuilder(molNames, size);
+                while (rawFileDFIterator.hasNext()) {
+                    dfRow = rawFileDFIterator.next();
+                    if (dfRow[0].equals("Cluster Index")){
+                        break;
+                    }
+                    String molecule = (String) dfRow[0];
+                    int count = (Integer) dfRow[1];
+                    clusterBuilder.addOnToComposition(molecule, count);
+                }
+                Cluster c = clusterBuilder.produceCluster();
+                clusterCompList.add(c);
+            }
+        }
+        IntStream.generate(()->1).limit(numClusters-clusterSizeList.size()).forEach(clusterSizeList::add);
+		return new RunTimePointSample(String.format(ClusterStatsProducer.SINGLE_RUN_STR, run), 
+										tpv, String.format("%."+nf+"f",tpv),
+										molNamesStr,
+										clusterSizeList, clusterCompList);
+	}
+
+	
+	
+	public FileOperationExceptionLogger getLogger() {
+		return logger;
+	}
+	public String getDataFolder() {
+		return dataFolder;
+	}
+	
 	public Iterable<RunTimePointSample> getSingleRunAllTimes(int run) {
-		//FIXME check argument
-		return byRunThenByTime.get(runNumberList.indexOf(run));
+		int runIndex = runNumberList.indexOf(run);
+		if (runIndex == -1) {
+			throw new IllegalArgumentException("Invalid run number: " + run);
+		}
+		return byRunThenByTime.get(runIndex);
 	}
 	
 	public Iterable<RunTimePointSample> getSingleTimeAllRuns(double tpv) {
-		// FIXME check argument
-		// FIXME use doubles comparator
-		return byRunThenByTime.get(timePointValueList.indexOf(tpv));
+		int timeIndex = timePointValueList.indexOf(tpv);
+		if (timeIndex == -1) {
+			throw new IllegalArgumentException("Invalid time point: " + tpv);
+		}
+		return byTimeThenByRun.get(timeIndex);
 	}
 	
 	private class SingleTimeAllRunsIterable implements Iterable<RunTimePointSample>{
@@ -125,72 +218,5 @@ class DataSource {
 		}
 	}
 	
-	// if data comes from somewhere else, extract an abstract datasource class with this method as the only abstract method
-	protected RunTimePointSample getRunTimePointSample(int run, double tpv) {
-		// FIXME throw ioe exception upwards
-		Path path = Paths.get(dataFolder, String.format(clusterInputFileFormat, run, tpv));
-		try {			
-			DataFrame rawFileDF = CSVHandler.readCSV(path);
-			RunTimePointSample rtps = parseRawFileDF(run, tpv, rawFileDF);
-			return rtps;
-		}
-		catch (IOException ioe) {
-			
-		}
-		
-		catch (ClassCastException cce){
-            throw new ClassCastException(cce.getMessage()
-                    + "\nData does not match expected format of String,Integer"
-                    + "\nFile: " + path);
-        }
-        catch (IllegalStateException ise) {
-        	throw new IllegalStateException(ise.getMessage() + "\nFile: " + path, ise);
-        }
-        // FIXME do we still need this?
-        catch (IllegalArgumentException iae){ 
-            throw new IllegalArgumentException(iae.getMessage() + "\nFile: " + path, iae);
-        }
-        catch (NoSuchElementException nsee){ //.next()
-            throw new NoSuchElementException(nsee.getMessage() + "\nFile: " + path);
-        }
-		return null;
-	}
 	
-	RunTimePointSample parseRawFileDF(int run, double tpv, DataFrame rawFileDF) {
-		List<Integer> clusterSizeList = new ArrayList<>();
-        List<Cluster> clusterCompList = new ArrayList<>();
-
-        Iterator<Object[]> rawFileDFIterator = rawFileDF.iterator();
-
-        //assembled clusterSizeList and clusterCompList
-        Object[] dfRow;
-        int numClusters = 0;
-        while (rawFileDFIterator.hasNext()){
-            dfRow = rawFileDFIterator.next();
-
-            String label = (String)dfRow[0];
-            if (label.equals("Total clusters")){
-                numClusters = (Integer)dfRow[1];
-            }
-            if (label.equals("Size")) {
-                int size = (Integer) dfRow[1];
-                clusterSizeList.add(size);
-                ClusterBuilder clusterBuilder = new ClusterBuilder(molNames, size);
-                while (rawFileDFIterator.hasNext()) {
-                    dfRow = rawFileDFIterator.next();
-                    if (dfRow[0].equals("Cluster Index")){
-                        break;
-                    }
-                    String molecule = (String) dfRow[0];
-                    int count = (Integer) dfRow[1];
-                    clusterBuilder.addToCluster(molecule, count);
-                }
-                clusterCompList.add(clusterBuilder.getCluster());
-            }
-        }
-        IntStream.generate(()->1).limit(numClusters-clusterSizeList.size()).forEach(clusterSizeList::add);
-		return new RunTimePointSample(String.format(ClusterStatsProducer.SINGLE_RUN_STR, run), 
-										tpv, clusterSizeList, clusterCompList);
-	}
-
 }

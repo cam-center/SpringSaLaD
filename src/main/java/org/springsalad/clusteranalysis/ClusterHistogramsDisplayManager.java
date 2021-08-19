@@ -39,28 +39,27 @@ class ClusterHistogramsDisplayManager implements DataDisplayManager {
 	
 	private String selectedRun, selectedTime;
 	
+	
+	
+	
 	ClusterHistogramsDisplayManager(String dataFolder, 
 									int firstRunNum, int lastRunNumInclusive,
 									double firstTimePoint, double lastTimePointInclusive, double timeStep) {	
 		// getting data
 		long numRuns = lastRunNumInclusive-firstRunNum +1;
-		
 		List<String> runStrList = new ArrayList<>();
 		runStrList.add(ClusterStatsProducer.MEAN_RUN_STR);
 		runStrList.add(ClusterStatsProducer.OVERALL_RUN_STR);
 		IntStream.iterate(firstRunNum, i -> i+1).limit(numRuns).mapToObj(i -> String.format(ClusterStatsProducer.SINGLE_RUN_STR, i)).forEach(runStrList::add);
+		
 		long numTPVs = (long)((lastTimePointInclusive - firstTimePoint)/timeStep) +1;
 		int nf = Math.max(0,BigDecimal.valueOf(timeStep).stripTrailingZeros().scale());
 		List<String> tpvStrList = DoubleStream.iterate(firstTimePoint, d -> d+timeStep).limit(numTPVs).mapToObj(tpv -> String.format("%."+nf+"f",tpv)).collect(toList());
 		
-		Path sffFolder = Paths.get(dataFolder, DataDestination.SffFolderEXTENSION);
-		sizeFreqFotmTableModel = new ClusterHistogramsTableModel(getData(sffFolder, DataDestination.sizeFreqFotmFileName, runStrList, tpvStrList));
-		Path scfFolder = Paths.get(dataFolder, DataDestination.ScfFolderEXTENSION);
-		sizeCompFreqTableModel = new ClusterHistogramsTableModel(getData(scfFolder, DataDestination.sizeCompFreqFileName, runStrList, tpvStrList));
-		
+		sizeFreqFotmTableModel = new ClusterHistogramsTableModel(getData(PathCreator::clusterSizeDistributionPath, dataFolder, runStrList, tpvStrList));
+		sizeCompFreqTableModel = new ClusterHistogramsTableModel(getData(PathCreator::clusterCompositionDistributionPath, dataFolder, runStrList, tpvStrList));
+
 		// UI init		
-		//JLabel mainLabel = new JLabel("Cluster Histograms");
-		//mainLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		
 		JLabel sffLabel = new JLabel("Cluster Size Frequency and Fraction of total molecules");
 		sffLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -69,7 +68,6 @@ class ClusterHistogramsDisplayManager implements DataDisplayManager {
 		jTable1.setFillsViewportHeight(true);
 		JScrollPane jScrollPane1 = new JScrollPane(jTable1);
 		jScrollPane1.setPreferredSize(new Dimension(350,150));
-		jScrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		
 		JLabel scfLabel = new JLabel("Frequency of Cluster Compositions");
 		scfLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -78,8 +76,7 @@ class ClusterHistogramsDisplayManager implements DataDisplayManager {
 		jTable2.setFillsViewportHeight(true);
 		JScrollPane jScrollPane2 = new JScrollPane(jTable2);
 		jScrollPane2.setPreferredSize(new Dimension(350,150));
-		jScrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-		
+
 		JPanel tablePanel = new JPanel();
 		tablePanel.setLayout(new BoxLayout(tablePanel, BoxLayout.Y_AXIS));
 		tablePanel.add(sffLabel);
@@ -122,21 +119,19 @@ class ClusterHistogramsDisplayManager implements DataDisplayManager {
 		mainPanel.add(mainScrollPane);
 	}
 	
-	private SortedMap<String, SortedMap<String, DataFrame>> getData(Path dataGridFolder, String fileNameEnding,
+	private SortedMap<String, SortedMap<String, DataFrame>> getData (HistogramPathCreator histogramPathCreator, String dataFolder,
 																	List<String> runStrList, List<String> tpvStrList){
 		SortedMap<String, SortedMap<String, DataFrame>> dataFrameGrid = new TreeMap<>();
 		for (String runStr: runStrList) {
-			String runFolderStr = dataGridFolder.toString() + "/" + runStr;
 			SortedMap<String, DataFrame> innerMap = new TreeMap<>();
 			for (String tpvStr: tpvStrList) {
-				Path filePath = Paths.get(runFolderStr, runStr + "_" + tpvStr + "_" + fileNameEnding);
-				// FIXME check if i handled this exception properly
 				try {
+					Path filePath = histogramPathCreator.createPath(dataFolder, runStr, tpvStr);
 					DataFrame df = CSVHandler.readCSV(filePath, 0);
 					innerMap.put(tpvStr, df);
 				}
-				catch (IOException | IllegalArgumentException e) {
-					innerMap.put(tpvStr, null);
+				catch (IOException | UnexpectedFileContentException e) {
+					innerMap.put(tpvStr, convertCSVReadParseExceptionToDataFrame(e));
 				}
 			}
 			dataFrameGrid.put(runStr, innerMap);
@@ -144,7 +139,13 @@ class ClusterHistogramsDisplayManager implements DataDisplayManager {
 		return dataFrameGrid;
 	}
 	
-
+	@Override
+	public DataFrame convertCSVReadParseExceptionToDataFrame(Exception exception) {
+		List<Object> tmp = new ArrayList<>();
+		tmp.add(DataDisplayManager.describeReadParseException(exception));
+		return new DataFrame(new String[] {"Cannot read or parse stats file"}, tmp);
+	}
+	
 	@Override
 	public void configureList(JLabel listLabel, JList<String> list, DefaultListModel listModel) {
 		listLabel.setText("");

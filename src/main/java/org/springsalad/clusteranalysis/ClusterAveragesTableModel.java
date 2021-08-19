@@ -16,19 +16,19 @@ class ClusterAveragesTableModel extends AbstractTableModel{
 	
 	private final List<String> namesToShow;
     private final NavigableMap<String,DataFrame> dataFrameMap;
-    private boolean mapAllNulls;
-    private DataFrame firstNonNullDF;
+    private boolean mapHasNoNormalDFs;
+    private DataFrame firstNormalDF;
     
 	public ClusterAveragesTableModel(NavigableMap<String, DataFrame> dataFrameMap) {
 		namesToShow = new ArrayList<>();
 		this.dataFrameMap = dataFrameMap;
 		
-		mapAllNulls = true;
-		firstNonNullDF = null;
+		mapHasNoNormalDFs = true;
+		firstNormalDF = null;
 		for (DataFrame df: this.dataFrameMap.values()) {
-			if (df != null) {
-				mapAllNulls = false;
-				firstNonNullDF = df;
+			if (df != null && df.getSeries(0).size() > 1 && df.getSeries(0).get(0).getClass() == Double.class) {
+				mapHasNoNormalDFs = false;
+				firstNormalDF = df;
 				break;
 			}
 		}
@@ -45,12 +45,12 @@ class ClusterAveragesTableModel extends AbstractTableModel{
     /* ****************** DETERMINE UNIT AND SCALE ***********************/
     private void determineTimeUnit(){
         // <editor-fold defaultstate="collapsed" desc="Method Code">
-    	if (mapAllNulls) {
+    	if (mapHasNoNormalDFs) {
     		unit = "s";
     		unitScale = 1;
     	}
     	else {
-    		List<Object> times = firstNonNullDF.getSeries(0);
+    		List<Object> times = firstNormalDF.getSeries(0);
 	        if(times.size() > 1){
 	            double dt = (Double)times.get(1);
 	            if(dt >= 0.1){
@@ -88,11 +88,11 @@ class ClusterAveragesTableModel extends AbstractTableModel{
 
     @Override
     public int getRowCount() {
-    	if (mapAllNulls) {
+    	if (mapHasNoNormalDFs) {
     		return 1;
     	}
     	else {
-    		return firstNonNullDF.getSeries(0).size();
+    		return firstNormalDF.getSeries(0).size();
     	}
     }
 
@@ -107,40 +107,46 @@ class ClusterAveragesTableModel extends AbstractTableModel{
             return "Time (" + unit + ")";
         }
         else{
-        	String detailStr;
-        	switch ((col-1) % 3){
-        		case 0:
-        			detailStr = "ACS";
-        			break;
-        		case 1:
-        			detailStr = "SD";
-        			break;
-        		default: // mod == 2
-        			detailStr = "ACO";
+        	String dfName = namesToShow.get((col-1)/3);
+        	DataFrame df = dataFrameMap.get(dfName);
+        	String shortHeader;
+        	if (df == null) {
+        		shortHeader = "";
         	}
-            return namesToShow.get((col-1)/3) + " " + detailStr;
+        	else {
+        		shortHeader = df.headers[((col-1) % 3) + 1];
+        	}
+            return dfName + " " + shortHeader;
         }
     }
 
     @Override
     public Object getValueAt(int row, int col) {
-    	if (mapAllNulls) {
+    	if(col == 0){
+    		if (mapHasNoNormalDFs) {
+        		return "NA";
+        	}
+    		else {
+    			return IOHelp.DF[3].format(unitScale * (Double) firstNormalDF.getSeries(0).get(row));
+    		}
+        }
+    	DataFrame df = dataFrameMap.get(namesToShow.get((col-1)/3));
+    	if (df == null) {
     		return "NA";
     	}
-    	else {
-	        if(col == 0){
-	            return IOHelp.DF[3].format(unitScale * (Double) firstNonNullDF.getSeries(0).get(row));
-	        }
-	        else{    
-	        	DataFrame df = dataFrameMap.get(namesToShow.get((col-1)/3));
-	        	if (df == null) {
-	        		return "NA";
-	        	}
-	        	else {
-	        		return IOHelp.DF[3].format((Double) df.getSeries((col-1)%3+1).get(row));
-	        	}
-	        }
-    	}
+        else{    
+    		if (row >= df.getSeries(0).size()) {
+    			return "";
+    		}
+    		Object element = df.getSeries((col-1)%3+1).get(row);
+    		if (element.getClass() == Double.class) {
+    			return IOHelp.DF[3].format((Double) element);
+    		}
+    		else {
+    			return element.toString();
+    		}
+        }
+    	
     }
 
     @Override

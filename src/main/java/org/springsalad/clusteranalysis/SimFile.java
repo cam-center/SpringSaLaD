@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class SimFile {
+class SimFile {
 
     public static void main(String[] args) throws IOException{
         //tests

@@ -12,6 +12,7 @@ import java.io.IOException;
 import javax.swing.*;
 
 import org.springsalad.dataprocessor.DataGUI;
+import org.springsalad.dataprocessor.DataProcessor;
 import org.springsalad.helpersetup.PopUp;
 import org.springsalad.clusteranalysis.DataGUI2;
 
@@ -31,6 +32,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
     
     private JButton viewSystemButton;
     private JButton viewDataButton;
+    private JButton recalculateStatsButton;
     
     private final String title;
     
@@ -48,6 +50,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
         abortSimButton.addActionListener(this);
         viewSystemButton.addActionListener(this);
         viewDataButton.addActionListener(this);
+        recalculateStatsButton.addActionListener(this);
     }
     
     private void initGUI(){
@@ -75,6 +78,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
         abortSimButton = new JButton("Abort Simulation");
         viewSystemButton = new JButton("View 3D Snapshots");
         viewDataButton = new JButton("View Data");
+        recalculateStatsButton = new JButton("Recalculate stats");
         
         JPanel p0 = new JPanel();
         p0.add(addSimButton);
@@ -89,6 +93,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
         JPanel p2 = new JPanel();
         p2.add(viewSystemButton);
         p2.add(viewDataButton);
+        p2.add(recalculateStatsButton);
         
         JPanel p = new JPanel();
         p.setLayout(new GridLayout(3,1));
@@ -239,6 +244,31 @@ public class LauncherFrame extends JFrame implements ActionListener,
             } else {
                 PopUp.warning("Please select a simulation.");
             }
+        }
+        
+        else if(source == recalculateStatsButton) {
+        	int index = tablePanel.getSelectedRow();
+        	if (index != -1) {
+        		Simulation sim = sm.getSimulation(index);
+        		if (sim.hasResults()) {
+        			int confirm = PopUp.doubleCheck(String.format("Are you sure you want to recalculate the statistics for %s?\nAny existing stats files will be lost.",
+        															sim.getSimulationName()));
+        			if (confirm == JOptionPane.OK_OPTION) {
+        				DataProcessor processor = sim.getDataProcessor();
+        				if(!processor.hasData()){
+        	                processor.grabNames();
+        	            }
+        				sim.calculateStatistics();
+        				sim.writeFile();        			
+        			}
+        		}
+        		else {
+        			PopUp.warning("Simulation does not have data. Cannot calculate statistics.");
+        		}
+        	}
+        	else {
+        		PopUp.warning("Please select a simulation for which to recalculate the statistics.");
+        	}
         }
         // </editor-fold>
     }

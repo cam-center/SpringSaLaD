@@ -473,15 +473,9 @@ public class Simulation extends Global implements ChangeListener{
         // </editor-fold>
     }
     
-    private void calculateStatistics(){
+    public void calculateStatistics(){
         // <editor-fold defaultstate="collapsed" desc="Method Code">
-        System.out.println("Computing time point averages.");
-        processor.computeAllTimePointAverages(0, runNumber-1);
-        System.out.println("Computing running times.");
-        processor.getRunningTimes(0, runNumber-1);
-        System.out.println("Computing raw data files.");
-        processor.makeAllRawDataFiles(0, runNumber-1);
-        System.out.println("Finished computing data.");
+        processor.calculateStatistics(0, runNumber-1);
         if(runOnCluster){
             writeFile();
         }

@@ -16,4 +16,24 @@ public interface DataDisplayManager {
 	JPanel getMainPanel();
 	
 	void setNamesToShow(List<String> selectedValuesList);
+	
+	DataFrame convertCSVReadParseExceptionToDataFrame(Exception exception);
+	
+	static String describeReadParseException(Exception exception){
+		StringBuilder sb = new StringBuilder();
+		Throwable t = exception;
+		while (true) {
+			sb.append(t.toString());
+			if (t.getCause() != null) {
+				sb.append(System.lineSeparator()).append("Caused by: ");
+				t = t.getCause();
+			}
+			else {
+				break;
+			}
+		}
+		return sb.toString();
+	}
+	
+	
 }

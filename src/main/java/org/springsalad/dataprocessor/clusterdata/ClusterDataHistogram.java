@@ -9,6 +9,7 @@
  */
 package org.springsalad.dataprocessor.clusterdata;
 
+@Deprecated
 public class ClusterDataHistogram {
     
     private final ClusterData clusterData;

@@ -10,41 +10,48 @@ import org.springsalad.dataprocessor.DataGUI;
 import org.springsalad.langevinsetup.SystemTimes;
 import org.springsalad.runlauncher.Simulation;
 
+/*
+	THIS IS A MAIN CLASS:
+	It includes the new cluster stats display.
+	
+*/
+
 public class DataGUI2 extends DataGUI{
-	private TableClusterPanel tableClusterPanel;
-	private static final String CLUSTER_STATS2 = "CLUSTER STATS 2";
+	public static void main(String[] args) {
+		Simulation sim = new Simulation(new File("C:\\Users\\imt_w\\Documents\\SpringSalad\\Clustering_tutorial_01\\Clustering_tutorial_01_SIMULATIONS\\TEST1X5_SIM.txt"));
+		new DataGUI2("Test", sim);
+	}
+	
+	private static final String CLUSTER_STATS = "CLUSTER STATS";
 	
 	private DataDisplayManager currentDataDisplayManager;
 	private ClusterAveragesDisplayManager clusterAveragesDisplayManager;
 	private ClusterHistogramsDisplayManager clusterHistogramsDisplayManager;
 	
-	public static void main(String[] args) {
-		Simulation sim = new Simulation(new File("C:\\Users\\imt_w\\Documents\\SpringSalad\\Clustering_tutorial_01\\Clustering_tutorial_01_SIMULATIONS\\Simulation3_SIM.txt"));
-		new DataGUI2("Test", sim);
-	}
-	
 	public DataGUI2 (String title, Simulation simulation) {
 		super(title, simulation);
-		// FIXME check if trackClusters is true first
-		SystemTimes systemTimes = this.simulation.getSystemTimes();
-		int numRuns = this.simulation.getRunNumber();
-		clusterAveragesDisplayManager = new ClusterAveragesDisplayManager(processor.getDataFolder(), 
-																			0, numRuns-1, 
-																			0, systemTimes.getTotalTime(), systemTimes.getdtdata());
-		clusterHistogramsDisplayManager = new ClusterHistogramsDisplayManager(processor.getDataFolder(), 
+		
+		if (this.simulation.isTrackingClusters()) {
+			SystemTimes systemTimes = this.simulation.getSystemTimes();
+			int numRuns = this.simulation.getRunNumber();
+			clusterAveragesDisplayManager = new ClusterAveragesDisplayManager(processor.getDataFolder(), 
 																				0, numRuns-1, 
 																				0, systemTimes.getTotalTime(), systemTimes.getdtdata());
-		dataClassBox.addItem(CLUSTER_STATS2);
+			clusterHistogramsDisplayManager = new ClusterHistogramsDisplayManager(processor.getDataFolder(), 
+																					0, numRuns-1, 
+																					0, systemTimes.getTotalTime(), systemTimes.getdtdata());
+			dataClassBox.addItem(CLUSTER_STATS);
+		}
 	}
 	
 	@Override
 	public void itemStateChanged(ItemEvent event) {
 		super.itemStateChanged(event);
 		if (event.getStateChange() == ItemEvent.SELECTED) {
-			if (dataClassBox.getSelectedItem().equals(CLUSTER_STATS2)) {
+			if (dataClassBox.getSelectedItem().equals(CLUSTER_STATS)) {
 				Object source = event.getSource();
 				if (source == dataClassBox) {
-					currentPick = CLUSTER_STATS2;
+					currentPick = CLUSTER_STATS;
 					if (dataTypeBox.getItemCount()==3) {
 						if (dataTypeBox.getSelectedIndex()==2) {
 							dataTypeBox.setSelectedIndex(1);
@@ -74,7 +81,7 @@ public class DataGUI2 extends DataGUI{
 	public void valueChanged(ListSelectionEvent event) {
 		super.valueChanged(event);
 		if (!event.getValueIsAdjusting()) {
-			if (currentPick.equals(CLUSTER_STATS2)) {
+			if (currentPick.equals(CLUSTER_STATS)) {
 				currentDataDisplayManager.setNamesToShow(list.getSelectedValuesList());
 			}
 		}

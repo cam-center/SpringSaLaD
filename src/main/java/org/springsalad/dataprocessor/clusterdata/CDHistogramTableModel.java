@@ -7,6 +7,7 @@ package org.springsalad.dataprocessor.clusterdata;
 
 import javax.swing.table.AbstractTableModel;
 
+@Deprecated
 public class CDHistogramTableModel extends AbstractTableModel {
     
     private final ClusterDataHistogram histogram;

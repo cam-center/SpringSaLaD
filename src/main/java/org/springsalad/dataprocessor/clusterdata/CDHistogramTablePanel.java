@@ -11,6 +11,7 @@ import javax.swing.*;
 
 import org.springsalad.helpersetup.IOHelp;
 
+@Deprecated
 public class CDHistogramTablePanel extends JPanel implements ItemListener {
     
     /* *****************  Top Panel Component ****************************/

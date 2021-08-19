@@ -5,12 +5,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
-
-import org.springsalad.dataprocessor.clusterdata.CDHistogramTableModel;
-import org.springsalad.dataprocessor.clusterdata.CDHistogramTablePanel;
-import org.springsalad.dataprocessor.clusterdata.ClusterData;
-import org.springsalad.dataprocessor.clusterdata.ClusterDataHistogram;
-import org.springsalad.dataprocessor.clusterdata.ClusterDataTableModel;
 import org.springsalad.helpersetup.Fonts;
 import org.springsalad.runlauncher.Simulation;
 
@@ -24,8 +18,13 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     protected JComboBox dataTypeBox;
     
     /* **********  DATA CLASSES AND TYPES *********************************/
-    private final String [] dataClasses = {"MOLECULE COUNTS", "BOND DATA", 
-                                    "STATE DATA", "SITE DATA", "CLUSTER DATA", "RUNNING TIMES"};
+    private static final String MOLECULECOUNTS = "MOLECULE COUNTS";
+    private static final String BONDDATA = "BOND DATA"; 
+    private static final String STATEDATA = "STATE DATA"; 
+    private static final String SITEDATA = "SITE DATA";
+    private static final String RUNNINGTIMES = "RUNNING TIMES";
+    private final String [] dataClasses = {MOLECULECOUNTS, BONDDATA, 
+                                    STATEDATA, SITEDATA, RUNNINGTIMES};
     public static final String [] dataTypes = {"AVERAGE", "HISTOGRAM", "RAW DATA"};
     
     /* **********  THE DATA PROCESSOR *************************************/
@@ -44,7 +43,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     public static final String BONDS = "Bonds";
     public static final String STATES = "States";
     public static final String SITES = "Sites";
-    public static final String CLUSTERS = "Cluster Size or Total Number Bound";
     public static final String RUNNING_TIMES = "Running Times";
     
     protected String currentPick;
@@ -56,14 +54,11 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     private RunningTimesDataHolder runningTimesData;
     private final HistogramBuilder histogramBuilder = new HistogramBuilder();
     private final SiteDataHolder siteData;
-    private final ClusterData clusterData;
-    private final ClusterDataHistogram clusterDataHistogram;
     
     /* **************** THE TABLES ***************************************/
     private JTable moleculeDataTable;
     private JTable bondDataTable;
     private JTable stateDataTable;
-    private JTable clusterDataTable;
     
     /* *******************  TABLE MODELS *********************************/
     private AverageDataTableModel moleculeDataModel;
@@ -74,8 +69,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     private SiteFreeBoundTableModel siteFBModel;
     private SiteStatesTableModel siteStateModel;
     private SiteBondsTableModel siteBondModel;
-    private ClusterDataTableModel clusterDataModel;
-    private CDHistogramTableModel clusterDataHistogramModel;
     
     /* **************** THE SCROLLPANE TO HOLD THE TABLES *****************/
     private JScrollPane pane;
@@ -86,7 +79,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
     private RunningTimesTablePanel runningTimesPanel;
     private JPanel rawDataPanel;
     private HistogramTablePanel histogramPanel;
-    private CDHistogramTablePanel cdHistogramPanel;
     private JPanel sitePanel;
     
     /* ************* THE CONSTRUCTOR ************************************/
@@ -95,11 +87,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
         this.simulation = simulation;
         this.processor = simulation.getDataProcessor();
         siteData = new SiteDataHolder(this.processor);
-        clusterData = new ClusterData(this.simulation.getMoleculeNames());
-        clusterData.loadSingleRuns(this.processor.getDataFolder(), this.simulation.getRunNumber());
-        
-        clusterDataHistogram = new ClusterDataHistogram(clusterData);
-        clusterDataHistogram.constructHistograms();
         
         buildDataHoldersAndTables();
         buildScrollPanePanel();
@@ -220,15 +207,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
             case SITES:
                 strings = processor.getSiteNames();;
                 break;
-            case CLUSTERS:
-                strings = new ArrayList<>();
-                strings.add(ClusterData.CLUSTER_SIZE);
-                if(dataTypeBox.getSelectedIndex()==0){
-                    for(String name : clusterData.getNames()){
-                        strings.add(name);
-                    }
-                }
-                break;
             case RUNNING_TIMES:
                 strings = new ArrayList<>();
                 strings.add("");
@@ -257,17 +235,14 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
         moleculeDataModel = new AverageDataTableModel(averageMoleculeData);
         bondDataModel = new AverageDataTableModel(averageBondData);
         stateDataModel = new AverageDataTableModel(averageStateData);
-        clusterDataModel = new ClusterDataTableModel(clusterData);
         
         moleculeDataTable = new JTable(moleculeDataModel);
         bondDataTable = new JTable(bondDataModel);
         stateDataTable = new JTable(stateDataModel);
-        clusterDataTable = new JTable(clusterDataModel);
         
         moleculeDataTable.setFillsViewportHeight(true);
         bondDataTable.setFillsViewportHeight(true);
         stateDataTable.setFillsViewportHeight(true);
-        clusterDataTable.setFillsViewportHeight(true);
         
         // </editor-fold>
     }
@@ -312,11 +287,7 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
         // <editor-fold defaultstate="collapsed" desc="Method Code">
         histogramModel = new HistogramTableModel(histogramBuilder);
         histogramPanel = new HistogramTablePanel(histogramModel);
-        
-        if(simulation.isTrackingClusters()){
-            clusterDataHistogramModel = new CDHistogramTableModel(clusterDataHistogram);
-            cdHistogramPanel = new CDHistogramTablePanel(clusterDataHistogramModel);
-        }
+
         // </editor-fold>
     }
     
@@ -342,9 +313,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
             case STATES:
                 pane.setViewportView(stateDataTable);
                 break;
-            case CLUSTERS:
-                pane.setViewportView(clusterDataTable);
-                break;
             default:
                 // do nothing
         }
@@ -369,15 +337,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
                     centerPanel.add(histogramPanel, "Center");
                 } else if(type == 2){
                     centerPanel.add(rawDataPanel, "Center");
-                }
-                break;
-            case CLUSTERS:
-                int ind = dataTypeBox.getSelectedIndex();
-                if(ind == 0){
-                    centerPanel.add(panePanel, "Center");
-                    swapAverageTables();
-                } else if(ind == 1 || ind == 2){ // Ignore the "raw data" option
-                    centerPanel.add(cdHistogramPanel, "Center");
                 }
                 break;
             case SITES:
@@ -411,27 +370,24 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
                 if (dataTypeBox.getItemCount()==2) {
                 	dataTypeBox.addItem(dataTypes[2]);
                 }
-                switch(dataClassBox.getSelectedIndex()){
-                    case 0:
+                switch((String) dataClassBox.getSelectedItem()){
+                    case MOLECULECOUNTS:
                         currentPick = MOLECULES;
                         break;
-                    case 1:
+                    case BONDDATA:
                         currentPick = BONDS;
                         break;
-                    case 2:
+                    case STATEDATA:
                         currentPick = STATES;
                         break;
-                    case 3:
+                    case SITEDATA:
                         currentPick = SITES;
                         dataTypeBox.setEnabled(false);
                         // At this point no way to view histograms or raw data for site properties
                         dataTypeBox.setSelectedIndex(0);
                         list.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                         break;
-                    case 4:
-                        currentPick = CLUSTERS;
-                        break;
-                    case 5:
+                    case RUNNING_TIMES:
                         currentPick = RUNNING_TIMES;
                         dataTypeBox.setEnabled(false);
                         // Only raw data makes sense for the running times, although that includes average data too
@@ -456,11 +412,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
                 } else {
                     list.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                 }
-                if(currentPick.equals(CLUSTERS)){
-                    // Right now I only build a histogram of cluster sizes, so get rid of other options if they pick histogram
-                    // The selection is checked in updateList().
-                    updateList();
-                }
                 swapPanels();
             }
         }
@@ -475,7 +426,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
             moleculeDataModel.clearNamesToShow();
             bondDataModel.clearNamesToShow();
             stateDataModel.clearNamesToShow();
-            clusterDataModel.clearNamesToShow();
             int type = dataTypeBox.getSelectedIndex();
             switch(type){
                 case 0:
@@ -493,11 +443,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
                         case STATES:
                             for(String name: list.getSelectedValuesList()){
                                 stateDataModel.addNameToShow(name);
-                            }
-                            break;
-                        case CLUSTERS:
-                            for(String name : list.getSelectedValuesList()){
-                                clusterDataModel.addNameToShow(name);
                             }
                             break;
                         case SITES:
@@ -524,8 +469,6 @@ public class DataGUI extends JFrame implements ItemListener, ActionListener,
                                 histogramModel.updateBuilder();
                                 histogramPanel.updateOptionsTable();
                             }
-                            break;
-                        case CLUSTERS:
                             break;
                     }
                     

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.*;
 
+@Deprecated
 public class ClusterData {
     
     public static final String CLUSTER_SIZE = "Cluster Size";

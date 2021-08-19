@@ -10,6 +10,7 @@ package org.springsalad.dataprocessor.clusterdata;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+@Deprecated
 public class Cluster {
 
     private final ArrayList<String> names;

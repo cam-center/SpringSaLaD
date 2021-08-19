@@ -5,23 +5,26 @@ import java.util.List;
 
 class OverallTPBuilder {
 	double tpv;
-	boolean tpvNotSetYet;
+	String tpvStr;
+	String molNamesStr;
+	boolean haveNotEncounteredFirstTPYet;
 	List<Integer> clusterSizeList;
 	List<Cluster> clusterCompList;
 	
 	OverallTPBuilder() {
-		tpvNotSetYet = true;
+		haveNotEncounteredFirstTPYet = true;
 		clusterSizeList = new ArrayList<>();
 		clusterCompList = new ArrayList<>();
 	}
 	
 	void addTP(RunTimePointSample runTimePointSample) {
-		if (tpvNotSetYet) {
+		if (haveNotEncounteredFirstTPYet) {
 			tpv = runTimePointSample.timePointValue;
-			tpvNotSetYet = false;
+			tpvStr = runTimePointSample.tpvStr;
+			molNamesStr = runTimePointSample.molNamesStr;
+			haveNotEncounteredFirstTPYet = false;
 		}
 		else {
-			// FIXME double comparator
 			assert runTimePointSample.timePointValue == tpv;
 		}
 		clusterSizeList.addAll(runTimePointSample.clusterSizeList);
@@ -29,6 +32,6 @@ class OverallTPBuilder {
 	}
 	
 	RunTimePointSample getOverallTP() {
-		return new RunTimePointSample(ClusterStatsProducer.OVERALL_RUN_STR, tpv, clusterSizeList, clusterCompList);
+		return new RunTimePointSample(ClusterStatsProducer.OVERALL_RUN_STR, tpv, tpvStr, molNamesStr, clusterSizeList, clusterCompList);
 	}
 }

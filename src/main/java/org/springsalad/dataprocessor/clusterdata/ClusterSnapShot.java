@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.io.*;
 
+@Deprecated
 public class ClusterSnapShot {
     
     private double time;

@@ -10,6 +10,7 @@ import javax.swing.table.AbstractTableModel;
 
 import org.springsalad.helpersetup.IOHelp;
 
+@Deprecated
 public class ClusterDataTableModel extends AbstractTableModel {
     
     private final ArrayList<String> namesToShow;

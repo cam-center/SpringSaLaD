@@ -6,18 +6,28 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/*
+	THIS IS A MAIN CLASS:
+	It prepares the information needed to retrieve the raw cluster data and write the cluster stats.
+	It also delegates the calculations to ClusterStatsProducer.
+	
+*/
+
 public class ClusterAnalyzer {
     
-    private DataSource dataSource;    
-    private DataDestination dataDestination;
-    
-    public static void main(String[] args) throws IOException{
-    	String dataFolder = "C:\\Users\\imt_w\\Documents\\SpringSalad\\Clustering_tutorial_01\\Clustering_tutorial_01_SIMULATIONS\\Simulation3_SIM_FOLDER\\data";
-    	ClusterAnalyzer ca = new ClusterAnalyzer(dataFolder, 0, 2);
+	public static void main(String[] args) throws IOException{
+    	String dataFolder = "C:\\Users\\imt_w\\Documents\\SpringSalad\\Clustering_tutorial_01\\Clustering_tutorial_01_SIMULATIONS\\Test1X4_SIM_FOLDER\\data";
+    	FileOperationExceptionLogger logger = new FileOperationExceptionLogger("");
+    	ClusterAnalyzer ca = new ClusterAnalyzer(logger, dataFolder, 0, 2);
     	ca.calculateAndWriteClusterStats();
+    	logger.displayLogGUI();
     }
+    
+	private DataSource dataSource;    
+    private DataDestination dataDestination;
+    private String dataFolder;
 	
-	public ClusterAnalyzer(String dataFolder, int startIndex, int finishIndexInclusive) throws IOException{
+	public ClusterAnalyzer(FileOperationExceptionLogger logger, String dataFolder, int startIndex, int finishIndexInclusive) throws IOException{
         Pattern simNamePattern = Pattern.compile(".*(_SIM)_FOLDER");
         Matcher simNameMatcher = simNamePattern.matcher(dataFolder);
         if (simNameMatcher.find()){
@@ -32,11 +42,11 @@ public class ClusterAnalyzer {
             if (finishIndexInclusive >= numOfRuns) {
             	throw new IllegalArgumentException("Unable to compute cluster stats: Last run index exceeds total number of runs");
             }           
-            //FIXME create a dataSrcDest obj so that the parameters are only given once?
             List<String> molNames = new ArrayList<>(simFileObj.getMolecules().keySet());
-            dataSource = new DataSource(dataFolder, molNames, 
+            this.dataFolder = dataFolder;
+            dataSource = new DataSource(logger, dataFolder, molNames, 
             		0, tTotal, dtData, startIndex, finishIndexInclusive);
-            dataDestination = new DataDestination(dataFolder, molNames, dtData);
+            dataDestination = new DataDestination(logger, dataFolder);
             
         }
         else {

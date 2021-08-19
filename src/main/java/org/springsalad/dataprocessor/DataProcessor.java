@@ -2,6 +2,9 @@
 package org.springsalad.dataprocessor;
 
 import java.util.Scanner;
+
+import org.springsalad.clusteranalysis.FileOperationExceptionLogger;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.File;
@@ -78,9 +81,26 @@ public class DataProcessor {
     
     /* ********************* CONSTRUCTOR ********************************/
     
+    protected FileOperationExceptionLogger logger;
     public DataProcessor(String drive, String simulationName){
         this.simulationName = simulationName;
         this.dataFolder = drive + "/" +  simulationName + "_FOLDER/data/";
+    }
+    
+    
+    
+    
+    public void calculateStatistics(int startNum, int endNumIncl) {
+    	logger = new FileOperationExceptionLogger("");
+    	System.out.println("Computing time point averages.");
+        computeAllTimePointAverages(startNum, endNumIncl);
+        System.out.println("Computing running times.");
+        getRunningTimes(startNum, endNumIncl);
+        System.out.println("Computing raw data files.");
+        makeAllRawDataFiles(startNum, endNumIncl);
+        System.out.println("Finished computing data.");
+        
+        displayLog();
     }
     
     /* ************* BUILD THE NAMES ONCE WE HAVE DATA ********************/
@@ -344,8 +364,7 @@ public class DataProcessor {
             }
             sc.close();
         } catch(IOException ioe){
-            System.out.println("IO Exception occurred when trying to read " + firstFile.getAbsolutePath());
-            ioExceptionLogger(ioe);
+            ioReadExceptionLogger(firstFile.getPath(), ioe);
         }
         
         // If there are no columns then just print a message and return. 
@@ -379,8 +398,7 @@ public class DataProcessor {
             }
             sc.close();
         } catch(IOException ioe){
-            System.out.println("IO Exception occurred when trying to read " + firstFile.getAbsolutePath());
-            ioExceptionLogger(ioe);
+        	ioReadExceptionLogger(firstFile.getPath(), ioe);
         }
         
         for(int i=0;i<av.length;i++){
@@ -397,19 +415,19 @@ public class DataProcessor {
         // First compute the averages
         int c = startIndex;
         
-        FileReader fr = null;
+        File file = null;
         BufferedReader br = null;
         Scanner sc = null;
         while(c <= finishIndex){
             
             try{
                 if(fileName.equals(MOLECULE_DATA) || fileName.equals(BOND_DATA) || fileName.equals(STATE_DATA)){
-                    fr = new FileReader(dataFolder + "Run" + c + "/" + fileName);
+                    file = new File(dataFolder + "Run" + c + "/" + fileName);
                 } else {
-                    fr = new FileReader(dataFolder + "Run" + c + "/" + sitePropertyFileName(fileName));
+                    file = new File(dataFolder + "Run" + c + "/" + sitePropertyFileName(fileName));
                 }
-                br = new BufferedReader(fr);
-                
+                br = new BufferedReader(new FileReader(file));
+
                 sc = new Scanner(br);
                 sc.useDelimiter(",");
                 sc.nextLine();
@@ -424,7 +442,7 @@ public class DataProcessor {
                 
             } catch(FileNotFoundException ioe){
                 success = false;
-                ioExceptionLogger(ioe);
+                ioReadExceptionLogger(file.getPath(), ioe);
             } finally {
                 if(sc != null){
                     sc.close();
@@ -435,14 +453,6 @@ public class DataProcessor {
                     }
                 } catch(IOException ioe1){
                     ioExceptionLogger(ioe1);
-                }
-                
-                try{
-                    if(fr != null){
-                        fr.close();
-                    }
-                } catch(IOException ioe2){
-                    ioExceptionLogger(ioe2);
                 }
             }
             
@@ -464,11 +474,11 @@ public class DataProcessor {
             
             try{
                 if(fileName.equals(MOLECULE_DATA) || fileName.equals(BOND_DATA) || fileName.equals(STATE_DATA)){
-                    fr = new FileReader(dataFolder + "Run" + c + "/" + fileName);
+                    file = new File(dataFolder + "Run" + c + "/" + fileName);
                 } else {
-                    fr = new FileReader(dataFolder + "Run" + c + "/" + sitePropertyFileName(fileName));
+                    file = new File(dataFolder + "Run" + c + "/" + sitePropertyFileName(fileName));
                 }
-                br = new BufferedReader(fr);
+                br = new BufferedReader(new FileReader(file));
                 
                 sc = new Scanner(br);
                 sc.useDelimiter(",");
@@ -485,7 +495,7 @@ public class DataProcessor {
                 
             } catch(FileNotFoundException ioe){
                 success = false;
-                ioExceptionLogger(ioe);
+                ioReadExceptionLogger(file.getPath(), ioe);
             } finally {
                 if(sc != null){
                     sc.close();
@@ -496,14 +506,6 @@ public class DataProcessor {
                     }
                 } catch(IOException ioe1){
                     ioExceptionLogger(ioe1);
-                }
-                
-                try{
-                    if(fr != null){
-                        fr.close();
-                    }
-                } catch(IOException ioe2){
-                    ioExceptionLogger(ioe2);
                 }
             }
             
@@ -568,7 +570,7 @@ public class DataProcessor {
                 }
                 
             } catch(IOException ioe){
-                ioExceptionLogger(ioe);
+            	ioWriteExceptionLogger(averageFile.getPath(), ioe);
             }
             
             switch(fileName){
@@ -638,8 +640,7 @@ public class DataProcessor {
             firstLine.close();
             sc.close();
         } catch(IOException ioe){
-            System.out.println("IO Exception occurred when trying to read " + firstFile.getAbsolutePath());
-            ioExceptionLogger(ioe);
+            ioReadExceptionLogger(firstFile.getPath(), ioe);
         }
         
         // Look to see if we actually found the species name
@@ -662,9 +663,10 @@ public class DataProcessor {
             }
             sc.close();
         } catch(IOException ioe){
-            ioExceptionLogger(ioe);
+        	ioReadExceptionLogger(firstFile.getPath(), ioe);
         }
-
+        
+        File file = null;
         FileReader fr = null;
         BufferedReader br = null;
         Scanner sc = null;
@@ -672,7 +674,8 @@ public class DataProcessor {
         while(c <= finishIndex){
             
             try{
-                fr = new FileReader(dataFolder + "Run" + c + "/" + fileName);
+            	file = new File(dataFolder + "Run" + c + "/" + fileName);
+                fr = new FileReader(file);
                 br = new BufferedReader(fr);
                 
                 sc = new Scanner(br);
@@ -687,7 +690,7 @@ public class DataProcessor {
                 }
                 
             } catch(FileNotFoundException ioe){
-                ioExceptionLogger(ioe);
+            	ioReadExceptionLogger(file.getPath(), ioe);
             } finally {
                 if(sc != null){
                     sc.close();
@@ -747,7 +750,7 @@ public class DataProcessor {
                 p.println();
             }
         } catch(IOException ioe){
-            ioExceptionLogger(ioe);
+            ioWriteExceptionLogger(allDataFile.getPath(), ioe);
         }
         
         rawDataFiles.put(speciesName, allDataFile);
@@ -1077,6 +1080,7 @@ public class DataProcessor {
         double var = 0;
         double stdev = 0;
         
+        File file = null;
         BufferedReader br = null;
         FileReader fr = null;
         Scanner sc = null;
@@ -1084,7 +1088,8 @@ public class DataProcessor {
             int index = i-startIndex;
             time[index] = 0;
             try{
-                fr = new FileReader(dataFolder + "Run" + i + "/" + RUNNING_TIME);
+            	file = new File(dataFolder + "Run" + i + "/" + RUNNING_TIME);
+                fr = new FileReader(file);
                 br = new BufferedReader(fr);
                 sc = new Scanner(br);
                 // Skip the words "Running Time:"
@@ -1121,7 +1126,7 @@ public class DataProcessor {
                 }
                 
             } catch(FileNotFoundException ioe){
-                ioExceptionLogger(ioe);
+                ioReadExceptionLogger(file.getPath(), ioe);
             } finally {
                 if(sc != null){
                     sc.close();
@@ -1172,7 +1177,7 @@ public class DataProcessor {
                 }
             }
         } catch (IOException ioe){
-            ioExceptionLogger(ioe);
+            ioWriteExceptionLogger(runningTimeFile.getPath(), ioe);
         }
         
         // </editor-fold>
@@ -1700,6 +1705,19 @@ public class DataProcessor {
     private void ioExceptionLogger(IOException ioe){
         System.out.println("Message: " + ioe.getMessage());
         ioe.printStackTrace(System.out);
+    }
+    
+    private void ioReadExceptionLogger(String location, IOException ioe) {
+    	logger.logFileReadParseException(location, ioe);
+    }
+    
+    private void ioWriteExceptionLogger(String location, IOException ioe) {
+    	logger.logFileWriteException(ioe);
+    }
+    
+    private void displayLog() {
+    	logger.displayLogGUI();
+        logger.writeLogFile(dataFolder);
     }
     
     public static void main(String [] args){

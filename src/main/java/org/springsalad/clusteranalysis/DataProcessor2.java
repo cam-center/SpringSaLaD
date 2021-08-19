@@ -1,13 +1,15 @@
-/*
-	To add more default data processing (that happens right after a Simulation has
-	finished running), write your own calculation class and call it from this class.
- */
-
 package org.springsalad.clusteranalysis;
 
 import java.io.IOException;
 
 import org.springsalad.dataprocessor.DataProcessor;
+
+/*
+	THIS IS A MAIN CLASS:
+	To add more calculations of statistics, 
+	write your own calculation class and call it from this class.
+
+*/
 
 public class DataProcessor2 extends DataProcessor{
 	private ClusterAnalyzer clusterAnalyzer;
@@ -21,11 +23,11 @@ public class DataProcessor2 extends DataProcessor{
 		super.computeAllTimePointAverages(startIndex, endIndexInclusive);
 		
 		try {
-			clusterAnalyzer = new ClusterAnalyzer(dataFolder, startIndex, endIndexInclusive);
+			clusterAnalyzer = new ClusterAnalyzer(logger, dataFolder, startIndex, endIndexInclusive);
 			clusterAnalyzer.calculateAndWriteClusterStats();
 		}
 		catch(IOException | IllegalArgumentException exception) {
-			ExceptionDisplayer.justDisplayException("Unable to calculate cluster stats.", exception);
+			FileOperationExceptionLogger.justDisplayException("Unable to calculate cluster stats.", exception);
 		}
 	}
 
