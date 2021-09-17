@@ -31,6 +31,9 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
+    - name: Setup tmate session for debugging
+      uses: mxschmitt/action-tmate@v3
+      if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
     - name: Build with Ant
       run: ant -noinput -buildfile build-new.xml
     - name: Setup tmate session for debugging
