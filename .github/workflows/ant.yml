@@ -48,7 +48,10 @@ jobs:
         cd $LANGEVIN_PATH
         mvn compile
         cd ..
-        cp -ar $LANGEVIN_PATH/target/classes ./target/classes
+        mkdir target
+        mkdir target/classes
+        cp -ar $LANGEVIN_PATH/target/classes/* ./target/classes
+        unzip lib/monte-repack-1.0.jar -d target/classes/
         mvn compile
     - name: Build with Ant
       run: ant -noinput -buildfile build-new.xml
