@@ -58,8 +58,8 @@ jobs:
     - name: Upload executable jar
       uses: actions/upload-artifact@v2
       with:
-        name: SpringSalad_$BUILD_VERSION
-        path: ./SpringSalad_$BUILD_VERSION.jar
+        name: SpringSalad_${{ github.event.inputs.tag_name }}
+        path: ./SpringSalad_${{ github.event.inputs.tag_name }}.jar
       
     
   
