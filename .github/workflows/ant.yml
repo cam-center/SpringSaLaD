@@ -55,4 +55,18 @@ jobs:
         mvn compile
     - name: Build with Ant
       run: ant -noinput -buildfile build-new.xml
+
+  upload:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/upload-artifact@v2
+      with:
+        name: SpringSalad_$BUILD_VERSION
+        path: ./SpringSalad_$BUILD_VERSION.jar
+      
+    
+  
+    
+
       
