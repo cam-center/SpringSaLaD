@@ -1,5 +1,6 @@
 package org.springsalad.clusteranalysis;
 
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
@@ -37,7 +38,7 @@ class DataSource {
 		
 		this.dataFolder = dataFolder;
 		nf = Math.max(0,BigDecimal.valueOf(timeStep).stripTrailingZeros().scale());
-		clusterInputFileFormat = "Run%d\\Clusters_Time_%."+nf+"f.csv";
+		clusterInputFileFormat = "Run%d" + File.separator + "Clusters_Time_%."+nf+"f.csv";
 		
 		this.molNames = molNames;
 		StringBuilder moleculeTypeHeaderSB = molNames.stream().collect(StringBuilder::new, (sb,str)->sb.append(str).append(","), StringBuilder::append);
