@@ -34,14 +34,14 @@ public class SitePositionEditor extends JFrame implements ActionListener {
         this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.setResizable(false);
-        this.setSize(200,200);
+        this.setSize(210,230);
         this.setVisible(true);
     }
     
     private void layoutComponents(){
         // <editor-fold defaultstate="collapsed" desc="Method Code">
         JLabel siteLabel = new JLabel("Site " + site.getIndex(), JLabel.CENTER);
-        siteLabel.setFont(Fonts.TITLEFONT);
+        siteLabel.setFont(Fonts.SITE_FONT);
         
         JPanel px = new JPanel();
         JLabel xLabel = new JLabel("x (nm): ", JLabel.RIGHT);
