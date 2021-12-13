@@ -76,7 +76,8 @@ public class RunLauncher implements Runnable {
             }
             if(process[0] != null){
                 try{
-                    process[0].waitFor();
+                    int exitCode = process[0].waitFor();
+                    System.out.println("Process returned exit code " + exitCode);
                 } catch(InterruptedException ie){
                     ie.printStackTrace(System.out);
                 }
