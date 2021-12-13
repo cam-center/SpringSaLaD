@@ -476,7 +476,9 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         closeItem = new javax.swing.JMenuItem();
         exitItem = new javax.swing.JMenuItem();
         jMenu1 = new javax.swing.JMenu();
+        jMenuHelp = new javax.swing.JMenu();
         simulationManagerItem = new javax.swing.JMenuItem();
+        aboutItem = new javax.swing.JMenuItem();
         PDBAdderItem = new javax.swing.JMenuItem();
         
         edit2D.setText("Edit in 2D");
@@ -575,7 +577,6 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         jMenuBar1.add(fileMenu);
 
         jMenu1.setText("Tools");
-
         simulationManagerItem.setText("Simulation Manager");
         simulationManagerItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -583,10 +584,24 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
             }
         });
         jMenu1.add(simulationManagerItem);
-        
-        
-
         jMenuBar1.add(jMenu1);
+
+        
+        jMenuHelp.setText("Help");
+        aboutItem.setText("About");
+        aboutItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aboutItemActionPerformed(evt);
+            }
+        });
+        jMenuHelp.add(aboutItem);
+        jMenuBar1.add(jMenuHelp);
+
+        
+//        private javax.swing.JMenuItem aboutItem;
+//        private javax.swing.JMenuItem websiteItem;
+
+
 
         setJMenuBar(jMenuBar1);
 
@@ -903,6 +918,13 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         }
         // </editor-fold>
     }//GEN-LAST:event_simulationManagerItemActionPerformed
+    
+    private void aboutItemActionPerformed(java.awt.event.ActionEvent evt) {
+    	System.out.println("Opening About Dialog Box");
+    	
+    	
+    	
+    }
 
     /**
      * @param args the command line arguments
@@ -941,10 +963,15 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
     private javax.swing.JSplitPane horizontalSplitPane;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenu jMenuHelp;
+    
     private javax.swing.JMenuItem loadItem;
     private javax.swing.JMenuItem saveAsItem;
     private javax.swing.JMenuItem saveItem;
     private javax.swing.JMenuItem simulationManagerItem;
+    private javax.swing.JMenuItem aboutItem;
+    private javax.swing.JMenuItem websiteItem;
+
     private javax.swing.JMenuItem PDBAdderItem;
     private javax.swing.JPanel topPanel;
     private org.springsalad.langevinsetup.SystemTree treePane;
