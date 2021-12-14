@@ -493,7 +493,7 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         aboutItem = new javax.swing.JMenuItem();
         PDBAdderItem = new javax.swing.JMenuItem();
         
-        URL appIconUrl = getClass().getResource("/icons/largeCircle.png");
+        URL appIconUrl = getClass().getResource("/icons/springSaLaD.png");
         if(appIconUrl != null) {
         	appIcon = new ImageIcon(appIconUrl);
         	Toolkit kit = Toolkit.getDefaultToolkit();
