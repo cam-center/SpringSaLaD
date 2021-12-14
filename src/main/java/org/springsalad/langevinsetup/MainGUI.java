@@ -9,9 +9,13 @@ package org.springsalad.langevinsetup;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -478,6 +482,7 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         jMenu1 = new javax.swing.JMenu();
         jMenuHelp = new javax.swing.JMenu();
         simulationManagerItem = new javax.swing.JMenuItem();
+        websiteItem = new javax.swing.JMenuItem();
         aboutItem = new javax.swing.JMenuItem();
         PDBAdderItem = new javax.swing.JMenuItem();
         
@@ -588,12 +593,19 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
 
         
         jMenuHelp.setText("Help");
-        aboutItem.setText("About");
+        websiteItem.setText("SpringSaLaD Website");
+        websiteItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                websiteItemActionPerformed(evt);
+            }
+        });
+        aboutItem.setText("About SpringSaLaD");
         aboutItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 aboutItemActionPerformed(evt);
             }
         });
+        jMenuHelp.add(websiteItem);
         jMenuHelp.add(aboutItem);
         jMenuBar1.add(jMenuHelp);
 
@@ -920,11 +932,19 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
     }//GEN-LAST:event_simulationManagerItemActionPerformed
     
     private void aboutItemActionPerformed(java.awt.event.ActionEvent evt) {
-    	System.out.println("Opening About Dialog Box");
-    	
-    	
-    	
+    	JOptionPane.showMessageDialog(this, "SpringSaLaD App\n   Version 2021-12 (2.2)", "About SpringSaLaD", JOptionPane.OK_OPTION);
     }
+    private void websiteItemActionPerformed(java.awt.event.ActionEvent evt) {
+    	String url = "https://vcell.org/ssalad";
+    	if(Desktop.isDesktopSupported()){
+    		Desktop desktop = Desktop.getDesktop();
+    		try {
+    			desktop.browse(new URI(url));
+    		} catch (IOException | URISyntaxException e) {
+    			e.printStackTrace();
+    		}
+    	}
+   	}
 
     /**
      * @param args the command line arguments
