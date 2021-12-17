@@ -24,6 +24,7 @@ import java.util.HashMap;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -69,7 +70,6 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
     private final AnnotationPanel moleculeAnnotationPanel;
     private final AnnotationPanel reactionAnnotationPanel;
     
-	private ImageIcon appIcon = null;
 	private Image appImage = null;
 
     /**
@@ -495,11 +495,8 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
         
         URL appIconUrl = getClass().getResource("/icons/springSaLaD.png");
         if(appIconUrl != null) {
-        	appIcon = new ImageIcon(appIconUrl);
         	Toolkit kit = Toolkit.getDefaultToolkit();
         	appImage = kit.createImage(appIconUrl);
-        }
-        if(appImage != null) {
         	setIconImage(appImage);
         }
         
@@ -949,12 +946,16 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
     }//GEN-LAST:event_simulationManagerItemActionPerformed
     
     private void aboutItemActionPerformed(java.awt.event.ActionEvent evt) {
-    	if(appIcon != null) {
-    		JOptionPane.showMessageDialog(this, "SpringSaLaD App\n   Version 2021-12 (2.2)", "About SpringSaLaD", JOptionPane.OK_OPTION, appIcon);
-    	} else {
-    		JOptionPane.showMessageDialog(this, "SpringSaLaD App\n   Version 2021-12 (2.2)", "About SpringSaLaD", JOptionPane.OK_OPTION);
-    	}
+    	
+    	ImageIcon ii = new ImageIcon(getClass().getResource("/images/springSaLaDLarge.png"));
+    	String aboutText = "<html><b>   SpringSaLaD App</b></html>\n      Version 2.2\n      Released Dec, 2021\n      Copyright 2016-2021 UConn Health\n" +
+    	"SpringSaLaD is Supported by NIH Grant R01GM132859";
+   		JOptionPane.showMessageDialog(this, aboutText, "About SpringSaLaD", JOptionPane.OK_OPTION, ii);
+
+//    	AboutBox aboutBox = new AboutBox();
+//    	aboutBox.showDialog(this, "About SpringSaLaD");
     }
+    
     private void websiteItemActionPerformed(java.awt.event.ActionEvent evt) {
     	String url = "https://vcell.org/ssalad";
     	if(Desktop.isDesktopSupported()){
