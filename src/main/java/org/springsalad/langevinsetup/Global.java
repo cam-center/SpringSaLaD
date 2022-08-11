@@ -91,7 +91,7 @@ public class Global {
             defaultFolder = null;
         }
         
-        trackClusters = false;
+        trackClusters = true;
     }
     
     public Global(){
