@@ -108,7 +108,7 @@ public class Global {
             defaultFolder = null;
         }
         
-        trackClusters = false;
+        trackClusters = true;
     }
     
     /* **************  METHODS TO SET AND GET THE SYSTEM NAME *************/
