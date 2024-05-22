@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<install4j version="8.0.11" transformSequenceNumber="8">
-  <directoryPresets config="C:/TEMP/install4j-output/SpringSaLaD_2021_09_16_OpenGL-2.4.jar" />
-  <application name="SpringSaLaD" applicationId="4844-6787-3669-5764" mediaDir="C:/TEMP/install4j-output" shortName="SpringSaLaD" publisher="CCAM" publisherWeb="http://vcell.org" version="2.2" macVolumeId="7cae8ba3067efc61" javaMinVersion="1.8">
-    <codeSigning macEnabled="true" macPkcs12File="C:/TEMP/install4j-output/VCELL_APPLE_2025.p12" />
+<install4j version="10.0.7" transformSequenceNumber="10">
+  <directoryPresets config="/Users/jimschaff/Documents/workspace/SpringSaLaD/install4j_output/VCELL_APPLE_2025.p12" />
+  <application name="SpringSaLaD" applicationId="4844-6787-3669-5764" mediaDir="/Users/jimschaff/Documents/workspace/SpringSaLaD/installers" shortName="SpringSaLaD" publisher="CCAM" publisherWeb="http://vcell.org" version="2.3" macVolumeId="7cae8ba3067efc61">
+    <codeSigning macEnabled="true" macPkcs12File="/Users/jimschaff/Documents/workspace/SpringSaLaD/install4j_output/VCELL_APPLE_2025.p12" />
+    <jreBundles jdkProviderId="JBR" release="17/17.0.7-b1000.6" />
   </application>
   <files>
     <mountPoints>
       <mountPoint id="24" />
     </mountPoints>
     <entries>
-      <fileEntry mountPoint="24" file="C:/TEMP/install4j-output/SpringSaLaD_2021_09_23_OpenGL-2.4.jar" />
+      <fileEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/springsalad-0.0.1-SNAPSHOT.jar" />
+      <dirEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/localsolvers" fileMode="755" overrideFileMode="true" entryMode="subdir" subDirectory="localsolvers">
+        <exclude>
+          <entry location="win64/.gitkeep" />
+          <entry location="macos_x86_64/.gitkeep" />
+          <entry location="linux64/.gitkeep" />
+          <entry location="macos_arm64/.gitkeep" />
+        </exclude>
+      </dirEntry>
+      <dirEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/dependency" entryMode="subdir" subDirectory="dependent_jars" />
     </entries>
   </files>
   <launchers>
@@ -17,7 +27,8 @@
       <executable name="SpringSaLaD" executableMode="gui" />
       <java mainClass="org.springsalad.langevinsetup.MainGUI">
         <classPath>
-          <archive location="SpringSaLaD_2021_09_23_OpenGL-2.4.jar" failOnError="false" />
+          <archive location="springsalad-0.0.1-SNAPSHOT.jar" failOnError="false" />
+          <scanDirectory location="dependent_jars" failOnError="false" />
         </classPath>
       </java>
     </launcher>
@@ -273,11 +284,19 @@ return console.askYesNo(message, true);
           <group id="8" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize banner image" externalParametrizationMode="include">
             <serializedBean>
               <property name="backgroundColor">
-                <object class="java.awt.Color">
-                  <int>255</int>
-                  <int>255</int>
-                  <int>255</int>
-                  <int>255</int>
+                <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                  <object class="java.awt.Color">
+                    <int>255</int>
+                    <int>255</int>
+                    <int>255</int>
+                    <int>255</int>
+                  </object>
+                  <object class="java.awt.Color">
+                    <int>49</int>
+                    <int>52</int>
+                    <int>53</int>
+                    <int>255</int>
+                  </object>
                 </object>
               </property>
               <property name="borderSides">
@@ -286,11 +305,19 @@ return console.askYesNo(message, true);
                 </object>
               </property>
               <property name="imageEdgeBackgroundColor">
-                <object class="java.awt.Color">
-                  <int>25</int>
-                  <int>143</int>
-                  <int>220</int>
-                  <int>255</int>
+                <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                  <object class="java.awt.Color">
+                    <int>25</int>
+                    <int>143</int>
+                    <int>220</int>
+                    <int>255</int>
+                  </object>
+                  <object class="java.awt.Color">
+                    <int>0</int>
+                    <int>74</int>
+                    <int>151</int>
+                    <int>255</int>
+                  </object>
                 </object>
               </property>
               <property name="imageEdgeBorder" type="boolean" value="true" />
@@ -344,11 +371,19 @@ return console.askYesNo(message, true);
               <group id="15" beanClass="com.install4j.runtime.beans.groups.VerticalFormComponentGroup" useExternalParametrization="true" externalParametrizationName="Customize title bar" externalParametrizationMode="include">
                 <serializedBean>
                   <property name="backgroundColor">
-                    <object class="java.awt.Color">
-                      <int>255</int>
-                      <int>255</int>
-                      <int>255</int>
-                      <int>255</int>
+                    <object class="com.install4j.runtime.beans.LightOrDarkColor">
+                      <object class="java.awt.Color">
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                        <int>255</int>
+                      </object>
+                      <object class="java.awt.Color">
+                        <int>49</int>
+                        <int>52</int>
+                        <int>53</int>
+                        <int>255</int>
+                      </object>
                     </object>
                   </property>
                   <property name="borderSides">
@@ -451,14 +486,25 @@ return console.askYesNo(message, true);
     </styles>
   </installerGui>
   <mediaSets>
-    <windows name="Windows" id="26">
-      <jreBundle jreBundleSource="preCreated" includedJre="windows-amd64-1.8.0_144" />
-    </windows>
-    <unixInstaller name="Unix Installer" id="38">
-      <jreBundle jreBundleSource="preCreated" includedJre="../install4j-bundles/linux-amd64-1.8.0_66.tar.gz" manualJreEntry="true" />
-    </unixInstaller>
-    <macos name="macOS Single Bundle" id="39" launcherId="25">
-      <jreBundle jreBundleSource="preCreated" includedJre="../install4j-bundles/macosx-amd64-1.8.0_141.tar.gz" manualJreEntry="true" />
-    </macos>
+    <macosArchive name="macOS Single Bundle Archive" id="45" architecture="universal" launcherId="25">
+      <exclude>
+        <entry location="localsolvers/win64" />
+        <entry location="localsolvers/linux64" />
+      </exclude>
+    </macosArchive>
+    <unixArchive name="Unix Archive" id="50">
+      <exclude>
+        <entry location="localsolvers/win64" />
+        <entry location="localsolvers/macos_x86_64" />
+        <entry location="localsolvers/macos_arm64" />
+      </exclude>
+    </unixArchive>
+    <windowsArchive name="Windows Archive" id="52" architecture="64">
+      <exclude>
+        <entry location="localsolvers/macos_x86_64" />
+        <entry location="localsolvers/linux64" />
+        <entry location="localsolvers/macos_arm64" />
+      </exclude>
+    </windowsArchive>
   </mediaSets>
 </install4j>
