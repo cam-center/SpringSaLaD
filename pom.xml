@@ -7,9 +7,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<solvers-langevin-mac.version>1.2.7</solvers-langevin-mac.version>
-		<solvers-langevin-windows.version>1.2.7</solvers-langevin-windows.version>
-		<solvers-langevin-linux.version>1.2.7</solvers-langevin-linux.version>
+		<solvers-langevin-mac.version>1.3.1</solvers-langevin-mac.version>
+		<solvers-langevin-windows.version>1.3.1</solvers-langevin-windows.version>
+		<solvers-langevin-linux.version>1.3.1</solvers-langevin-linux.version>
 	</properties>
 
 	<build>
@@ -77,19 +77,6 @@
 			<artifactId>org.monte.media</artifactId>
 			<version>17.1</version>
 		</dependency>
-
-
-		<!-- https://mvnrepository.com/artifact/org.jogamp.gluegen/gluegen-rt -->
-
-
-
-		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-linux-amd64 -->
-
-		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-macosx-universal -->
-
-		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-linux-armv6hf -->
-
-		<!-- https://mvnrepository.com/artifact/org.clojars.originalsurfmex.processing/gluegen-rt-natives-windows-amd64 -->
 
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-rng-core -->
 		<dependency>
@@ -232,7 +219,7 @@
 								<configuration>
 									<target>
 										<chmod file="${project.build.directory}/../localsolvers/macos_x86_64/langevin_x64" perm="755"/>
-										<chmod file="${project.build.directory}/../localsolvers/macos_amd64/langevin_x64" perm="755"/>
+										<chmod file="${project.build.directory}/../localsolvers/macos_arm64/langevin_x64" perm="755"/>
 									</target>
 								</configuration>
 							</execution>

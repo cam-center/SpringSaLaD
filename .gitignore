@@ -4,3 +4,11 @@
 .idea/
 
 example_files/example_SIMULATIONS/
+
+localsolvers/linux64/langevin_x64
+
+localsolvers/macos_arm64/langevin_x64
+
+localsolvers/macos_x86_64/langevin_x64
+
+localsolvers/win64/langevin_x64.exe
