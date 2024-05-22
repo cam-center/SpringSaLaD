@@ -189,7 +189,7 @@
 								<configuration>
 									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-14</url>
 									<outputDirectory>localsolvers/macos_arm64</outputDirectory>
-									<outputFileName>langevin_x64</outputFileName>
+									<outputFileName>langevin_arm64</outputFileName>
 								</configuration>
 							</execution>
 							<execution>
@@ -219,7 +219,7 @@
 								<configuration>
 									<target>
 										<chmod file="${project.build.directory}/../localsolvers/macos_x86_64/langevin_x64" perm="755"/>
-										<chmod file="${project.build.directory}/../localsolvers/macos_arm64/langevin_x64" perm="755"/>
+										<chmod file="${project.build.directory}/../localsolvers/macos_arm64/langevin_arm64" perm="755"/>
 									</target>
 								</configuration>
 							</execution>
@@ -276,7 +276,7 @@
 								<configuration>
 									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-14</url>
 									<outputDirectory>localsolvers/macos_arm64</outputDirectory>
-									<outputFileName>langevin_x64</outputFileName>
+									<outputFileName>langevin_arm64</outputFileName>
 								</configuration>
 							</execution>
 							<execution>
@@ -306,7 +306,7 @@
 								<configuration>
 									<target>
 										<chmod file="${project.build.directory}/../localsolvers/macos_x86_64/langevin_x64" perm="755"/>
-										<chmod file="${project.build.directory}/../localsolvers/macos_arm64/langevin_x64" perm="755"/>
+										<chmod file="${project.build.directory}/../localsolvers/macos_arm64/langevin_arm64" perm="755"/>
 									</target>
 								</configuration>
 							</execution>

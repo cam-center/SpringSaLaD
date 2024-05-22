@@ -36,7 +36,7 @@ public class RunLauncher implements Runnable {
             case "mac os x":
                 if (System.getProperty("os.arch").equals("x86_64")) {
                     return new File("./localsolvers/macos_x86_64/langevin_x64");
-                } else if (System.getProperty("os.arch").equals("arm64")) {
+                } else if (System.getProperty("os.arch").equals("aarch64")) {
                     return new File("./localsolvers/macos_arm64/langevin_arm64");
                 } else {
                     throw new IllegalStateException("Unsupported architecture: " + System.getProperty("os.arch"));
@@ -52,11 +52,15 @@ public class RunLauncher implements Runnable {
     private void launchSequentialRuns(){
 
         for(int i=0;i<totalRuns;i++){
-            String intString = Integer.toString(i);
+            String runCounter = Integer.toString(i);
             // switch statement to determine the platform we are running on, linux, macos or windows
             try{
-                ProcessBuilder builder = new ProcessBuilder(getSolverExecutable().getAbsolutePath(), inputFile.getAbsolutePath(),
-                        intString, outputFile[i].getAbsolutePath());
+                ProcessBuilder builder = new ProcessBuilder(
+                        getSolverExecutable().getAbsolutePath(),
+                        "simulate",
+                        "--output-log", outputFile[i].getAbsolutePath(),
+                        inputFile.getAbsolutePath(),
+                        runCounter);
                 builder.inheritIO();
                 process[0] = builder.start();
             } catch(IOException ioe2){
@@ -76,10 +80,14 @@ public class RunLauncher implements Runnable {
     
     private void launchParallelRuns(){
         for(int i=0;i<totalRuns;i++){
-            String intString = Integer.toString(i);
+            String runCounter = Integer.toString(i);
                 try{
-                    ProcessBuilder builder = new ProcessBuilder(getSolverExecutable().getAbsolutePath(), inputFile.getAbsolutePath(),
-                            intString, outputFile[i].getAbsolutePath());
+                    ProcessBuilder builder = new ProcessBuilder(
+                            getSolverExecutable().getAbsolutePath(),
+                            "simulate",
+                            "--output-log", outputFile[i].getAbsolutePath(),
+                            inputFile.getAbsolutePath(),
+                            runCounter);
                     builder.inheritIO();
                     process[i] = builder.start();
                 } catch(IOException ioe2){
