@@ -1,2 +1,6 @@
 /bin/
 /target/
+
+.idea/
+
+example_files/example_SIMULATIONS/

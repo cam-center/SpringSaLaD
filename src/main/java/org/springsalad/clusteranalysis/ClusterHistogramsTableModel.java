@@ -1,14 +1,10 @@
 package org.springsalad.clusteranalysis;
 
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedMap;
+import org.springsalad.helpernovis.IOHelp;
 
 import javax.swing.table.AbstractTableModel;
-
-import helpernovis.IOHelp;
+import java.util.Set;
+import java.util.SortedMap;
 
 class ClusterHistogramsTableModel extends AbstractTableModel{
 	private static final long serialVersionUID = -7651404506470682025L;

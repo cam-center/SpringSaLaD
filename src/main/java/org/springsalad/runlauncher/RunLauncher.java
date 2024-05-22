@@ -27,52 +27,40 @@ public class RunLauncher implements Runnable {
         this.parallel = parallel;
         this.numberSimultaneous = numberSimultaneous;
     }
+
+    private File getSolverExecutable() {
+
+        switch (System.getProperty("os.name").toLowerCase()) {
+            case "linux":
+                return new File("./localsolvers/linux64/langevin_x64");
+            case "mac os x":
+                if (System.getProperty("os.arch").equals("x86_64")) {
+                    return new File("./localsolvers/macos_x86_64/langevin_x64");
+                } else if (System.getProperty("os.arch").equals("arm64")) {
+                    return new File("./localsolvers/macos_arm64/langevin_arm64");
+                } else {
+                    throw new IllegalStateException("Unsupported architecture: " + System.getProperty("os.arch"));
+                }
+            case "windows":
+                return new File("./localsolvers/win64/langevin_x64.exe");
+            default:
+                throw new IllegalStateException("Unsupported OS: " + System.getProperty("os.name"));
+        }
+
+    }
     
     private void launchSequentialRuns(){
-        // <editor-fold defaultstate="collapsed" desc="Method Code">
-        String separator = System.getProperty("file.separator");
-        String classPath = System.getProperty("java.class.path");
-        String javaHome = System.getProperty("java.home");
-        String javaPath = javaHome + separator + "bin" + separator + "java";
-        Class clazz = langevinnovis01.Global.class;
-        ProcessBuilder builder = null;
-        
-        //
-        // to debug the solver from SpringSaLaD
-        //
-//        boolean debugSolver = true;
-//        if(totalRuns == 1 && debugSolver == true) {
-//        	String canonicalName = clazz.getCanonicalName();
-//        	String inputPath = inputFile.getAbsolutePath();
-//        	String outputPath = outputFile[0].getAbsolutePath();
-//        	
-//        	String[] args = {inputPath, Integer.toString(0), outputPath};
-//        	langevinnovis01.Global.main(args);
-//        	return;
-//        }
-        
+
         for(int i=0;i<totalRuns;i++){
             String intString = Integer.toString(i);
-            if(classPath.contains("SpringSalad-")){
-                try{
-                    builder = new ProcessBuilder(javaPath, "-Xms64m","-Xmx1024m","-jar", 
-                            "LangevinNoVis01.jar", inputFile.getAbsolutePath(),
-                            intString, outputFile[i].getAbsolutePath());
-                    builder.inheritIO();
-                    process[0] = builder.start();
-                } catch(IOException ioe2){
-                    ioe2.printStackTrace(System.out);
-                }
-            } else {
-                try{
-                    builder = new ProcessBuilder(javaPath,"-cp",classPath,
-                            clazz.getCanonicalName(), inputFile.getAbsolutePath(),
-                            intString, outputFile[i].getAbsolutePath());
-                    builder.inheritIO();
-                    process[0] = builder.start();
-                } catch(IOException ioe){
-                    ioe.printStackTrace(System.out);
-                }
+            // switch statement to determine the platform we are running on, linux, macos or windows
+            try{
+                ProcessBuilder builder = new ProcessBuilder(getSolverExecutable().getAbsolutePath(), inputFile.getAbsolutePath(),
+                        intString, outputFile[i].getAbsolutePath());
+                builder.inheritIO();
+                process[0] = builder.start();
+            } catch(IOException ioe2){
+                ioe2.printStackTrace(System.out);
             }
             if(process[0] != null){
                 try{
@@ -87,41 +75,17 @@ public class RunLauncher implements Runnable {
     }
     
     private void launchParallelRuns(){
-        // <editor-fold defaultstate="collapsed" desc="Method Code">
-        String separator = System.getProperty("file.separator");
-        String classPath = System.getProperty("java.class.path");
-        String javaHome = System.getProperty("java.home");
-        String javaPath = javaHome + separator + "bin" + separator + "java";
-        Class clazz = langevinnovis01.Global.class;
-        ProcessBuilder builder = null;
         for(int i=0;i<totalRuns;i++){
             String intString = Integer.toString(i);
-            // All distributed jars are named SpringSalad-xxx, where xxx is
-            // either "win" or "mac" or "linux".  Thus, to see if we're running
-            // from a distributed jar, just look for the string "SpringSalad-" 
-            // on the classpath.
-            if(classPath.contains("SpringSalad-")){
                 try{
-                    builder = new ProcessBuilder(javaPath, "-Xms64m","-Xmx1024m","-jar", 
-                            "LangevinNoVis01.jar", inputFile.getAbsolutePath(),
+                    ProcessBuilder builder = new ProcessBuilder(getSolverExecutable().getAbsolutePath(), inputFile.getAbsolutePath(),
                             intString, outputFile[i].getAbsolutePath());
                     builder.inheritIO();
                     process[i] = builder.start();
                 } catch(IOException ioe2){
                     ioe2.printStackTrace(System.out);
                 }
-            } else {
-                try{
-                    builder = new ProcessBuilder(javaPath,"-cp",classPath,
-                            clazz.getCanonicalName(), inputFile.getAbsolutePath(),
-                            intString, outputFile[i].getAbsolutePath());
-                    builder.inheritIO();
-                    process[i] = builder.start();
-                } catch(IOException ioe){
-                    ioe.printStackTrace(System.out);
-                }
-            }
-            if(0 == (i+1)%numberSimultaneous){
+             if(0 == (i+1)%numberSimultaneous){
                 // Wait for all the currently running processes to finish. 
                 // WOULD BE BETTER TO LAUNCH ANOTHER AS SOON AS ONE FINISHES,
                 // BUT I DON'T HAVE TIME TO FIGURE OUT HOW TO DO THAT.
