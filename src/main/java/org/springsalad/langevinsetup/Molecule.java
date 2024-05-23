@@ -9,15 +9,12 @@
 
 package org.springsalad.langevinsetup;
 
+import org.springsalad.helpersetup.IOHelp;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
-
-import javax.vecmath.GMatrix;
-
-import org.springsalad.helpersetup.IOHelp;
-import org.springsalad.helpersetup.PopUp;
 
 public class Molecule {
     

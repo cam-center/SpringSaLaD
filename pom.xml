@@ -27,14 +27,13 @@
 
 	<repositories>
 		<repository>
-			<id>clojars</id>
-			<url>https://clojars.org/repo/</url>
+			<id>jogamp-Java3d</id>
+			<url>https://jogamp.org/deployment/maven-java3d/</url>
 		</repository>
 	</repositories>
 
 
 	<dependencies>
-
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -43,32 +42,18 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.massisframework.j3d/vecmath -->
+		<!-- https://jogamp.org/deployment/maven-java3d/org/jogamp/java3d/java3d-core/ -->
 		<dependency>
-			<groupId>com.massisframework.j3d</groupId>
-			<artifactId>vecmath</artifactId>
-			<version>1.6.0.1</version>
+			<groupId>org.jogamp.java3d</groupId>
+			<artifactId>java3d-core</artifactId>
+			<version>1.7.2</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.massisframework.j3d/java3d-core -->
+		<!-- https://jogamp.org/deployment/maven-java3d/org/jogamp/java3d/java3d-core/ -->
 		<dependency>
-			<groupId>com.massisframework.j3d</groupId>
-			<artifactId>java3d-core</artifactId>
-			<version>1.6.0.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jogamp.jogl</groupId>
-					<artifactId>jogl-all</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jogamp.jogl</groupId>
-					<artifactId>jogl-all-main</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.jogamp.gluegen</groupId>
-					<artifactId>gluegen</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.jogamp.java3d</groupId>
+			<artifactId>java3d-utils</artifactId>
+			<version>1.7.2</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/ch.randelshofer/org.monte.media -->
@@ -105,7 +90,6 @@
 			<artifactId>commons-math3</artifactId>
 			<version>3.6.1</version>
 		</dependency>
-
 
 	</dependencies>
 

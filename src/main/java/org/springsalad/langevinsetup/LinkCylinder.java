@@ -6,23 +6,29 @@
 
 package org.springsalad.langevinsetup;
 
-import com.sun.j3d.utils.geometry.Cylinder;
+//import com.sun.j3d.utils.geometry.Cylinder;
+//
+//import javax.media.j3d.Appearance;
+//import javax.media.j3d.Material;
+//import javax.media.j3d.RenderingAttributes;
+//import javax.media.j3d.Shape3D;
+//import javax.media.j3d.TransformGroup;
+//import javax.media.j3d.Transform3D;
+//import javax.media.j3d.BranchGroup;
+//import javax.vecmath.Color3f;
+//import javax.vecmath.Vector3d;
 
-import javax.media.j3d.Appearance;
-import javax.media.j3d.Material;
-import javax.media.j3d.RenderingAttributes;
-import javax.media.j3d.Shape3D;
-import javax.media.j3d.TransformGroup;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.BranchGroup;
-import javax.vecmath.Color3f;
-import javax.vecmath.Vector3d;
-
+import org.jogamp.java3d.*;
+import org.jogamp.java3d.utils.geometry.Cylinder;
+import org.jogamp.vecmath.AxisAngle4d;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Vector3d;
 import org.springsalad.helpersetup.Colors;
 
 import java.util.Enumeration;
-import javax.media.j3d.BadTransformException;
-import javax.vecmath.AxisAngle4d;
+import java.util.Iterator;
+//import javax.media.j3d.BadTransformException;
+//import javax.vecmath.AxisAngle4d;
 
 public class LinkCylinder extends BranchGroup {
     
@@ -48,8 +54,9 @@ public class LinkCylinder extends BranchGroup {
         cylinder.setCapability(Cylinder.ENABLE_PICK_REPORTING);
         cylinder.setCapability(Cylinder.ENABLE_APPEARANCE_MODIFY);
         cylinder.setCapability(Cylinder.ALLOW_CHILDREN_WRITE);
-        for(Enumeration e = cylinder.getAllChildren(); e.hasMoreElements();){
-            Shape3D shape = (Shape3D)e.nextElement();
+        Iterator<Node> iter = cylinder.getAllChildren();
+        while (iter.hasNext()){
+            Shape3D shape = (Shape3D) iter.next();
             shape.setCapability(Shape3D.ALLOW_APPEARANCE_WRITE);
         }
         

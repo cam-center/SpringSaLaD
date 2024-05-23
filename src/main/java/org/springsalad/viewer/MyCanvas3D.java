@@ -6,19 +6,23 @@
 
 package org.springsalad.viewer;
 
-import com.sun.j3d.utils.universe.*;
-import com.sun.j3d.utils.behaviors.vp.*;
-import com.sun.j3d.utils.geometry.*;
 
-import javax.media.j3d.*;
-import javax.vecmath.*;
-
+import org.jogamp.java3d.*;
+import org.jogamp.java3d.utils.behaviors.vp.OrbitBehavior;
+import org.jogamp.java3d.utils.universe.SimpleUniverse;
+import org.jogamp.java3d.utils.universe.ViewingPlatform;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Point3d;
+import org.jogamp.vecmath.Vector3d;
+import org.jogamp.vecmath.Vector3f;
 import org.springsalad.helpersetup.Colors;
 
-import java.awt.*;
-import java.awt.image.*;
-import java.io.*;
 import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
 
 class MyCanvas3D extends Canvas3D {
     
@@ -28,7 +32,6 @@ class MyCanvas3D extends Canvas3D {
     BoundingSphere bounds;
     // Following MUST be static or else it can't be used by the super constructor!
     static GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
-    
     // Reference to this component's off screen canvas3d
     private Canvas3D offScreenCanvas;
     private ImageComponent2D image2d;
@@ -61,7 +64,6 @@ class MyCanvas3D extends Canvas3D {
     public MyCanvas3D(){
         super(config);
         this.setPreferredSize(new Dimension(700,500));
-        
         su = new SimpleUniverse(this);
         rootBG = new BranchGroup();
         rootBG.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
@@ -153,7 +155,7 @@ class MyCanvas3D extends Canvas3D {
     }
     
     public void writeImage(File file, String extension)
-        throws IOException{ 
+        throws IOException {
 
         offScreenCanvas.renderOffScreenBuffer();
         offScreenCanvas.waitForOffScreenRendering();

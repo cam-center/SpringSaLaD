@@ -6,9 +6,10 @@
 
 package org.springsalad.viewer;
 
-import javax.media.j3d.*;
-import javax.vecmath.*;
-
+import org.jogamp.java3d.BranchGroup;
+import org.jogamp.java3d.Transform3D;
+import org.jogamp.java3d.TransformGroup;
+import org.jogamp.vecmath.AxisAngle4d;
 import org.springsalad.helpersetup.Colors;
 
 public class Axes extends BranchGroup {

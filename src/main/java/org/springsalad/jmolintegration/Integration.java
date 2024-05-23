@@ -1,24 +1,17 @@
 package org.springsalad.jmolintegration;
 
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.event.ActionListener;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.WindowConstants;
-import javax.vecmath.Matrix3f;
-
+import javajs.util.M3;
 import org.jmol.adapter.smarter.SmarterJmolAdapter;
 import org.jmol.api.JmolViewer;
 import org.jmol.viewer.TransformManager;
 import org.jmol.viewer.Viewer;
+import org.jogamp.vecmath.Matrix3f;
 import org.springsalad.langevinsetup.RotateUpdateListener;
 import org.springsalad.langevinsetup.RotationUpdateEvent;
 
-import javajs.util.M3;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
 
 /**
  * A example of integrating the Jmol viewer into a CDK application.
