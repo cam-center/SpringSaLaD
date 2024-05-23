@@ -30,21 +30,26 @@ public class RunLauncher implements Runnable {
 
     private File getSolverExecutable() {
 
-        switch (System.getProperty("os.name").toLowerCase()) {
-            case "linux":
-                return new File("./localsolvers/linux64/langevin_x64");
-            case "mac os x":
-                if (System.getProperty("os.arch").equals("x86_64")) {
-                    return new File("./localsolvers/macos_x86_64/langevin_x64");
-                } else if (System.getProperty("os.arch").equals("aarch64")) {
-                    return new File("./localsolvers/macos_arm64/langevin_arm64");
-                } else {
-                    throw new IllegalStateException("Unsupported architecture: " + System.getProperty("os.arch"));
-                }
-            case "windows":
-                return new File("./localsolvers/win64/langevin_x64.exe");
-            default:
-                throw new IllegalStateException("Unsupported OS: " + System.getProperty("os.name"));
+        String os_name = System.getProperty("os.name").toLowerCase();
+        String os_arch = System.getProperty("os.arch").toLowerCase();
+
+        if (os_name.contains("linux")) {
+            return new File("./localsolvers/linux64/langevin_x64");
+
+        }else if (os_name.contains("windows")) {
+            return new File("./localsolvers/win64/langevin_x64.exe");
+
+        }else if (os_name.contains("mac")) {
+            if (os_arch.equals("x86_64")) {
+                return new File("./localsolvers/macos_x86_64/langevin_x64");
+            } else if (os_arch.equals("aarch64")) {
+                return new File("./localsolvers/macos_arm64/langevin_arm64");
+            } else {
+                throw new IllegalStateException("Unsupported architecture: " + os_arch);
+            }
+
+        } else {
+            throw new IllegalStateException("Unsupported OS: " + os_name);
         }
 
     }
