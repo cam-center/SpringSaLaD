@@ -6,6 +6,8 @@
 
 package org.springsalad.helpersetup;
 
+import org.jogamp.vecmath.Color3f;
+
 import java.awt.Color;
 
 public class NamedColor {
@@ -29,6 +31,10 @@ public class NamedColor {
     @Override
     public String toString(){
         return name;
+    }
+
+    public Color3f getColor3f(){
+        return new Color3f(this.color.getRed()/255.0f, this.color.getGreen()/255.0f, this.color.getBlue()/255.0f);
     }
     
 }

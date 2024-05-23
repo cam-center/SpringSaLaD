@@ -5,19 +5,19 @@
 
 package org.springsalad.runlauncher;
 
+import org.springsalad.clusteranalysis.DataProcessor2;
+import org.springsalad.dataprocessor.DataProcessor;
+import org.springsalad.helpersetup.IOHelp;
+import org.springsalad.langevinsetup.Global;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Scanner;
-import javax.swing.*;
-import javax.swing.event.*;
-
-import org.springsalad.dataprocessor.DataProcessor;
-import org.springsalad.helpersetup.IOHelp;
-import org.springsalad.langevinsetup.Global;
-
-import org.springsalad.clusteranalysis.DataProcessor2;
 
 public class Simulation extends Global implements ChangeListener{
     
@@ -301,8 +301,6 @@ public class Simulation extends Global implements ChangeListener{
         File [] outputFile = new File[runNumber];
         String [] outputFileName = new String[runNumber];
         progressPanel = new ProgressPanel[runNumber];
-        Class clazz = langevinnovis01.Global.class;
-        ProcessBuilder builder = null;
         process = new Process[runNumber];
         // Construct the files and progress panels.
         for(int i=0;i<runNumber;i++){
@@ -333,93 +331,7 @@ public class Simulation extends Global implements ChangeListener{
         writeFile();
         // </editor-fold>
     }
-    
-    /* ****************  RUN WARM UP CODE *******************************/
-    public static WarmUpWindow warmUpSimulationEngine(){
-        // <editor-fold defaultstate="collapsed" desc="Method Code">
-        InputStream in = null;
-        OutputStream out = null;
-        File warmUpFile = null;
-        try {
-            in = org.springsalad.langevinsetup.MainGUI.class.getResourceAsStream("res/WarmUp.txt");
-            warmUpFile = Files.createTempFile("TempWarmUp", "txt").toFile();
-            out = new FileOutputStream(warmUpFile);
 
-            int read;
-            byte [] bytes = new byte[1024];
-            while((read = in.read(bytes)) != -1){
-                out.write(bytes, 0, read);
-            }
-        } catch(IOException ioe){
-            ioe.printStackTrace(System.out);
-        } finally{
-            if(in != null){
-                try{
-                    in.close();
-                } catch(IOException ioe1){
-                    ioe1.printStackTrace(System.out);
-                }
-            }
-            if(out != null){
-                try{
-                    out.flush();
-                    out.close();
-                } catch(IOException ioe2){
-                    ioe2.printStackTrace(System.out);
-                }
-            }
-        }
-
-        if(warmUpFile != null){
-            File outputFile = new File(warmUpFile.getParent() + "/WarmUpOutput.txt");
-            String separator = System.getProperty("file.separator");
-            String classPath = System.getProperty("java.class.path");
-            String javaHome = System.getProperty("java.home");
-            String javaPath = javaHome + separator + "bin" + separator + "java";
-            Class clazz = langevinnovis01.Global.class;
-            try(PrintWriter p = new PrintWriter(new FileWriter(outputFile),true)){
-                p.println("Simulation 0% complete. Elapsed time: 0.000 sec.");
-            }catch(IOException fne){
-                fne.printStackTrace(System.out);
-            }
-            // All distributed jars are named SpringSalad-xxx, where xxx is
-            // either "win" or "mac" or "linux".  Thus, to see if we're running
-            // from a distributed jar, just look for the string "SpringSalad-" 
-            // on the classpath. 
-            ProcessBuilder builder;
-            if(classPath.contains("SpringSalad-")){
-                try{
-                    builder = new ProcessBuilder(javaPath, /* "-cp", classPath, */
-                        "-Xms64m","-Xmx1024m","-jar", "LangevinNoVis01.jar", warmUpFile.getAbsolutePath(),
-                        "0", outputFile.getAbsolutePath());
-                    builder.inheritIO();
-                    builder.start();
-                } catch(IOException ioe){
-                    ioe.printStackTrace(System.out);
-                }
-            } else {
-                try{
-                    builder = new ProcessBuilder(javaPath, "-cp",classPath,
-                        clazz.getCanonicalName(),warmUpFile.getAbsolutePath(), "0",
-                        outputFile.getAbsolutePath());
-                    builder.inheritIO();
-                    builder.start();
-                } catch(IOException ioe2){
-                    ioe2.printStackTrace(System.out);
-                }
-            }
-            // Pop up a progress bar to tell the user that the simulation
-            // engine is warming up.
-            WarmUpWindow win = new WarmUpWindow(outputFile);
-            win.showWarmUpWindow();
-            return win;
-        } else {
-            System.out.println("Unable to read the warmup file!");
-            return null;
-        }
-        // </editor-fold>
-    }
-    
     /* *************** SHOW PROGRESS ************************************/
     
     public JFrame getProgressFrame(){

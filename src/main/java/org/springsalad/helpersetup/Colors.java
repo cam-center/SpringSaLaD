@@ -6,9 +6,11 @@
 
 package org.springsalad.helpersetup;
 
-import java.awt.Color;
+import org.jogamp.vecmath.Color3f;
+
+import java.awt.*;
 import java.util.HashMap;
-import javax.vecmath.*;
+
 
 public class Colors {
     
@@ -88,35 +90,35 @@ public class Colors {
         DARKVIOLET, VIOLET, SLATEBLUE, LIGHTCYAN, DARKCYAN, LIGHTGRAY,
         DARKGRAY, WHITE, BLACK};
     
-    public final static Color3f RED3D = new Color3f(Color.RED);
-    public final static Color3f BLUE3D = new Color3f(Color.BLUE);
-    public final static Color3f LIME3D = new Color3f(LIME.getColor());
-    public final static Color3f ORANGE3D = new Color3f(Color.ORANGE);
-    public final static Color3f CYAN3D = new Color3f(Color.CYAN);
-    public final static Color3f MAGENTA3D = new Color3f(Color.MAGENTA);
-    public final static Color3f PINK3D = new Color3f(Color.PINK);
-    public final static Color3f YELLOW3D = new Color3f(Color.YELLOW);
-    public final static Color3f GRAY3D = new Color3f(Color.GRAY);
-    public final static Color3f PURPLE3D = new Color3f(PURPLE.getColor());
-    public final static Color3f GREEN3D = new Color3f(GREEN.getColor());
-    public final static Color3f MAROON3D = new Color3f(MAROON.getColor());
-    public final static Color3f NAVY3D = new Color3f(NAVY.getColor());
-    public final static Color3f OLIVE3D = new Color3f(OLIVE.getColor());
-    public final static Color3f TEAL3D = new Color3f(TEAL.getColor());
-    public final static Color3f LIMEGREEN3D = new Color3f(LIMEGREEN.getColor());
-    public final static Color3f GOLD3D = new Color3f(GOLD.getColor());
-    public final static Color3f DARKGREEN3D = new Color3f(DARKGREEN.getColor());
-    public final static Color3f CRIMSON3D = new Color3f(CRIMSON.getColor());
-    public final static Color3f DARKVIOLET3D = new Color3f(DARKVIOLET.getColor());
-    public final static Color3f VIOLET3D = new Color3f(VIOLET.getColor());
-    public final static Color3f SLATEBLUE3D = new Color3f(SLATEBLUE.getColor());
-    public final static Color3f LIGHTCYAN3D = new Color3f(LIGHTCYAN.getColor());
-    public final static Color3f DARKCYAN3D = new Color3f(DARKCYAN.getColor());
+    public final static Color3f RED3D = RED.getColor3f();
+    public final static Color3f BLUE3D = BLUE.getColor3f();
+    public final static Color3f LIME3D = LIME.getColor3f();
+    public final static Color3f ORANGE3D = ORANGE.getColor3f();
+    public final static Color3f CYAN3D = CYAN.getColor3f();
+    public final static Color3f MAGENTA3D = MAGENTA.getColor3f();
+    public final static Color3f PINK3D = PINK.getColor3f();
+    public final static Color3f YELLOW3D = YELLOW.getColor3f();
+    public final static Color3f GRAY3D = GRAY.getColor3f();
+    public final static Color3f PURPLE3D = PURPLE.getColor3f();;
+    public final static Color3f GREEN3D = GREEN.getColor3f();;
+    public final static Color3f MAROON3D = MAROON.getColor3f();;
+    public final static Color3f NAVY3D = NAVY.getColor3f();;
+    public final static Color3f OLIVE3D = OLIVE.getColor3f();;
+    public final static Color3f TEAL3D = TEAL.getColor3f();;
+    public final static Color3f LIMEGREEN3D = LIMEGREEN.getColor3f();;
+    public final static Color3f GOLD3D = GOLD.getColor3f();;
+    public final static Color3f DARKGREEN3D = DARKGREEN.getColor3f();;
+    public final static Color3f CRIMSON3D = CRIMSON.getColor3f();;
+    public final static Color3f DARKVIOLET3D = DARKVIOLET.getColor3f();;
+    public final static Color3f VIOLET3D = VIOLET.getColor3f();;
+    public final static Color3f SLATEBLUE3D = SLATEBLUE.getColor3f();;
+    public final static Color3f LIGHTCYAN3D = LIGHTCYAN.getColor3f();;
+    public final static Color3f DARKCYAN3D = DARKCYAN.getColor3f();;
     
-    public final static Color3f LIGHTGRAY3D = new Color3f(Color.LIGHT_GRAY);
-    public final static Color3f DARKGRAY3D = new Color3f(Color.DARK_GRAY);
-    public final static Color3f WHITE3D = new Color3f(Color.WHITE);
-    public final static Color3f BLACK3D = new Color3f(Color.BLACK);
+    public final static Color3f LIGHTGRAY3D = LIGHTGRAY.getColor3f();
+    public final static Color3f DARKGRAY3D = DARKGRAY.getColor3f();
+    public final static Color3f WHITE3D = WHITE.getColor3f();
+    public final static Color3f BLACK3D = BLACK.getColor3f();
     
     public final static Color3f [] COLOR3FARRAY = {RED3D, BLUE3D, LIME3D, 
         ORANGE3D, CYAN3D, MAGENTA3D, PINK3D, YELLOW3D, GRAY3D, PURPLE3D,
@@ -168,6 +170,19 @@ public class Colors {
             }
         }
         return name;
+        // </editor-fold>
+    }
+
+    public static Color3f getColor3fByColor(Color color){
+        // <editor-fold defaultstate="collapsed" desc="Method Code">
+        Color3f color3f = null;
+        for(int i=0;i<COLOR3FARRAY.length;i++){
+            if(color.equals(COLORARRAY[i].getColor())){
+                color3f = COLOR3FARRAY[i];
+                break;
+            }
+        }
+        return color3f;
         // </editor-fold>
     }
     

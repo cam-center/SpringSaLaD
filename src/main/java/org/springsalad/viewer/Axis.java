@@ -1,11 +1,16 @@
 
 package org.springsalad.viewer;
 
-import com.sun.j3d.utils.geometry.*;
+//import com.sun.j3d.utils.geometry.*;
+//
+//import javax.media.j3d.*;
+//import javax.vecmath.*;
 
-import javax.media.j3d.*;
-import javax.vecmath.*;
-
+import org.jogamp.java3d.*;
+import org.jogamp.java3d.utils.geometry.Cone;
+import org.jogamp.java3d.utils.geometry.Cylinder;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Vector3d;
 import org.springsalad.helpersetup.Colors;
 
 import java.util.ArrayList;

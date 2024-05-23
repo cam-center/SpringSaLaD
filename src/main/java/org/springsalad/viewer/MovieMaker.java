@@ -6,15 +6,19 @@
 
 package org.springsalad.viewer;
 
-import org.monte.media.*;
-// import org.monte.media.VideoFormatKeys.*;
+import org.monte.media.av.Buffer;
+import org.monte.media.av.Format;
+import org.monte.media.av.MovieWriter;
+import org.monte.media.av.Registry;
+import org.monte.media.av.codec.video.VideoFormatKeys;
 import org.monte.media.math.Rational;
-// import org.monte.media.avi.*;
 
-import java.awt.image.*;
-import java.io.*;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class MovieMaker {
 

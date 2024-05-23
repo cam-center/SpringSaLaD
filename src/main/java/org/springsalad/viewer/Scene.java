@@ -12,18 +12,18 @@
 
 package org.springsalad.viewer;
 
-import java.util.HashMap;
-import java.util.Scanner;
-import java.io.*;
-
-import com.sun.j3d.utils.geometry.*;
-
-import java.util.InputMismatchException;
-import javax.media.j3d.*;
-import javax.vecmath.*;
-
+import org.jogamp.java3d.*;
+import org.jogamp.java3d.utils.geometry.Cylinder;
+import org.jogamp.java3d.utils.geometry.Sphere;
+import org.jogamp.vecmath.AxisAngle4d;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Vector3d;
+import org.jogamp.vecmath.Vector3f;
 import org.springsalad.helpersetup.Colors;
 import org.springsalad.helpersetup.IOHelp;
+
+import java.util.HashMap;
+import java.util.Scanner;
 
 public class Scene {
 
@@ -189,7 +189,7 @@ public class Scene {
                 if(leader.equals("ID")){
                     // System.out.println("Reading id.");
                     try{
-                        id = new Integer(scline.nextInt());
+                        id = scline.nextInt();
                     } catch(NumberFormatException e){
                         System.out.println("Choked on the id.");
                     }
@@ -209,12 +209,12 @@ public class Scene {
                     // System.out.println(dd1);
                     Integer id1 = null;
                     try{
-                        id1 = new Integer(scline.nextInt());
+                        id1 = scline.nextInt();
                     } catch(NumberFormatException e){
                         System.out.println("Couldn't read id1.");
                     }   
                     scline.next();
-                    Integer id2 = new Integer(scline.nextInt());
+                    Integer id2 = scline.nextInt();
                     try{
                         double [] pos1 = positions.get(id1);
                         double [] pos2 = positions.get(id2);
@@ -250,7 +250,7 @@ public class Scene {
             if(scline.next().equals("ID")){
                 // System.out.println("Reading id.");
                 try{
-                    id = new Integer(scline.nextInt());
+                    id = scline.nextInt();
                 } catch(NumberFormatException e){
                     System.out.println("Choked on the id.");
                 }
@@ -268,12 +268,12 @@ public class Scene {
                 // System.out.println(dd1);
                 Integer id1 = null;
                 try{
-                    id1 = new Integer(scline.nextInt());
+                    id1 = scline.nextInt();
                 } catch(NumberFormatException e){
                     System.out.println("Couldn't read id1.");
                 }   
                 scline.next();
-                Integer id2 = new Integer(scline.nextInt());
+                Integer id2 = scline.nextInt();
                 double [] pos1 = positions.get(id1);
                 double [] pos2 = positions.get(id2);
                 tg = makeLink(pos1,pos2);

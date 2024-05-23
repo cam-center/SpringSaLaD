@@ -1,7 +1,8 @@
 package org.springsalad.langevinsetup;
 
+import org.jogamp.vecmath.Matrix3f;
+
 import java.awt.event.ActionEvent;
-import javax.vecmath.Matrix3f;
 
 
 public class RotationUpdateEvent extends ActionEvent{

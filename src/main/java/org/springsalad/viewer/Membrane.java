@@ -1,11 +1,15 @@
 
 package org.springsalad.viewer;
 
-import com.sun.j3d.utils.geometry.Box;
+//import com.sun.j3d.utils.geometry.Box;
+//
+//import javax.media.j3d.*;
+//import javax.vecmath.*;
 
-import javax.media.j3d.*;
-import javax.vecmath.*;
-
+import org.jogamp.java3d.*;
+import org.jogamp.java3d.utils.geometry.Box;
+import org.jogamp.vecmath.Color3f;
+import org.jogamp.vecmath.Vector3f;
 import org.springsalad.helpersetup.Colors;
 
 public class Membrane extends BranchGroup {

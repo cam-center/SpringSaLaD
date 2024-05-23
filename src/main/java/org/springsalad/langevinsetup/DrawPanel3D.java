@@ -6,49 +6,22 @@
 
 package org.springsalad.langevinsetup;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GraphicsConfiguration;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import org.jogamp.java3d.*;
+import org.jogamp.java3d.utils.behaviors.vp.OrbitBehavior;
+import org.jogamp.java3d.utils.geometry.*;
+import org.jogamp.java3d.utils.picking.PickCanvas;
+import org.jogamp.java3d.utils.picking.PickResult;
+import org.jogamp.java3d.utils.universe.SimpleUniverse;
+import org.jogamp.java3d.utils.universe.ViewingPlatform;
+import org.jogamp.vecmath.*;
+import org.springsalad.helpersetup.Colors;
+import org.springsalad.helpersetup.NamedColor;
+
+import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.media.j3d.AmbientLight;
-import javax.media.j3d.Appearance;
-import javax.media.j3d.BoundingSphere;
-import javax.media.j3d.BranchGroup;
-import javax.media.j3d.Canvas3D;
-import javax.media.j3d.DirectionalLight;
-import javax.media.j3d.Group;
-import javax.media.j3d.Material;
-import javax.media.j3d.RenderingAttributes;
-import javax.media.j3d.Transform3D;
-import javax.media.j3d.TransformGroup;
-import javax.media.j3d.View;
-import javax.vecmath.AxisAngle4d;
-import javax.vecmath.Color3f;
-import javax.vecmath.Matrix3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Vector3d;
-import javax.vecmath.Vector3f;
-
-import org.springsalad.helpersetup.Colors;
-
-import com.sun.j3d.utils.behaviors.vp.OrbitBehavior;
-import com.sun.j3d.utils.geometry.Box;
-import com.sun.j3d.utils.geometry.Cone;
-import com.sun.j3d.utils.geometry.Cylinder;
-import com.sun.j3d.utils.geometry.Primitive;
-import com.sun.j3d.utils.geometry.Sphere;
-import com.sun.j3d.utils.picking.PickCanvas;
-import com.sun.j3d.utils.picking.PickResult;
-import com.sun.j3d.utils.universe.SimpleUniverse;
-import com.sun.j3d.utils.universe.ViewingPlatform;
 
 public class DrawPanel3D extends Canvas3D implements MouseListener, 
         KeyListener, MoleculeSelectionListener, RotateUpdateListener, MouseMotionListener {
@@ -231,11 +204,11 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
         }
     }
     
-    private Group makeAxis(double length, Color col){
+    private Group makeAxis(double length, NamedColor col){
         TransformGroup topTG = new TransformGroup();
         // All these will glow
         Appearance ap = new Appearance();
-        ap.setMaterial(new Material(new Color3f(col), Colors.BLACK3D, new Color3f(col), Colors.BLACK3D, 40.0f));
+        ap.setMaterial(new Material(col.getColor3f(), Colors.BLACK3D, col.getColor3f(), Colors.BLACK3D, 40.0f));
         
         RenderingAttributes ra = new RenderingAttributes();
         ra.setDepthBufferEnable(true);
@@ -261,19 +234,19 @@ public class DrawPanel3D extends Canvas3D implements MouseListener,
     private BranchGroup makeAxes(double lengthY, double lengthX, double lengthZ){
         TransformGroup topTG = new TransformGroup();
         // Add y-axis directly
-        topTG.addChild(makeAxis(lengthY, Color.green));
+        topTG.addChild(makeAxis(lengthY, Colors.GREEN));
         // Make and add x-axis
         Transform3D xt3d = new Transform3D();
         xt3d.setRotation(new AxisAngle4d(x_axis, Math.PI/2));
         TransformGroup xTG = new TransformGroup(xt3d);
-        xTG.addChild(makeAxis(lengthZ,Color.blue));
+        xTG.addChild(makeAxis(lengthZ,Colors.BLUE));
         topTG.addChild(xTG);
         
         // Make and add z-axis
         Transform3D zt3d = new Transform3D();
         zt3d.setRotation(new AxisAngle4d(z_axis, -Math.PI/2));
         TransformGroup zTG = new TransformGroup(zt3d);
-        zTG.addChild(makeAxis(lengthX,Color.magenta));
+        zTG.addChild(makeAxis(lengthX,Colors.MAGENTA));
         topTG.addChild(zTG);
         
         BranchGroup tempBG = new BranchGroup();
