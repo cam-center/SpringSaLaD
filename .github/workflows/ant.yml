@@ -26,7 +26,7 @@ jobs:
 
     - name: Maven dependencies
       run: |
-        mvn clean install dependency:copy-dependencies
+        mvn --batch-mode clean install dependency:copy-dependencies
 
 #    - name: Upload zipped executable jar
 #      uses: actions/upload-artifact@v2
