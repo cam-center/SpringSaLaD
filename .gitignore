@@ -5,28 +5,7 @@
 
 example_files/example_SIMULATIONS/
 
-localsolvers/linux64/langevin_x64
-
-localsolvers/macos_arm64/langevin_arm64
-
-localsolvers/macos_x86_64/langevin_x64
-
-localsolvers/win64/langevin_x64.exe
-
-install4j_output/VCELL_APPLE_2025.p12
-
-installers/md5sums
-
-installers/output.txt
-
-installers/sha256sums
-
-installers/SpringSaLaD_macos_2_3.dmg
-
-installers/SpringSaLaD_unix_2_3.tar.gz
-
-installers/SpringSaLaD_windows-x64_2_3.zip
-
-installers/updates.xml
-
 .DS_Store
+/installers/
+/localsolvers/
+/install4j_output/
