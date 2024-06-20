@@ -11,7 +11,9 @@ import org.monte.media.av.Format;
 import org.monte.media.av.MovieWriter;
 import org.monte.media.av.Registry;
 import org.monte.media.av.codec.video.VideoFormatKeys;
+import org.monte.media.avi.AVIWriter;
 import org.monte.media.math.Rational;
+import org.monte.media.quicktime.QuickTimeWriter;
 
 import javax.imageio.stream.FileImageOutputStream;
 import javax.imageio.stream.ImageOutputStream;
@@ -24,8 +26,8 @@ public class MovieMaker {
 
     public static void makeAVI(File file, BufferedImage [] frames, int fps)
         throws IOException {
-        MovieWriter out = Registry.getInstance().getWriter(file);
-        
+        AVIWriter out = new AVIWriter(file);
+
         Format format = new Format(VideoFormatKeys.MediaTypeKey, VideoFormatKeys.MediaType.VIDEO, //
                 VideoFormatKeys.EncodingKey, VideoFormatKeys.ENCODING_AVI_PNG,
                 VideoFormatKeys.FrameRateKey, new Rational(fps, 1),//
@@ -53,8 +55,8 @@ public class MovieMaker {
     
     public static void makeQuicktime(File file, BufferedImage [] frames, int fps)
         throws IOException {
-        MovieWriter out = Registry.getInstance().getWriter(file);
-        
+        QuickTimeWriter out = new QuickTimeWriter(file);
+
         Format format = new Format(VideoFormatKeys.MediaTypeKey, VideoFormatKeys.MediaType.VIDEO, //
                 VideoFormatKeys.EncodingKey, VideoFormatKeys.ENCODING_QUICKTIME_PNG,
                 VideoFormatKeys.FrameRateKey, new Rational(fps, 1),//
