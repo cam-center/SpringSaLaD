@@ -16,6 +16,7 @@ import org.monte.media.av.Format;
 import org.monte.media.av.MovieWriter;
 import org.monte.media.av.Registry;
 import org.monte.media.av.codec.video.VideoFormatKeys;
+import org.monte.media.avi.AVIWriter;
 //import org.monte.media.math.Rational;
 
 import javax.imageio.stream.FileImageOutputStream;
@@ -32,36 +33,29 @@ import static org.jcodec.api.awt.AWTSequenceEncoder.createSequenceEncoder;
 
 public class MovieMaker {
 
-    public static void makeAVI(File file, BufferedImage [] frames, int fps)
-        throws IOException {
-        MovieWriter out = Registry.getInstance().getWriter(file);
-        
+    public static void makeAVI(File file, BufferedImage [] frames, int fps) throws IOException {
+        AVIWriter out = new AVIWriter(file);
+
         Format format = new Format(VideoFormatKeys.MediaTypeKey, VideoFormatKeys.MediaType.VIDEO, //
-                VideoFormatKeys.EncodingKey, VideoFormatKeys.ENCODING_AVI_PNG,
-                VideoFormatKeys.FrameRateKey, new org.monte.media.math.Rational(fps, 1),//
-                VideoFormatKeys.WidthKey, frames[0].getWidth(), //
-                VideoFormatKeys.HeightKey, frames[0].getHeight(),//
-                VideoFormatKeys.DepthKey, 24
-                );
+        VideoFormatKeys.EncodingKey, VideoFormatKeys.ENCODING_AVI_PNG,
+        VideoFormatKeys.FrameRateKey, new org.monte.media.math.Rational(fps, 1),//
+        VideoFormatKeys.WidthKey, frames[0].getWidth(), //
+        VideoFormatKeys.HeightKey, frames[0].getHeight(),//
+        VideoFormatKeys.DepthKey, 24);
         
         int track = out.addTrack(format);
-        
         Buffer buf = new Buffer();
-        
         buf.format = new Format(VideoFormatKeys.DataClassKey, BufferedImage.class);
         buf.sampleDuration = format.get(VideoFormatKeys.FrameRateKey).inverse();
         for (BufferedImage frame : frames) {
             buf.data = frame;
             out.write(track, buf);
         }
-       
         out.close();
-        
-      
     }
     
     
-    public static void makeQuicktime(File file, BufferedImage [] frames, int fps)
+    public static void makeMP4(File file, BufferedImage [] frames, int fps)
         throws IOException {
         SeekableByteChannel out = null;
         try {
@@ -71,44 +65,14 @@ public class MovieMaker {
             int width = frames[0].getWidth();
             int height = frames[0].getHeight();
             AWTSequenceEncoder encoder = new AWTSequenceEncoder(out, Rational.R(fps, 1));
-            //SequenceEncoder encoder = createSequenceEncoder(file, fps);
-            System.out.println("Frames: " + frames.length);
-            int i = 0;
             for (BufferedImage frame : frames) {
-                System.out.println("    frane " + i);
                 encoder.encodeImage(frame);
-                i++;
             }
             encoder.finish();
 
         } finally {
             NIOUtils.closeQuietly(out);
         }
-
-//        MovieWriter out = Registry.getInstance().getWriter(file);
-//
-//        Format format = new Format(VideoFormatKeys.MediaTypeKey, VideoFormatKeys.MediaType.VIDEO, //
-//                VideoFormatKeys.EncodingKey, VideoFormatKeys.ENCODING_QUICKTIME_PNG,
-//                VideoFormatKeys.FrameRateKey, new Rational(fps, 1),//
-//                VideoFormatKeys.WidthKey, frames[0].getWidth(), //
-//                VideoFormatKeys.HeightKey, frames[0].getHeight(),//
-//                VideoFormatKeys.DepthKey, 24
-//                );
-//
-//        int track = out.addTrack(format);
-//
-//
-//        Buffer buf = new Buffer();
-//
-//        buf.format = new Format(VideoFormatKeys.DataClassKey, BufferedImage.class);
-//        buf.sampleDuration = format.get(VideoFormatKeys.FrameRateKey).inverse();
-//        for (BufferedImage frame : frames) {
-//            buf.data = frame;
-//            out.write(track, buf);
-//        }
-//
-//        out.close();
-      
     }
     
     public static void makeAnimagedGIF(File file, BufferedImage [] frames, int fps)

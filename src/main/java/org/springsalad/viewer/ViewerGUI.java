@@ -34,6 +34,7 @@ public class ViewerGUI extends JFrame implements ActionListener,
     private JMenuItem jpegItem;
     private JMenuItem gifItem;
     private JMenuItem aviItem;
+    private JMenuItem mp4Item;
     private JMenuItem quicktimeItem;
     private JCheckBoxMenuItem timeStampItem;
     private JCheckBoxMenuItem loadToBufferItem;
@@ -155,6 +156,7 @@ public class ViewerGUI extends JFrame implements ActionListener,
         jpegItem = new JMenuItem("JPEG");
         gifItem = new JMenuItem("GIF");
         aviItem = new JMenuItem("AVI");
+        mp4Item = new JMenuItem("MP4");
         quicktimeItem = new JMenuItem("QuickTime");
         closeItem = new JMenuItem("Close Viewer");
         axesOptionsItem = new JMenuItem("Axes Options");
@@ -173,6 +175,7 @@ public class ViewerGUI extends JFrame implements ActionListener,
         jpegItem.addActionListener(this);
         gifItem.addActionListener(this);
         aviItem.addActionListener(this);
+        mp4Item.addActionListener(this);
         quicktimeItem.addActionListener(this);
         closeItem.addActionListener(this);
         axesOptionsItem.addActionListener(this);
@@ -186,8 +189,9 @@ public class ViewerGUI extends JFrame implements ActionListener,
         saveImageMenu.add(pngItem);
         saveImageMenu.add(jpegItem);
         saveImageMenu.add(gifItem);
-        saveVideoMenu.add(aviItem);
-        saveVideoMenu.add(quicktimeItem);
+//        saveVideoMenu.add(aviItem);
+        saveVideoMenu.add(mp4Item);
+//        saveVideoMenu.add(quicktimeItem);
         
         fileMenu.add(saveImageMenu);
         fileMenu.add(saveVideoMenu);
@@ -705,8 +709,11 @@ public class ViewerGUI extends JFrame implements ActionListener,
                         case "avi":
                             MovieMaker.makeAVI(file, bi, fpsint);
                             break;
-                        case "mov":
-                            MovieMaker.makeQuicktime(file, bi, fpsint);
+//                        case "mov":
+//                            MovieMaker.makeQuicktime(file, bi, fpsint);
+//                            break;
+                        case "mp4":
+                            MovieMaker.makeMP4(file, bi, fpsint);
                             break;
                         default:
                             System.out.println("writeVideo() received unexpected input: " + extension );
@@ -750,7 +757,11 @@ public class ViewerGUI extends JFrame implements ActionListener,
         if(source == aviItem){
             writeVideo("avi");
         }
-        
+
+        if(source == mp4Item){
+            writeVideo("mp4");
+        }
+
         if(source == quicktimeItem){
             writeVideo("mov");
         }
