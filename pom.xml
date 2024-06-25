@@ -67,13 +67,6 @@
 			<version>1.7.2</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/ch.randelshofer/org.monte.media -->
-		<dependency>
-			<groupId>ch.randelshofer</groupId>
-			<artifactId>org.monte.media</artifactId>
-			<version>17.1</version>
-		</dependency>
-
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-rng-core -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

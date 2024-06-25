@@ -11,12 +11,12 @@ import org.jcodec.api.awt.AWTSequenceEncoder;
 import org.jcodec.common.io.NIOUtils;
 import org.jcodec.common.io.SeekableByteChannel;
 import org.jcodec.common.model.Rational;
-import org.monte.media.av.Buffer;
-import org.monte.media.av.Format;
-import org.monte.media.av.MovieWriter;
-import org.monte.media.av.Registry;
-import org.monte.media.av.codec.video.VideoFormatKeys;
-import org.monte.media.avi.AVIWriter;
+//import org.monte.media.av.Buffer;
+//import org.monte.media.av.Format;
+//import org.monte.media.av.MovieWriter;
+//import org.monte.media.av.Registry;
+//import org.monte.media.av.codec.video.VideoFormatKeys;
+//import org.monte.media.avi.AVIWriter;
 //import org.monte.media.math.Rational;
 
 import javax.imageio.stream.FileImageOutputStream;
@@ -29,32 +29,8 @@ import java.io.IOException;
 //import org.jcodec.api.awt.SequenceEncoder;
 import javax.imageio.ImageIO;
 
-import static org.jcodec.api.awt.AWTSequenceEncoder.createSequenceEncoder;
-
 public class MovieMaker {
 
-    public static void makeAVI(File file, BufferedImage [] frames, int fps) throws IOException {
-        AVIWriter out = new AVIWriter(file);
-
-        Format format = new Format(VideoFormatKeys.MediaTypeKey, VideoFormatKeys.MediaType.VIDEO, //
-        VideoFormatKeys.EncodingKey, VideoFormatKeys.ENCODING_AVI_PNG,
-        VideoFormatKeys.FrameRateKey, new org.monte.media.math.Rational(fps, 1),//
-        VideoFormatKeys.WidthKey, frames[0].getWidth(), //
-        VideoFormatKeys.HeightKey, frames[0].getHeight(),//
-        VideoFormatKeys.DepthKey, 24);
-        
-        int track = out.addTrack(format);
-        Buffer buf = new Buffer();
-        buf.format = new Format(VideoFormatKeys.DataClassKey, BufferedImage.class);
-        buf.sampleDuration = format.get(VideoFormatKeys.FrameRateKey).inverse();
-        for (BufferedImage frame : frames) {
-            buf.data = frame;
-            out.write(track, buf);
-        }
-        out.close();
-    }
-    
-    
     public static void makeMP4(File file, BufferedImage [] frames, int fps)
         throws IOException {
         SeekableByteChannel out = null;
