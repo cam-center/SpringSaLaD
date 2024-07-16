@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="10.0.7" transformSequenceNumber="10">
-  <directoryPresets config="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/classes/icons" />
-  <application name="SpringSaLaD" applicationId="4844-6787-3669-5764" mediaDir="/Users/jimschaff/Documents/workspace/SpringSaLaD/installers" shortName="SpringSaLaD" publisher="CCAM" publisherWeb="http://vcell.org" version="2.3.2" macVolumeId="7cae8ba3067efc61">
-    <codeSigning macEnabled="true" macPkcs12File="/Users/jimschaff/Documents/workspace/SpringSaLaD/install4j_output/VCELL_APPLE_2025.p12" />
+  <directoryPresets config="./target/classes/icons" />
+  <application name="SpringSaLaD" applicationId="4844-6787-3669-5764" mediaDir="./installers" shortName="SpringSaLaD" publisher="CCAM" publisherWeb="http://vcell.org" version="2.3.3" macVolumeId="7cae8ba3067efc61">
+    <codeSigning macEnabled="true" macPkcs12File="./VCELL_APPLE_2025.p12" />
     <jreBundles jdkProviderId="JBR" release="17/17.0.7-b1000.6" />
   </application>
   <files>
@@ -10,8 +10,8 @@
       <mountPoint id="24" />
     </mountPoints>
     <entries>
-      <fileEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/springsalad-0.0.1-SNAPSHOT.jar" />
-      <dirEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/localsolvers" fileMode="755" overrideFileMode="true" entryMode="subdir" subDirectory="localsolvers">
+      <fileEntry mountPoint="24" file="./target/springsalad-0.0.1-SNAPSHOT.jar" />
+      <dirEntry mountPoint="24" file="./localsolvers" fileMode="755" overrideFileMode="true" entryMode="subdir" subDirectory="localsolvers">
         <exclude>
           <entry location="win64/.gitkeep" />
           <entry location="macos_x86_64/.gitkeep" />
@@ -19,11 +19,11 @@
           <entry location="macos_arm64/.gitkeep" />
         </exclude>
       </dirEntry>
-      <dirEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/dependency" entryMode="subdir" subDirectory="dependent_jars" />
-      <fileEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/classes/icons/smallCircle.png" />
-      <fileEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/classes/icons/springSaLaD_128.png" />
-      <fileEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/classes/images/springSaLaDLarge.png" />
-      <fileEntry mountPoint="24" file="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/classes/icons/springSaLaD.png" />
+      <dirEntry mountPoint="24" file="./target/dependency" entryMode="subdir" subDirectory="dependent_jars" />
+      <fileEntry mountPoint="24" file="./target/classes/icons/smallCircle.png" />
+      <fileEntry mountPoint="24" file="./target/classes/icons/springSaLaD_128.png" />
+      <fileEntry mountPoint="24" file="./target/classes/images/springSaLaDLarge.png" />
+      <fileEntry mountPoint="24" file="./target/classes/icons/springSaLaD.png" />
     </entries>
   </files>
   <launchers>
@@ -36,8 +36,8 @@
         </classPath>
       </java>
       <iconImageFiles>
-        <file path="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/classes/icons/springSaLaD.png" />
-        <file path="/Users/jimschaff/Documents/workspace/SpringSaLaD/target/classes/icons/springSaLaD_128.png" />
+        <file path="./target/classes/icons/springSaLaD.png" />
+        <file path="./target/classes/icons/springSaLaD_128.png" />
       </iconImageFiles>
     </launcher>
   </launchers>
