@@ -124,6 +124,42 @@
 									<outputFileName>langevin_x64.exe</outputFileName>
 								</configuration>
 							</execution>
+							<execution>
+								<id>install-langevin-macos_x86_64</id>
+								<phase>generate-test-resources</phase>
+								<goals>
+									<goal>wget</goal>
+								</goals>
+								<configuration>
+									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-13</url>
+									<outputDirectory>localsolvers/macos_x86_64</outputDirectory>
+									<outputFileName>langevin_x64</outputFileName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>install-langevin-macos_arm64</id>
+								<phase>generate-test-resources</phase>
+								<goals>
+									<goal>wget</goal>
+								</goals>
+								<configuration>
+									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-14</url>
+									<outputDirectory>localsolvers/macos_arm64</outputDirectory>
+									<outputFileName>langevin_arm64</outputFileName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>install-langevin-linux</id>
+								<phase>generate-test-resources</phase>
+								<goals>
+									<goal>wget</goal>
+								</goals>
+								<configuration>
+									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-linux.version}/langevin-ubuntu-latest</url>
+									<outputDirectory>${project.build.directory}/../localsolvers/linux64</outputDirectory>
+									<outputFileName>langevin_x64</outputFileName>
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
 				</plugins>
