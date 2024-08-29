@@ -1,0 +1,18 @@
+Simulation.java		stateChanged()	entry point, at end of run
+DataProcessor		calculateStatistics()
+					calculateStatistics()
+					computeAllTimePointAverages()	data reduction COMPUTE TIME POINT AVERAGES FOR ALL DATA
+		computeAllSiteAverages() COMPUTE AVERAGE SITE DATA FOR ALL SITES OF INTEREST
+
+		computeTimePointAverages()	gooes to each of the "Run" folders specified, looks for the file specified
+		by the given name, gets the data for each run and computes the averages and standard deviations at each
+		time point
+		repeatedly called for: bonds, molecules, states
+
+
+ClusterAnalyzer			calculateAndWriteClusterStats()		cluster specific, set here data source and destination
+ClusterStatsProducer	calculateAndWriteClusterStats()		here work is getting done
+
+DataSource				getRunTimePointSample()		utility class
+CSVHandler				readCSV(), writeCSV()
+MyCSVReader
