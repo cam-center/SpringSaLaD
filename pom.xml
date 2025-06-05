@@ -27,6 +27,10 @@
 
 	<repositories>
 		<repository>
+			<id>jogamp-remote</id>
+			<url>https://www.jogamp.org/deployment/maven/</url>
+		</repository>
+		<repository>
 			<id>jogamp-Java3d</id>
 			<url>https://jogamp.org/deployment/maven-java3d/</url>
 		</repository>
