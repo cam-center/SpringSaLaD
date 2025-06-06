@@ -948,7 +948,7 @@ public class MainGUI extends JFrame implements TreeSelectionListener {
     private void aboutItemActionPerformed(java.awt.event.ActionEvent evt) {
     	
     	ImageIcon ii = new ImageIcon(getClass().getResource("/images/springSaLaDLarge.png"));
-    	String aboutText = "<html><b>   SpringSaLaD App</b></html>\n      Version 2.4.0\n      Released June, 2025\n      Copyright 2016-2025 UConn Health\n" +
+    	String aboutText = "<html><b>   SpringSaLaD App</b></html>\n      Version 2.4.1\n      Released June, 2025\n      Copyright 2016-2025 UConn Health\n" +
     	"SpringSaLaD is Supported by NIH Grant R01GM132859";
    		JOptionPane.showMessageDialog(this, aboutText, "About SpringSaLaD", JOptionPane.OK_OPTION, ii);
 
