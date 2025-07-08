@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="10.0.7" transformSequenceNumber="10">
   <directoryPresets config="./target/classes/icons" />
-  <application name="SpringSaLaD" applicationId="4844-6787-3669-5764" mediaDir="./installers" shortName="SpringSaLaD" publisher="CCAM" publisherWeb="http://vcell.org" version="2.4.1" macVolumeId="7cae8ba3067efc61">
+  <application name="SpringSaLaD" applicationId="4844-6787-3669-5764" mediaDir="./installers" shortName="SpringSaLaD" publisher="CCAM" publisherWeb="http://vcell.org" version="2.4.2" macVolumeId="7cae8ba3067efc61">
     <codeSigning macEnabled="true" macPkcs12File="./VCELL_APPLE_2025.p12" />
     <jreBundles jdkProviderId="JBR" release="17/17.0.7-b1000.6" />
   </application>
