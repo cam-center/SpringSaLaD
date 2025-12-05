@@ -30,7 +30,7 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-          ref: "${TAG}"
+          ref: ${TAG}
 
       - name: setup java 17 with maven cache
         uses: actions/setup-java@v3
@@ -59,9 +59,9 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: "${TAG}"
-          name: "Release ${TAG}"
-          body: "Automated release of installers for version ${TAG}"
+          tag_name: ${TAG}
+          name: Release ${TAG}
+          body: Automated release of installers for version ${TAG}
           draft: false
           prerelease: false
           files: |
