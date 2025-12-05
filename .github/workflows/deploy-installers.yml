@@ -28,6 +28,8 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
+          fetch-tags: true
           ref: "${TAG}"
 
       - name: setup java 17 with maven cache
