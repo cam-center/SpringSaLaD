@@ -2,6 +2,7 @@
 /target/
 
 .idea/
+*.env
 
 example_files/example_SIMULATIONS/
 

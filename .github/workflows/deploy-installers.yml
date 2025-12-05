@@ -1,0 +1,66 @@
+# This workflow will build and release the SS application
+
+name: Deploy Installers
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'version tag'
+        required: true
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: set global environment variables
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV   
+          else
+            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          fi
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${TAG}
+
+      - name: setup java 17 with maven cache
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Install Install4J
+        run: |
+          INSTALL4J_HOME=/opt/install4j10.0.5
+          wget https://download.ej-technologies.com/install4j/install4j_unix_10_0_5.tar.gz
+          tar -xvzf install4j_unix_10_0_5.tar.gz
+          sudo mv install4j10.0.5 ${INSTALL4J_HOME}
+          sudo chmod 777 -R ${INSTALL4J_HOME}
+          echo "INSTALL4J_HOME=${INSTALL4J_HOME}" >> $GITHUB_ENV
+
+      - name: Maven dependencies
+        run: |
+          mvn --batch-mode clean install dependency:copy-dependencies
+
+      - name: Run Install4J
+        run: |
+          ./generate_client_installers $(pwd) $(pwd) ${INSTALL4J_HOME}
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${TAG}
+          name: Release ${TAG}
+          body: "Automated release of installers for version ${TAG}"
+          draft: false
+          prerelease: false
+          files: |
+            installers/*  
