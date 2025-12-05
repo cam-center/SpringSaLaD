@@ -54,7 +54,7 @@ jobs:
 
       - name: Run Install4J
         run: |
-          ./generate_client_installers.sh $(pwd) $(pwd) ${INSTALL4J_HOME}/bin/install4j
+          ./generate_client_installers.sh $(pwd) $(pwd) ${INSTALL4J_HOME}/bin/install4jc
 
       - name: Release
         uses: softprops/action-gh-release@v2
