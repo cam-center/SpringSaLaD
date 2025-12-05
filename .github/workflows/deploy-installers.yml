@@ -46,6 +46,7 @@ jobs:
           tar -xvzf install4j_unix_10_0_5.tar.gz
           sudo mv install4j10.0.5 ${INSTALL4J_HOME}
           sudo chmod 777 -R ${INSTALL4J_HOME}
+          echo ${{ secrets.INSTALL4J_V10 }} > ${INSTALL4J_HOME}/install4j_license_key.txt
           echo "INSTALL4J_HOME=${INSTALL4J_HOME}" >> $GITHUB_ENV
 
       - name: Maven dependencies
@@ -54,7 +55,7 @@ jobs:
 
       - name: Run Install4J
         run: |
-          ./generate_client_installers.sh $(pwd) $(pwd) ${INSTALL4J_HOME}/bin/install4jc
+          ./generate_client_installers.sh $(pwd) $(pwd) ${INSTALL4J_HOME}/bin/install4jc ${INSTALL4J_HOME}/install4j_license_key.txt
 
       - name: Release
         uses: softprops/action-gh-release@v2
