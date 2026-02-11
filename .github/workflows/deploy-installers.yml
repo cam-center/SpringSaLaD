@@ -60,6 +60,8 @@ jobs:
           echo '${{ secrets.WINDOWS_KEYSTORE }}' | base64 --decode > VCELL_UCONN_MS_2017.pfx
           export WINDOWS_PASSWORD='${{ secrets.WINDOWS_KEYSTORE_PASSWORD }}'
           
+          export TAG=${{ env.TAG }}
+          
           ./generate_client_installers.sh $(pwd) $(pwd) ${INSTALL4J_HOME}/bin/install4jc ${{ secrets.INSTALL4J_V10 }}
 
       - name: upload generated installers

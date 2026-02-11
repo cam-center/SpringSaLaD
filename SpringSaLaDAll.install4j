@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <install4j version="10.0.9" transformSequenceNumber="10">
   <directoryPresets config="./target/classes/icons/springSaLaD.png" />
-  <application name="SpringSaLaD" applicationId="4844-6787-3669-5764" mediaDir="./installers" shortName="SpringSaLaD" publisher="CCAM" publisherWeb="http://vcell.org" version="2.4.2" macVolumeId="7cae8ba3067efc61">
+  <application name="SpringSaLaD" applicationId="4844-6787-3669-5764" mediaDir="./installers" shortName="SpringSaLaD" publisher="CCAM" publisherWeb="http://vcell.org" version="${compiler:springSaladVersion}" macVolumeId="7cae8ba3067efc61">
     <variables>
       <variable name="mavenRootDir" value="NO-MAVEN-DIR" />
       <variable name="macKeystore" value="NO-MAC-KEY-STORE" />
       <variable name="windowsKeystore" value="NO-WINDOWS-KEY-STORE" />
+      <variable name="springSaladVersion" value="NO_VALUE" />
     </variables>
     <codeSigning macEnabled="true" macPkcs12File="${compiler:macKeystore}" windowsEnabled="true" windowsPkcs12File="${compiler:windowsKeystore}" />
     <jreBundles jdkProviderId="JBR" release="17/17.0.7-b1000.6" />
