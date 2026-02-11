@@ -43,6 +43,6 @@ $INSTALL4J_PATH \
 -D \
 macKeystore="${CONFIG_DIR}"/Apple_Dev_Id_Certificate_exp_20270924.p12,\
 windowsKeystore="${CONFIG_DIR}"/VCELL_UCONN_MS_2017.pfx,\
-mavenRootDir="${MAVEN_ROOT_DIR}" \
+mavenRootDir="${MAVEN_ROOT_DIR}",\
 springSaladVersion="${TAG}" \
 "${MAVEN_ROOT_DIR}"/SpringSaLaDAll.install4j
