@@ -98,10 +98,10 @@ jobs:
           fetch-tags: true
           ref: ${{ env.TAG }}
 
-      - name: notarize mac installer
-        run: |
-          export MAC_INSTALLER=$(ls installers/*.dmg)
-          ./.github/mac_notarize.sh "${{ secrets.MAC_TEAM_ID }}" "${{ secrets.MAC_ID }}" "${{ secrets.MAC_PASSWORD }}" "${MAC_INSTALLER}"
+#      - name: notarize mac installer
+#        run: |
+#          export MAC_INSTALLER=$(ls installers/*.dmg)
+#          ./.github/mac_notarize.sh "${{ secrets.MAC_TEAM_ID }}" "${{ secrets.MAC_ID }}" "${{ secrets.MAC_PASSWORD }}" "${MAC_INSTALLER}"
 
       - name: Release
         uses: softprops/action-gh-release@v2
