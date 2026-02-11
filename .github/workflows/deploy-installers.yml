@@ -28,7 +28,9 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${TAG}
+          fetch-depth: 0
+          fetch-tags: true
+          ref: ${{ env.TAG }}
 
       - name: setup java 17 with maven cache
         uses: actions/setup-java@v3
@@ -52,15 +54,68 @@ jobs:
 
       - name: Run Install4J
         run: |
-          ./generate_client_installers $(pwd) $(pwd) ${INSTALL4J_HOME}
+          echo '${{ secrets.MAC_KEYSTORE }}' | base64 --decode > Apple_Dev_Id_Certificate_exp_20270924.p12
+          export MAC_PASSWORD='${{ secrets.MAC_KEYSTORE_PASSWORD }}'
+          
+          echo '${{ secrets.WINDOWS_KEYSTORE }}' | base64 --decode > VCELL_UCONN_MS_2017.pfx
+          export WINDOWS_PASSWORD='${{ secrets.WINDOWS_KEYSTORE_PASSWORD }}'
+          
+          export TAG=${{ env.TAG }}
+          
+          ./generate_client_installers.sh $(pwd) $(pwd) ${INSTALL4J_HOME}/bin/install4jc ${{ secrets.INSTALL4J_V10 }}
+
+#      - name: upload generated installers
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: installers
+#          path: installers
+#          retention-days: 1
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${TAG}
-          name: Release ${TAG}
-          body: "Automated release of installers for version ${TAG}"
+          tag_name: ${{ env.TAG }}
+          name: Release ${{ env.TAG }}
+          body: Automated release of installers for version ${{ env.TAG }}
           draft: false
           prerelease: false
           files: |
             installers/*  
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
+
+#  notarize:
+#    name: Notarize the MacOS client
+#    runs-on: macos-latest
+#    needs: build
+#    steps:
+#      - name: set global environment variables
+#        run: |
+#          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+#            echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+#          else
+#            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+#          fi
+#
+#      - name: download generated installers
+#        uses: actions/download-artifact@v4
+#
+#      - name: checkout code
+#        uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#          fetch-tags: true
+#          ref: ${{ env.TAG }}
+
+#      - name: notarize mac installer
+#        run: |
+#          export MAC_INSTALLER=$(ls installers/*.dmg)
+#          ./.github/mac_notarize.sh "${{ secrets.MAC_TEAM_ID }}" "${{ secrets.MAC_ID }}" "${{ secrets.MAC_PASSWORD }}" "${MAC_INSTALLER}"
+
+
+
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v3
+#        if: ${{ failure() }}

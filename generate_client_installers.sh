@@ -8,13 +8,19 @@
 # CONFIG_DIR: directory containing configuration files
 # MAVEN_ROOT_DIR: root directory of the Maven project
 # INSTALL4J_PATH: path to the install4j compiler executable
+# WINDOWS_PASSWORD: password for the Windows keystore
+# MAC_PASSWORD: password for the Mac keystore
 source install4j.env
 
-if [[ "$#" == 3 ]]; then
+
+if [[ "$#" -ge 3 ]]; then
   echo "Using command line arguments for configuration."
   CONFIG_DIR="$1"
   MAVEN_ROOT_DIR="$2"
   INSTALL4J_PATH="$3"
+  if [[ "$#" == 4 ]]; then
+    INSTALL4J_LICENSE="$4"
+  fi
 elif [[ -z "${CONFIG_DIR}" ]] || [[ -z "${MAVEN_ROOT_DIR}" ]] || [[ -z "${INSTALL4J_PATH}" ]]; then
     echo "One or more required environment variables are not set:"
     echo "  CONFIG_DIR='${CONFIG_DIR}'"
@@ -25,12 +31,18 @@ fi
 
 #--------------------------------#
 
+if [[ -n "${INSTALL4J_LICENSE}" ]]; then
+  echo "Installing Install4J license."
+  $INSTALL4J_PATH -L "${INSTALL4J_LICENSE}"
+fi
+
 $INSTALL4J_PATH \
---disable-signing \
---faster \
+--mac-keystore-password "${MAC_PASSWORD}" \
+--win-keystore-password "${WINDOWS_PASSWORD}" \
 --debug \
 -D \
 macKeystore="${CONFIG_DIR}"/Apple_Dev_Id_Certificate_exp_20270924.p12,\
+windowsKeystore="${CONFIG_DIR}"/VCELL_UCONN_MS_2017.pfx,\
 mavenRootDir="${MAVEN_ROOT_DIR}",\
-updateSiteBaseUrl='http://vcell.org/webstart/Fake' \
+springSaladVersion="${TAG}" \
 "${MAVEN_ROOT_DIR}"/SpringSaLaDAll.install4j
