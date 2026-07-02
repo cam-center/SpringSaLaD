@@ -1,0 +1,57 @@
+{
+  "upload_type": "software",
+  "title": "SpringSaLaD",
+  "license": "mit",
+  "creators": [
+    {
+      "name": "Michalski, Paul J.",
+      "affiliation": "University of Connecticut School of Medicine"
+    },
+    {
+      "name": "Loew, Leslie M.",
+      "affiliation": "University of Connecticut School of Medicine",
+      "orcid": "0000-0002-1851-4646"
+    },
+    {
+      "name": "Vasilescu, Dan",
+      "affiliation": "University of Connecticut School of Medicine"
+    },
+    {
+      "name": "Valencia, Ezequiel",
+      "affiliation": "University of Connecticut School of Medicine"
+    },
+    {
+      "name": "Schaff, James C.",
+      "affiliation": "University of Connecticut School of Medicine",
+      "orcid": "0000-0003-3286-7736"
+    },
+    {
+      "name": "Masison, Joseph",
+      "affiliation": "University of Connecticut School of Medicine",
+      "orcid": "0000-0003-2113-9282"
+    },
+    {
+      "name": "Moraru, Ion I.",
+      "affiliation": "University of Connecticut School of Medicine",
+      "orcid": "0000-0002-3746-9676"
+    }
+  ],
+  "description": "<p>SpringSaLaD is a particle-based, spatial, stochastic biochemical simulation platform. It implements a spatially-resolved stochastic simulation algorithm for biochemical systems based on the Langevin equation in a particle-based framework with excluded volume. The algorithm is described in Michalski &amp; Loew, &quot;SpringSaLaD: A Spatial, Particle-Based Biochemical Simulation Platform with Excluded Volume&quot; (Biophysical Journal, 2016; PMID 26840718). This is the Java implementation, developed at the Center for Cell Analysis and Modeling (CCAM) at UConn Health; the underlying solver is LangevinNoVis01 (https://github.com/cam-center/LangevinNoVis01).</p>",
+  "keywords": [
+    "stochastic simulation",
+    "spatial simulation",
+    "particle-based",
+    "Langevin dynamics",
+    "systems biology",
+    "biochemical reaction networks",
+    "excluded volume"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isDocumentedBy",
+      "identifier": "10.1016/j.bpj.2015.12.026",
+      "scheme": "doi",
+      "resource_type": "publication-article"
+    }
+  ]
+}

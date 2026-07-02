@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "SpringSaLaD"
+type: software
+repository-code: "https://github.com/cam-center/SpringSaLaD"
+url: "https://vcell.org/ssalad"
+license: MIT
+doi: 10.5281/zenodo.11270119   # concept DOI (all versions)
+preferred-citation:
+  type: article
+  title: "SpringSaLaD: A Spatial, Particle-Based Biochemical Simulation Platform with Excluded Volume"
+  doi: 10.1016/j.bpj.2015.12.026
+  year: 2016
+  authors:
+    - family-names: "Michalski"
+      given-names: "Paul J."
+    - family-names: "Loew"
+      given-names: "Leslie M."
+authors:
+  - family-names: "Michalski"
+    given-names: "Paul J."
+    affiliation: "University of Connecticut School of Medicine"
+  - family-names: "Loew"
+    given-names: "Leslie M."
+    affiliation: "University of Connecticut School of Medicine"
+    orcid: "https://orcid.org/0000-0002-1851-4646"
+  - family-names: "Vasilescu"
+    given-names: "Dan"
+    affiliation: "University of Connecticut School of Medicine"
+  - family-names: "Valencia"
+    given-names: "Ezequiel"
+    affiliation: "University of Connecticut School of Medicine"
+  - family-names: "Schaff"
+    given-names: "James C."
+    affiliation: "University of Connecticut School of Medicine"
+    orcid: "https://orcid.org/0000-0003-3286-7736"
+  - family-names: "Masison"
+    given-names: "Joseph"
+    affiliation: "University of Connecticut School of Medicine"
+    orcid: "https://orcid.org/0000-0003-2113-9282"
+  - family-names: "Moraru"
+    given-names: "Ion I."
+    affiliation: "University of Connecticut School of Medicine"
+    orcid: "https://orcid.org/0000-0002-3746-9676"
