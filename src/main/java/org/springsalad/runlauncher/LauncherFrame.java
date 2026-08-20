@@ -31,6 +31,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
     private JButton abortSimButton;
     
     private JButton viewSystemButton;
+    private JButton viewTrajectoryButton;
     private JButton viewDataButton;
     private JButton recalculateStatsButton;
     
@@ -49,6 +50,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
         viewProgressButton.addActionListener(this);
         abortSimButton.addActionListener(this);
         viewSystemButton.addActionListener(this);
+        viewTrajectoryButton.addActionListener(this);
         viewDataButton.addActionListener(this);
         recalculateStatsButton.addActionListener(this);
     }
@@ -77,6 +79,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
         viewProgressButton = new JButton("View Progress");
         abortSimButton = new JButton("Abort Simulation");
         viewSystemButton = new JButton("View 3D Snapshots");
+        viewTrajectoryButton = new JButton("View Trajectory");
         viewDataButton = new JButton("View Data");
         recalculateStatsButton = new JButton("Recalculate stats");
         
@@ -92,6 +95,7 @@ public class LauncherFrame extends JFrame implements ActionListener,
         
         JPanel p2 = new JPanel();
         p2.add(viewSystemButton);
+        p2.add(viewTrajectoryButton);
         p2.add(viewDataButton);
         p2.add(recalculateStatsButton);
         
@@ -224,6 +228,20 @@ public class LauncherFrame extends JFrame implements ActionListener,
                         };
                     });
                     t.start();
+                } else {
+                    PopUp.warning("The selected simulation has no results.");
+                }
+            } else {
+                PopUp.warning("Please select a simulation to view.");
+            }
+        }
+        
+        else if(source == viewTrajectoryButton){
+            int index = tablePanel.getSelectedRow();
+            if(index != -1){
+                Simulation sim = sm.getSimulation(index);
+                if(sim.isRunning() || sim.hasResults()){
+                    org.springsalad.viewer.SpringSaladViewerFrame.open(title, sim);
                 } else {
                     PopUp.warning("The selected simulation has no results.");
                 }
