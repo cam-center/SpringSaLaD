@@ -10,6 +10,8 @@
 		<solvers-langevin-mac.version>1.4.2</solvers-langevin-mac.version>
 		<solvers-langevin-windows.version>1.4.2</solvers-langevin-windows.version>
 		<solvers-langevin-linux.version>1.4.2</solvers-langevin-linux.version>
+		<junit-jupiter.version>5.10.2</junit-jupiter.version>
+		<maven-surefire.version>3.2.5</maven-surefire.version>
 	</properties>
 
 	<build>
@@ -20,6 +22,16 @@
 				<configuration>
 					<source>17</source>
 					<target>17</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire.version}</version>
+				<configuration>
+					<!-- The code under test is Swing-adjacent; never let a test open a window. -->
+					<systemPropertyVariables>
+						<java.awt.headless>true</java.awt.headless>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -55,9 +67,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>${junit-jupiter.version}</version>
 			<scope>test</scope>
 		</dependency>
 
