@@ -50,8 +50,25 @@ don't prune them as duplicates.
 
 ### Tests
 
-There is no `src/test`. JUnit 3.8.1 is declared in `pom.xml` but unused; `mvn test` is a no-op.
-Verification is manual — run the GUI against `example_files/example.txt`.
+`mvn test` runs a JUnit 5 suite under `src/test/java`. Surefire forces `java.awt.headless=true`;
+the code under test is Swing-adjacent, so keep tests off any class that opens a window.
+
+The suite covers the two contracts with the external solver, not the GUI:
+
+- `GlobalRoundTripTest` — loads the tracked `example_files/example.txt`, writes it back, reloads,
+  and asserts the structure and the exact `*** SECTION ***` literals survive. Copy the fixture to
+  a temp dir first: `Global.writeFile()` overwrites the file it was loaded from.
+- `SiteTypeTest` — grammar of the `TYPE:` line, including a regression test for commit `4f05dc5`.
+- `IOHelpTest` — `DF[n]` precision, and the locale hazard noted below.
+- `ViewerTrajectoryFormatTest` — characterization of the solver's `_VIEW_Run0.txt` trajectory
+  and `SiteIDs.csv`.
+
+**Test fixtures must be self-contained.** `example_files/example_SIMULATIONS/` is gitignored, so
+simulation output — trajectories, `SiteIDs.csv`, CSVs — exists only in a working copy that has
+run the GUI. A fresh clone and CI have `example_files/example.txt` and nothing else. Trimmed
+fixtures live in `src/test/resources/`.
+
+GUI behaviour is still verified by hand: run against `example_files/example.txt`.
 
 ### CI / release
 
@@ -196,3 +213,7 @@ root is a short call-graph sketch of this flow.
   user's input as seen by the solver**, not just display formatting — commit 4f05dc5 fixed
   diffusion coefficients silently rounding to 3 decimals in `SiteType.writeType()`. Be
   deliberate when picking an index for a new field.
+- **Known latent bug:** those `DecimalFormat`s are built in a static initializer without a
+  `Locale`, so they bind the JVM default. On a comma-decimal locale (de, fr, es…) the app writes
+  `D 1,50000` into the model file and the solver's `Double.parseDouble` cannot read it. Unfixed —
+  `IOHelpTest` documents the mechanism and guards the current locale.
