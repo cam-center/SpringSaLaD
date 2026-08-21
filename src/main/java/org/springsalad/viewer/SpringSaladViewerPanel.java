@@ -39,6 +39,7 @@ import java.util.function.Consumer;
 public class SpringSaladViewerPanel extends JPanel {
 
     private static final int[] SPEEDS = {2, 5, 10, 20, 30};
+    private static final String NOTHING_PICKED = "Click a site to identify it";
 
     private final SpringSaladViewerCanvas canvas = new SpringSaladViewerCanvas();
     private final SiteTypeLegend legend = new SiteTypeLegend(canvas);
@@ -46,6 +47,7 @@ public class SpringSaladViewerPanel extends JPanel {
     private final JButton playButton = new JButton("Play");
     private final JButton saveMovieButton = new JButton("Save movie…");
     private final JLabel readout = new JLabel(" ");
+    private final JLabel pickReadout = new JLabel(NOTHING_PICKED);
     private final JComboBox<String> speedCombo = new JComboBox<>(speedLabels());
     private final Timer timer;
 
@@ -64,9 +66,13 @@ public class SpringSaladViewerPanel extends JPanel {
         sceneToggles.add(sceneToggle("Box", true, canvas::setShowBox));
         sceneToggles.add(sceneToggle("Membrane", true, canvas::setShowMembrane));
 
+        pickReadout.setBorder(BorderFactory.createEmptyBorder(4, 6, 6, 6));
+        pickReadout.setForeground(java.awt.Color.DARK_GRAY);
+
         JPanel sidebar = new JPanel(new BorderLayout());
         sidebar.add(sceneToggles, BorderLayout.NORTH);
         sidebar.add(legend, BorderLayout.CENTER);
+        sidebar.add(pickReadout, BorderLayout.SOUTH);
         sidebar.setPreferredSize(new Dimension(190, 400));
 
         JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, canvas, sidebar);
@@ -85,6 +91,7 @@ public class SpringSaladViewerPanel extends JPanel {
             canvas.setFrameIndex(frameSlider.getValue());
             updateReadout();
         });
+        canvas.setOnSitePicked(this::showPickedSite);
         setTrajectory(null);
     }
 
@@ -119,7 +126,28 @@ public class SpringSaladViewerPanel extends JPanel {
         playButton.setEnabled(frames > 1);
         saveMovieButton.setEnabled(frames > 0);
         legend.rebuild();
+        showPickedSite(null);
         updateReadout();
+    }
+
+    /** Show what the user clicked, or the prompt again when they click empty space. */
+    private void showPickedSite(SpringSaladTrajectory.Site site) {
+        SpringSaladTrajectory t = canvas.getTrajectory();
+        if (site == null || t == null) {
+            pickReadout.setText(NOTHING_PICKED);
+            pickReadout.setToolTipText(null);
+            return;
+        }
+        String name = SiteTypeLegend.label(t, site);
+        pickReadout.setText("<html><b>" + escape(name) + "</b><br>id " + site.getId() + "</html>");
+        pickReadout.setToolTipText(String.format(Locale.ROOT,
+                "%s  (id %d)  at %.2f, %.2f, %.2f", name, site.getId(),
+                site.getX(), site.getY(), site.getZ()));
+    }
+
+    /** Site type names come from the model, so they can contain HTML-significant characters. */
+    private static String escape(String s) {
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 
     public SpringSaladViewerCanvas getCanvas() {

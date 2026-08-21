@@ -70,7 +70,12 @@ public class SiteTypeLegend extends JPanel {
         return byKey;
     }
 
-    private static String label(SpringSaladTrajectory trajectory, SpringSaladTrajectory.Site site) {
+    /**
+     * How a site's type is named to the user: the real molecule and site type when the run recorded
+     * them, otherwise what we are actually grouping by. Shared with the click readout so the legend
+     * and the readout cannot disagree about what a site is called.
+     */
+    public static String label(SpringSaladTrajectory trajectory, SpringSaladTrajectory.Site site) {
         SpringSaladTrajectory.SiteIdentity identity = trajectory.getSiteIdentity(site.getId());
         if (identity != null) {
             return identity.getMoleculeName() + " : " + identity.getSiteTypeName();

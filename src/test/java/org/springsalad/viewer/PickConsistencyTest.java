@@ -258,4 +258,73 @@ class PickConsistencyTest {
         // outcome follows depth, not the order the sites happen to sit in the frame's list.
         assertFrontWinsBothWays("BLUE", "RED");
     }
+
+    // ---- click wiring: a click selects, a drag does not ----
+
+    private static void click(SpringSaladViewerCanvas c, int x, int y) {
+        c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false));
+        c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_RELEASED, 0, 0, x, y, 1, false));
+    }
+
+    private static void dragAndRelease(SpringSaladViewerCanvas c, int x1, int y1, int x2, int y2) {
+        c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_PRESSED, 0, 0, x1, y1, 1, false));
+        c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_DRAGGED, 0, 0, x2, y2, 0, false));
+        c.dispatchEvent(new MouseEvent(c, MouseEvent.MOUSE_RELEASED, 0, 0, x2, y2, 1, false));
+    }
+
+    @Test
+    @DisplayName("clicking a site reports that site")
+    void clickReportsTheSiteUnderTheCursor() {
+        SpringSaladViewerCanvas c = canvas();
+        List<SpringSaladTrajectory.Site> seen = new ArrayList<>();
+        c.setOnSitePicked(seen::add);
+
+        Map<Integer, int[]> centroids = renderedCentroids(c);
+        int[] at = centroids.get(10);
+        assertNotNull(at);
+        click(c, at[0], at[1]);
+
+        assertEquals(1, seen.size(), "exactly one selection per click");
+        assertNotNull(seen.get(0), "clicking a drawn site reported nothing");
+        assertEquals(10, seen.get(0).getId());
+    }
+
+    @Test
+    @DisplayName("clicking empty space reports nothing selected")
+    void clickOnEmptySpaceReportsNull() {
+        SpringSaladViewerCanvas c = canvas();
+        List<SpringSaladTrajectory.Site> seen = new ArrayList<>();
+        c.setOnSitePicked(seen::add);
+        click(c, 3, 3);
+        assertEquals(1, seen.size());
+        assertNull(seen.get(0), "empty space should clear the selection, not keep the old one");
+    }
+
+    @Test
+    @DisplayName("releasing after a drag is a rotation, not a selection")
+    void dragDoesNotSelect() {
+        // Otherwise letting go at the end of a rotation selects whatever is under the cursor.
+        SpringSaladViewerCanvas c = canvas();
+        List<SpringSaladTrajectory.Site> seen = new ArrayList<>();
+        c.setOnSitePicked(seen::add);
+        Map<Integer, int[]> centroids = renderedCentroids(c);
+        int[] at = centroids.get(10);
+        assertNotNull(at);
+        dragAndRelease(c, W / 2, H / 2, at[0], at[1]);
+        assertEquals(List.of(), seen, "a drag reported a selection");
+    }
+
+    @Test
+    @DisplayName("the click readout names the site the same way the legend does")
+    void readoutAgreesWithLegend() {
+        // One labelling routine, so the sidebar list and the click readout cannot disagree.
+        SpringSaladTrajectory t = canvas().getTrajectory().withSiteIdentities(
+                Map.of(10, new SpringSaladTrajectory.SiteIdentity("MT0", 0, "Head")));
+        SpringSaladTrajectory.Site named = t.getFrames().get(0).getSites().get(0);
+        assertEquals("MT0 : Head", SiteTypeLegend.label(t, named));
+
+        SpringSaladTrajectory.Site unnamed = t.getFrames().get(0).getSites().get(1);
+        assertTrue(SiteTypeLegend.label(t, unnamed).contains(unnamed.getColor()),
+                "without identities the label should say what it is actually grouping by");
+    }
 }

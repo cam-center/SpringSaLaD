@@ -108,6 +108,9 @@ public class SpringSaladViewerCanvas extends JPanel {
 	// mouse drag state
 	private int lastX, lastY;
 	private boolean panning;
+	/** True once a press has turned into a drag, so releasing does not read as a click. */
+	private boolean dragged;
+	private Consumer<SpringSaladTrajectory.Site> onSitePicked;
 
 	public SpringSaladViewerCanvas() {
 		setBackground(Color.black);
@@ -115,6 +118,14 @@ public class SpringSaladViewerCanvas extends JPanel {
 			@Override public void mousePressed(MouseEvent e) {
 				lastX = e.getX(); lastY = e.getY();
 				panning = e.isShiftDown() || javax.swing.SwingUtilities.isRightMouseButton(e);
+				dragged = false;
+			}
+			@Override public void mouseReleased(MouseEvent e) {
+				// Pick on release, and only if the press never became a drag -- otherwise letting go
+				// at the end of a rotation would select whatever happened to be under the cursor.
+				if (!dragged && onSitePicked != null) {
+					onSitePicked.accept(pickSite(e.getX(), e.getY(), getWidth(), getHeight()));
+				}
 			}
 			@Override public void mouseDragged(MouseEvent e) {
 				int w = Math.max(1, getWidth()), h = Math.max(1, getHeight());
@@ -128,6 +139,7 @@ public class SpringSaladViewerCanvas extends JPanel {
 					trackball.rotate_xy(p1x, p1y, p2x, p2y);
 				}
 				lastX = e.getX(); lastY = e.getY();
+				dragged = true;
 				repaint();
 			}
 			@Override public void mouseWheelMoved(MouseWheelEvent e) {
@@ -194,6 +206,14 @@ public class SpringSaladViewerCanvas extends JPanel {
 	 * is the pitch (applied first) and the <em>Y</em> angle acts as the turntable azimuth. The Z
 	 * angle would be a roll about the view axis — leave it at zero so the horizon stays level.
 	 */
+	/**
+	 * Called with the site under a click, or {@code null} when the user clicks empty space.
+	 * Not fired at the end of a drag — releasing after a rotation is not a selection.
+	 */
+	public void setOnSitePicked(Consumer<SpringSaladTrajectory.Site> listener) {
+		this.onSitePicked = listener;
+	}
+
 	public void resetView() {
 		trackball.getCamera().resetView();
 		trackball.setRotation(Math.toRadians(DEFAULT_ELEVATION_DEG - 90), Math.toRadians(DEFAULT_AZIMUTH_DEG), 0);
