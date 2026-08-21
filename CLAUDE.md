@@ -315,6 +315,12 @@ Two viewers were rewritten in Java2D:
 
 ## Conventions in this codebase
 
+- **Several files are CRLF** — `pom.xml`, `README.md`, `MainGUI.java` and others predate any
+  normalisation, and there is no `.gitattributes`. Editing one with a tool that rewrites the whole
+  file (Python's `read_text`/`write_text`, most formatters) silently converts it to LF and turns a
+  one-line change into a whole-file diff that buries the real edit and destroys `git blame`. Check
+  with `file <path>` before and after, or edit in place with something line-ending agnostic.
+
 - Swing tables follow a consistent `XTableModel` + `XTablePanel` pair per concept; adding a new
   editable model property usually means touching the domain class, its `TableModel`, the
   `write`/`load` methods in `Global`, and the corresponding `runlauncher.EditX*` override panel.
