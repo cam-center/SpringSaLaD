@@ -333,4 +333,85 @@ class DrawPanel3DTest {
             }
         }
     }
+
+    // ---- depth shading ----
+
+    /** Brightest pixel of a given hue: 0 red, 1 green, 2 blue. */
+    private static int peak(BufferedImage img, int hue) {
+        int best = 0;
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
+                int rgb = img.getRGB(x, y), r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, b = rgb & 255;
+                if (r + g + b < 40) continue;
+                int dom = (r > g && r > b) ? 0 : (g > r && g > b) ? 1 : (b > r && b > g) ? 2 : -1;
+                if (dom == hue) best = Math.max(best, Math.max(r, Math.max(g, b)));
+            }
+        }
+        return best;
+    }
+
+    private static void dragRight(DrawPanel3D p, int by) {
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_PRESSED, 0, 0, W / 2, H / 2, 1, false));
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_DRAGGED, 0, 0, W / 2 + by, H / 2, 0, false));
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_RELEASED, 0, 0, W / 2 + by, H / 2, 1, false));
+    }
+
+    @Test
+    @DisplayName("the depth ramp is gradual and scaled to the scene, not to the sites on screen")
+    void shadingRampIsGradual() {
+        // Shading used to be normalised against the nearest and furthest site on screen, so with
+        // two sites the nearer was always fully lit and the further always at the floor, and the
+        // two swapped abruptly as the view turned. Against the scene's own size, a small change in
+        // depth is a small change in shade -- and crucially the ramp does not depend on how many
+        // sites there are or how they happen to be spread.
+        double radius = 10;
+        double previous = DrawPanel3D.brightness(-radius, radius);
+        double biggestStep = 0;
+        for (double depth = -radius; depth <= radius; depth += radius / 50) {
+            double now = DrawPanel3D.brightness(depth, radius);
+            assertTrue(now >= previous - 1e-9, "the ramp must not go backwards as depth increases");
+            biggestStep = Math.max(biggestStep, Math.abs(now - previous));
+            previous = now;
+        }
+        assertTrue(biggestStep < 0.05,
+                "a 1/50th-of-the-scene step in depth changed brightness by " + biggestStep);
+
+        // Two sites a hair apart must not come out at opposite ends of the ramp.
+        double near = DrawPanel3D.brightness(0.05, radius), far = DrawPanel3D.brightness(-0.05, radius);
+        assertTrue(Math.abs(near - far) < 0.05,
+                "sites 0.1 units apart in a 10-unit scene differ in brightness by "
+                        + Math.abs(near - far) + "; the ramp is being stretched to fit them");
+    }
+
+    @Test
+    @DisplayName("the ramp is clamped, so nothing goes black or blows out")
+    void shadingRampIsClamped() {
+        assertEquals(DrawPanel3D.brightness(-1000, 10), DrawPanel3D.brightness(-20, 10), 1e-9);
+        assertEquals(DrawPanel3D.brightness(1000, 10), DrawPanel3D.brightness(20, 10), 1e-9);
+        assertTrue(DrawPanel3D.brightness(-1000, 10) > 0.1, "the far end must stay visible");
+        assertTrue(DrawPanel3D.brightness(1000, 10) <= 1.0);
+    }
+
+    @Test
+    @DisplayName("a distant site is darkened, not made translucent")
+    void depthShadingDoesNotUseAlpha() {
+        // Applying the depth ramp as alpha would let whatever is behind a site show through it.
+        // Put one site squarely behind another and check the front one is drawn solid: every pixel
+        // at its centre belongs to its own hue, with nothing of the far site blended in.
+        b.setX(a.getX());
+        b.setY(a.getY());
+        b.setZ(a.getZ() - 12);           // directly behind, well separated
+        DrawPanel3D p = panel();
+        BufferedImage img = p.renderToImage(W, H);
+
+        int[] centre = centreOf(p, p.siteAt(W / 2, H / 2) == null ? a : p.siteAt(W / 2, H / 2));
+        assertNotNull(centre, "neither site was drawn");
+        int rgb = img.getRGB(centre[0], centre[1]);
+        int r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, bl = rgb & 255;
+        int dominant = Math.max(r, Math.max(g, bl));
+        int second = r + g + bl - dominant - Math.min(r, Math.min(g, bl));
+        assertTrue(dominant > 3 * Math.max(1, second),
+                "the front site's centre is a blend (" + r + "," + g + "," + bl
+                        + "); the one behind is showing through, so shading is being applied as alpha");
+    }
 }

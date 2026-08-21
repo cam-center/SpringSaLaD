@@ -56,6 +56,7 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
 
     private static final int SPRITE_SIZE = 96;
     private static final double MIN_BRIGHT = 0.45;
+    private static final int DEPTH_BUCKETS = 24;
     private static final double SCREEN_FILL = 0.42;
     private static final Color LINK_COLOR = new Color(150, 150, 150);
     private static final Color HIGHLIGHT = Color.WHITE;
@@ -85,7 +86,10 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
     private Matrix3f m3 = new Matrix3f();
 
     /** Cheap sprite cache: one shaded ball per colour, tinted per depth at draw time. */
-    private final Map<Color, BufferedImage> sprites = new HashMap<>();
+    private final Map<SpriteKey, BufferedImage> sprites = new HashMap<>();
+
+    /** Sprites are cached per colour and depth bucket. */
+    private record SpriteKey(Color color, int depthBucket) { }
 
     public DrawPanel3D(Molecule molecule) {
         this.molecule = molecule;
@@ -204,14 +208,9 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
         double ox = w / 2.0 + panX, oy = h / 2.0 + panY;
 
         Map<Site, double[]> projected = new HashMap<>();
-        double minD = Double.POSITIVE_INFINITY, maxD = Double.NEGATIVE_INFINITY;
         for (Site s : sites) {
-            double[] p = project(rot, s.getX(), s.getY(), s.getZ(), scale, ox, oy);
-            projected.put(s, p);
-            minD = Math.min(minD, p[2]);
-            maxD = Math.max(maxD, p[2]);
+            projected.put(s, project(rot, s.getX(), s.getY(), s.getZ(), scale, ox, oy));
         }
-        double span = (maxD - minD) < 1e-12 ? 1 : maxD - minD;
 
         List<Drawable> drawables = new ArrayList<>();
         if (showMembrane) {
@@ -252,16 +251,11 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
         for (Site s : sites) {
             double[] p = projected.get(s);
             double r = Math.max(2.0, s.getRadius() * scale);
-            double bright = MIN_BRIGHT + (1 - MIN_BRIGHT) * ((p[2] - minD) / span);
-            BufferedImage sprite = sprite(siteColor(s));
+            BufferedImage sprite = sprite(siteColor(s), brightness(p[2], radius));
             boolean on = selectedSites.contains(s);
             drawables.add(new Drawable(p[2], gg -> {
-                java.awt.Composite old = gg.getComposite();
-                gg.setComposite(java.awt.AlphaComposite.getInstance(
-                        java.awt.AlphaComposite.SRC_OVER, (float) bright));
                 gg.drawImage(sprite, (int) Math.round(p[0] - r), (int) Math.round(p[1] - r),
                         (int) Math.round(2 * r), (int) Math.round(2 * r), null);
-                gg.setComposite(old);
                 if (on) {
                     gg.setColor(HIGHLIGHT);
                     gg.setStroke(new BasicStroke(2f));
@@ -339,9 +333,34 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
         return c == null ? Colors.RED.getColor() : c;
     }
 
-    /** A lit sphere impostor, cached per colour. */
-    private BufferedImage sprite(Color color) {
-        return sprites.computeIfAbsent(color, c -> {
+    /**
+     * How lit a sphere at this depth is, on a ramp spanning the whole scene.
+     *
+     * <p>Deliberately measured against the scene's own size, not against the nearest and furthest
+     * sites currently on screen. Normalising by that range makes contrast depend on how many sites
+     * there are: with two, the nearer is always fully lit and the further always at the floor,
+     * however close together they are, and rotation swaps them abruptly. Against a fixed scale a
+     * small depth difference gives a small difference in shade, and the shading turns smoothly.
+     */
+    static double brightness(double depth, double sceneRadius) {   // package-private: pinned by tests
+        double t = 0.5 + depth / (2 * Math.max(1e-9, sceneRadius));   // 0 at the back, 1 at the front
+        return MIN_BRIGHT + (1 - MIN_BRIGHT) * Math.max(0, Math.min(1, t));
+    }
+
+    /** Quantized so the cache holds a bounded number of sprites rather than one per frame. */
+    private static int bucket(double brightness) {
+        return (int) Math.round(brightness * (DEPTH_BUCKETS - 1));
+    }
+
+    /**
+     * A lit sphere impostor, cached per colour and depth bucket. The depth ramp tints the sprite's
+     * colour; it must not be applied as alpha, which would make distant sites translucent and let
+     * whatever is behind them show through instead of simply darkening them.
+     */
+    private BufferedImage sprite(Color color, double brightness) {
+        int b = bucket(brightness);
+        double shade = MIN_BRIGHT + (1 - MIN_BRIGHT) * b / (double) (DEPTH_BUCKETS - 1);
+        return sprites.computeIfAbsent(new SpriteKey(color, b), k -> {
             int n = SPRITE_SIZE;
             BufferedImage img = new BufferedImage(n, n, BufferedImage.TYPE_INT_ARGB);
             double r = n / 2.0;
@@ -355,9 +374,10 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
                     double nz = Math.sqrt(1.0 - d2);
                     // light from the upper left, toward the viewer
                     double lambert = Math.max(0.0, -0.4 * dx - 0.5 * dy + 0.75 * nz);
-                    double shade = 0.25 + 0.75 * lambert;
-                    int rr = clamp(c.getRed() * shade), gg = clamp(c.getGreen() * shade),
-                            bb = clamp(c.getBlue() * shade);
+                    double lit = (0.25 + 0.75 * lambert) * shade;
+                    Color c = k.color();
+                    int rr = clamp(c.getRed() * lit), gg = clamp(c.getGreen() * lit),
+                            bb = clamp(c.getBlue() * lit);
                     img.setRGB(x, y, (255 << 24) | (rr << 16) | (gg << 8) | bb);
                 }
             }
