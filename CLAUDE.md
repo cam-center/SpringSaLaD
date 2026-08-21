@@ -126,7 +126,7 @@ password). If any is missing the job fails rather than skipping: a signed-but-un
 installer looks fine until a user's Gatekeeper refuses it, which is exactly how 2.5.0 shipped.
 
 The Maven artifact version is permanently `0.0.1-SNAPSHOT`. The *product* version (currently
-2.5.0) comes from the git tag at release time via `springSaladVersion`, so install4j no longer
+2.5.1) comes from the git tag at release time via `springSaladVersion`, so install4j no longer
 needs editing — but two copies are still hand-maintained and drift easily: the About text in
 `MainGUI.java` (~line 951) and the version line in `README.md`. (`AboutBox.java` has its own
 stale hardcoded version and appears unused.)
