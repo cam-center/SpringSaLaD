@@ -122,7 +122,7 @@ macOS notarization is implemented in `.github/mac_notarize.sh` but the job that 
 commented out in `deploy-installers.yml`, so released DMGs are signed but **not** notarized.
 
 The Maven artifact version is permanently `0.0.1-SNAPSHOT`. The *product* version (currently
-2.4.2) comes from the git tag at release time via `springSaladVersion`, so install4j no longer
+2.5.0) comes from the git tag at release time via `springSaladVersion`, so install4j no longer
 needs editing — but two copies are still hand-maintained and drift easily: the About text in
 `MainGUI.java` (~line 951) and the version line in `README.md`. (`AboutBox.java` has its own
 stale hardcoded version and appears unused.)
