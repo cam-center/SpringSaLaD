@@ -62,6 +62,9 @@ The suite covers the two contracts with the external solver, not the GUI:
 - `IOHelpTest` — `DF[n]` precision, and the locale hazard noted below.
 - `ViewerTrajectoryFormatTest` — characterization of the solver's `_VIEW_Run0.txt` trajectory
   and `SiteIDs.csv`.
+- `SpringSaladTrajectoryTest`, `SpringSaladViewerCanvasTest`, `SpringSaladMovieExporterTest`,
+  `TrajectoryFilesTest`, `Vect3dTest`, `ViewerIsJava2dOnlyTest` — the Java2D viewer. The canvas
+  and exporter tests render offscreen via `renderToImage`, so they run headless in CI.
 
 **Test fixtures must be self-contained.** `example_files/example_SIMULATIONS/` is gitignored, so
 simulation output — trajectories, `SiteIDs.csv`, CSVs — exists only in a working copy that has
@@ -113,8 +116,8 @@ Three sequential user-facing stages, each with its own top-level frame:
    swap-in editor panel on the right, all mutating one `Global` instance.
 2. **Simulation launch** — `runlauncher.LauncherFrame`, opened from `MainGUI` once the model
    has been saved to a file.
-3. **Analysis & visualization** — `clusteranalysis.DataGUI2` and `viewer.ViewerGUI`, both
-   opened from `LauncherFrame` for a finished simulation.
+3. **Analysis & visualization** — `clusteranalysis.DataGUI2` and
+   `viewer.SpringSaladViewerFrame`, both opened from `LauncherFrame` for a finished simulation.
 
 ### The `Global` model and its file format
 
@@ -193,10 +196,47 @@ root is a short call-graph sketch of this flow.
 | `runlauncher` | `Simulation`, `SimulationManager`, `RunLauncher`, progress UI, per-simulation parameter-override editors |
 | `dataprocessor` | Gen-1 statistics + tables/histograms/heat maps |
 | `clusteranalysis` | Gen-2 statistics, cluster stats, CSV I/O |
-| `viewer` | Java3D trajectory viewer (`MyCanvas3D`, `Scene`), GIF/MP4 export via jcodec |
+| `viewer` | Java2D trajectory viewer (`SpringSaladViewerCanvas`, `SpringSaladTrajectory`), GIF/MP4 export via jcodec |
+| `render` | Software 3D math for the viewer — `Camera`, `Trackball`, `Affine`, `Vect3d`, `Quaternion`, `Matrix3d` |
 | `jmolintegration` | Jmol viewer for PDB-derived molecule structures |
 | `helpersetup` | Swing helpers — `PopUp`, `Fonts`, `Colors`, `Constraints`, `IOHelp` |
 | `helpernovis` | Numerics shared with the solver's conventions (`OnRateSolver`, `Rand`, `Location`) |
+
+## The trajectory viewer
+
+`viewer.SpringSaladViewerFrame` renders the solver's `_VIEW_Run<N>.txt` trajectory with
+**Java2D only**. The renderer (`SpringSaladViewerCanvas`, `SpringSaladTrajectory`) and the 3D
+math in `render/` were ported from VCell (`virtualcell/vcell`), which is also MIT and reads the
+same solver file with an independently written parser. Ported files carry a provenance note;
+**if you fix a bug in one of them, send it back to VCell** or the two copies drift.
+
+`Colors`/`NamedColor` were deliberately *not* ported — VCell's are a verbatim copy of this
+project's `helpersetup` versions, so the canvas imports ours.
+
+Two things to know before changing it:
+
+- **`SiteIDs.csv` is not beside the trajectory.** The trajectory is in
+  `<sim>_FOLDER/viewer_files/`; the site identities are in `<sim>_FOLDER/data/Run<N>/`.
+  `TrajectoryFiles` handles both. Without that file the viewer can only group sites by colour and
+  radius, and types that share both collapse into one visibility toggle — which is exactly what
+  happens on the shipped example, where every site is RED at radius 1.0.
+- **The example trajectory is a poor test subject for rendering.** Its paired sites sit ~0.2
+  apart at radius 1.0, so the canvas correctly suppresses their bonds as overlapping and hiding
+  one site type leaves an identical-looking site on the same pixels. Renderer tests use a
+  synthetic trajectory instead; both behaviours are pinned by their own tests.
+
+### Java3D is still a dependency
+
+Replacing the trajectory viewer did **not** remove Java3D, and the jogamp repos and
+`--add-exports java.desktop/sun.awt=ALL-UNNAMED` all have to stay. Two other places still use it:
+
+- `langevinsetup` — `DrawPanel3D`, `DrawPanel3DPanel`, `SiteSphere`, `LinkCylinder` (~1,310
+  lines): the molecule editor's *interactive* 3D preview, with picking and selection sync to
+  `MoleculeEditor`. This is a separate application from the trajectory viewer and VCell has no
+  equivalent to port — replacing it means writing one.
+- `jmolintegration` — imports `org.jogamp.vecmath.Matrix3f`.
+
+`ViewerIsJava2dOnlyTest` fails if anything in `viewer/` or `render/` imports jogamp again.
 
 ## Conventions in this codebase
 
@@ -213,7 +253,10 @@ root is a short call-graph sketch of this flow.
   user's input as seen by the solver**, not just display formatting — commit 4f05dc5 fixed
   diffusion coefficients silently rounding to 3 decimals in `SiteType.writeType()`. Be
   deliberate when picking an index for a new field.
-- **Known latent bug:** those `DecimalFormat`s are built in a static initializer without a
-  `Locale`, so they bind the JVM default. On a comma-decimal locale (de, fr, es…) the app writes
-  `D 1,50000` into the model file and the solver's `Double.parseDouble` cannot read it. Unfixed —
-  `IOHelpTest` documents the mechanism and guards the current locale.
+- **Numbers on the data path are locale-pinned, deliberately.** Build formatters with
+  `IOHelp.decimalFormat(pattern)`, never `new DecimalFormat(pattern)` — the bare constructor binds
+  the JVM default locale, and on a comma-decimal one (de, fr, es, pt, ru) it writes `D 1,50000`
+  into the model file, which the solver's `Double.parseDouble` cannot read. For the same reason
+  the code reads numbers with `Double.parseDouble(sc.next())` rather than `Scanner.nextDouble()`,
+  which resolves the decimal separator against the default locale. `CommaLocaleRoundTripTest` and
+  `IOHelpTest` guard both halves; the suite passes under en_US, de_DE and fr_FR.

@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -53,29 +54,39 @@ class IOHelpTest {
     }
 
     @Test
-    @DisplayName("DECIMAL SEPARATOR HAZARD: the DF pattern is locale-sensitive")
-    void decimalFormatPatternIsLocaleSensitive() {
-        // IOHelp.DF is built from `new DecimalFormat("0.00000")` in a static initializer, so it
-        // binds the JVM's default locale at class-load time. Under a comma locale that writes
-        // "1,50000" into the model file, which the solver's Double.parseDouble cannot read.
-        // This test documents the mechanism; it cannot exercise IOHelp.DF itself, because that
-        // array is already initialized by the time any test can change the default locale.
+    @DisplayName("DF writes '.' even under a comma-decimal locale")
+    void dfIsLocaleIndependent() {
+        // The bug this replaced: IOHelp.DF used to be built with the bare DecimalFormat(pattern)
+        // constructor, which binds the JVM's default locale. On de/fr/es/pt/ru that wrote
+        // "D 1,50000" into the model file, and the solver's Double.parseDouble cannot read it --
+        // so the app silently produced files it could not run.
         Locale previous = Locale.getDefault();
         try {
-            Locale.setDefault(Locale.GERMANY);
-            assertEquals("1,50000", new DecimalFormat("0.00000").format(1.5),
-                    "if this ever changes, the hazard below is gone and this test can go with it");
+            for (Locale comma : new Locale[]{Locale.GERMANY, Locale.FRANCE, Locale.ITALY}) {
+                Locale.setDefault(comma);
+                assertEquals("1.50000", IOHelp.DF[5].format(1.5), "under locale " + comma);
+                assertEquals("0.001", IOHelp.DF[3].format(0.001), "under locale " + comma);
+                assertFalse(IOHelp.scientificFormat.format(0.000123).contains(","),
+                        "scientificFormat used a comma under " + comma);
+            }
         } finally {
             Locale.setDefault(previous);
         }
     }
 
     @Test
-    @DisplayName("IOHelp.DF writes '.' under the locale this JVM actually booted with")
-    void dfUsesDotUnderCurrentLocale() {
-        // Guards the hazard above for whatever locale CI and developers actually run in.
-        assertTrue(IOHelp.DF[5].format(1.5).contains("."),
-                "IOHelp.DF wrote '" + IOHelp.DF[5].format(1.5) + "' under default locale "
-                        + Locale.getDefault() + "; the solver cannot parse that");
+    @DisplayName("a bare DecimalFormat still is locale-sensitive -- pinning is what fixes it")
+    void bareDecimalFormatShowsWhyPinningIsNeeded() {
+        // Guards the reason the pinning exists: if this ever stops producing a comma, someone has
+        // changed the platform's behaviour and the note in IOHelp can be revisited.
+        Locale previous = Locale.getDefault();
+        try {
+            Locale.setDefault(Locale.GERMANY);
+            assertEquals("1,50000", new DecimalFormat("0.00000").format(1.5));
+            assertEquals("1.50000", IOHelp.decimalFormat("0.00000").format(1.5),
+                    "IOHelp.decimalFormat must not follow the default locale");
+        } finally {
+            Locale.setDefault(previous);
+        }
     }
 }

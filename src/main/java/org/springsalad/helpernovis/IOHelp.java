@@ -7,7 +7,9 @@
 package org.springsalad.helpernovis;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Scanner;
 
 /**
@@ -23,11 +25,19 @@ public class IOHelp {
     
     // An array of decimal formatters for file output.  DF[i] is used to output
     // a double with i digits after the decimal.
-    public static final DecimalFormat [] DF = new DecimalFormat[]{new DecimalFormat("0."), new DecimalFormat("0.0"), 
-        new DecimalFormat("0.00"), new DecimalFormat("0.000"), new DecimalFormat("0.0000"), new DecimalFormat("0.00000"),
-        new DecimalFormat("0.000000"), new DecimalFormat("0.0000000"), new DecimalFormat("0.00000000")};
+    // Pinned to '.' like org.springsalad.helpersetup.IOHelp -- see the note there. These numbers
+    // reach the same solver-readable files, so a comma locale would corrupt them the same way.
+    private static final DecimalFormatSymbols DOT = DecimalFormatSymbols.getInstance(Locale.ROOT);
+
+    public static final DecimalFormat [] DF = new DecimalFormat[]{df("0."), df("0.0"), 
+        df("0.00"), df("0.000"), df("0.0000"), df("0.00000"),
+        df("0.000000"), df("0.0000000"), df("0.00000000")};
     
-    public static DecimalFormat scientificFormat = new DecimalFormat("0.00#E0");
+    public static DecimalFormat scientificFormat = df("0.00#E0");
+
+    private static DecimalFormat df(String pattern) {
+        return new DecimalFormat(pattern, DOT);
+    }
     
     public static Scanner makeScanner(ArrayList<String> stringArray){
         StringBuilder sb = new StringBuilder();

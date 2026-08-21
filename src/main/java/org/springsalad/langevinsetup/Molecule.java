@@ -648,13 +648,13 @@ public class Molecule {
             while(sc1.hasNext()){
                 String var = sc1.next();
                 switch(var){
-                    case "x":{ tempSite.setX(sc1.nextDouble());
+                    case "x":{ tempSite.setX(Double.parseDouble(sc1.next()));
                     break;
                     }
-                    case "y":{ tempSite.setY(sc1.nextDouble());
+                    case "y":{ tempSite.setY(Double.parseDouble(sc1.next()));
                     break;
                     }
-                    case "z":{ tempSite.setZ(sc1.nextDouble());
+                    case "z":{ tempSite.setZ(Double.parseDouble(sc1.next()));
                     break;
                     }
                     default:{ System.out.println("ERROR: Couldn't read (x,y,z) values.");

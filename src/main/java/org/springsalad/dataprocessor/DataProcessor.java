@@ -394,7 +394,7 @@ public class DataProcessor {
             
             for(int i=0;i<time.length;i++){
                 sc.nextLine();
-                time[i] = sc.nextDouble();
+                time[i] = Double.parseDouble(sc.next());
             }
             sc.close();
         } catch(IOException ioe){
@@ -436,7 +436,7 @@ public class DataProcessor {
                     // Skip the time
                     sc.next();
                     for(int j=0;j<av[0].length;j++){
-                        av[i][j] += sc.nextDouble();
+                        av[i][j] += Double.parseDouble(sc.next());
                     }
                 }
                 
@@ -488,7 +488,7 @@ public class DataProcessor {
                     // Skip the time
                     sc.next();
                     for(int j=0;j<av[0].length;j++){
-                        double v = sc.nextDouble();
+                        double v = Double.parseDouble(sc.next());
                         var[i][j] += (v - av[i][j])*(v-av[i][j]);
                     }
                 }
@@ -659,7 +659,7 @@ public class DataProcessor {
             sc.useDelimiter(",");
             for(int i=0;i<time.length;i++){
                 sc.nextLine();
-                time[i] = sc.nextDouble();
+                time[i] = Double.parseDouble(sc.next());
             }
             sc.close();
         } catch(IOException ioe){
@@ -686,7 +686,7 @@ public class DataProcessor {
                     for(int j=0;j<columnIndex;j++){
                         sc.next();
                     }
-                    number[i][c-startIndex] = sc.nextDouble();
+                    number[i][c-startIndex] = Double.parseDouble(sc.next());
                 }
                 
             } catch(FileNotFoundException ioe){
@@ -859,7 +859,7 @@ public class DataProcessor {
             String line = lines.get(i);
             Scanner sc = new Scanner(line);
             sc.useDelimiter(",");
-            time[i] = sc.nextDouble();
+            time[i] = Double.parseDouble(sc.next());
             while(sc.hasNext()){
                 String s = sc.next();
                 if(!s.equals(" ")){
@@ -1098,7 +1098,7 @@ public class DataProcessor {
                 // Rest of the line comes in pairs as    number unit
                 // Read in both pairs and determine what to add to the time
                 while(sc.hasNext()){
-                    double value = sc.nextDouble();
+                    double value = Double.parseDouble(sc.next());
                     String unit = sc.next();
                     switch(unit){
                         case DAYS:
@@ -1476,14 +1476,14 @@ public class DataProcessor {
             while(sc.hasNextLine()){
                 Scanner line = new Scanner(sc.nextLine());
                 line.useDelimiter(",");
-                times.add(line.nextDouble());
+                times.add(Double.parseDouble(line.next()));
                 for(int i=0;i<siteIDs.size();i++){
                     String vec = line.next().trim();
                     if(vec.length()>0){
                         Scanner xyz = new Scanner(vec);
-                        x.get(i).add(xyz.nextDouble());
-                        y.get(i).add(xyz.nextDouble());
-                        z.get(i).add(xyz.nextDouble());
+                        x.get(i).add(Double.parseDouble(xyz.next()));
+                        y.get(i).add(Double.parseDouble(xyz.next()));
+                        z.get(i).add(Double.parseDouble(xyz.next()));
                         xyz.close();
                     }
                 }

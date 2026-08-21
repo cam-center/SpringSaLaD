@@ -236,13 +236,13 @@ public class BindingReaction extends Reaction {
         }
         // Skip 'kon'
         dataScanner.next();
-        kon = dataScanner.nextDouble();
+        kon = Double.parseDouble(dataScanner.next());
         // Skip 'koff'
         dataScanner.next();
-        koff = dataScanner.nextDouble();
+        koff = Double.parseDouble(dataScanner.next());
         // Skip bond_length
         dataScanner.next();
-        bondLength = dataScanner.nextDouble();
+        bondLength = Double.parseDouble(dataScanner.next());
         // </editor-fold>
     }
     
