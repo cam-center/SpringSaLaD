@@ -226,7 +226,7 @@ public class HistogramBuilder {
             String line = lines.get(i);
             Scanner sc = new Scanner(line);
             sc.useDelimiter(",");
-            times.add(sc.nextDouble());
+            times.add(Double.parseDouble(sc.next()));
             while(sc.hasNext()){
                 String s = sc.next();
                 if(!s.equals(" ")){

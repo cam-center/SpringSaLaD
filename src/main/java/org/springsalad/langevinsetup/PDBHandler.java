@@ -1,5 +1,6 @@
 package org.springsalad.langevinsetup;
 
+import org.springsalad.helpersetup.IOHelp;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -70,7 +71,7 @@ public class PDBHandler{
 		HashMap<AtomPDB, Double> radii = getRadiiAL(this.centers, this.groups);
 							
 		//format coors
-		DecimalFormat df = new DecimalFormat("#.####");
+		DecimalFormat df = IOHelp.decimalFormat("#.####");  // dot decimal separator regardless of JVM locale
 		df.setRoundingMode(RoundingMode.CEILING);
 				
 		//set up center of mass of centers for translation to the origin

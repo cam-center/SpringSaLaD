@@ -62,19 +62,19 @@ class SimFile {
             String label = lineScanner.next();
             switch (label){
                 case "Total time":
-                    times[0] = lineScanner.nextDouble();
+                    times[0] = Double.parseDouble(lineScanner.next());
                     break;
                 case "dt":
-                    times[1] = lineScanner.nextDouble();
+                    times[1] = Double.parseDouble(lineScanner.next());
                     break;
                 case "dt_spring":
-                    times[2] = lineScanner.nextDouble();
+                    times[2] = Double.parseDouble(lineScanner.next());
                     break;
                 case "dt_data":
-                    times[3] = lineScanner.nextDouble();
+                    times[3] = Double.parseDouble(lineScanner.next());
                     break;
                 case "dt_image":
-                    times[4] = lineScanner.nextDouble();
+                    times[4] = Double.parseDouble(lineScanner.next());
                     break;
             }
             fillCounter++;

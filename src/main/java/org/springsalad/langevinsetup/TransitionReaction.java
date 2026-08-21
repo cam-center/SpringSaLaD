@@ -235,7 +235,7 @@ public class TransitionReaction extends Reaction {
         dataScanner.next();
         finalState = type.getState(IOHelp.getNameInQuotes(dataScanner));
         dataScanner.next();
-        rate = dataScanner.nextDouble();
+        rate = Double.parseDouble(dataScanner.next());
         dataScanner.next();
         condition = dataScanner.next();
         if(!condition.equals(BOUND_CONDITION)){

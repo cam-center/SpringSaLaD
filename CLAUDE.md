@@ -253,7 +253,10 @@ Replacing the trajectory viewer did **not** remove Java3D, and the jogamp repos 
   user's input as seen by the solver**, not just display formatting — commit 4f05dc5 fixed
   diffusion coefficients silently rounding to 3 decimals in `SiteType.writeType()`. Be
   deliberate when picking an index for a new field.
-- **Known latent bug:** those `DecimalFormat`s are built in a static initializer without a
-  `Locale`, so they bind the JVM default. On a comma-decimal locale (de, fr, es…) the app writes
-  `D 1,50000` into the model file and the solver's `Double.parseDouble` cannot read it. Unfixed —
-  `IOHelpTest` documents the mechanism and guards the current locale.
+- **Numbers on the data path are locale-pinned, deliberately.** Build formatters with
+  `IOHelp.decimalFormat(pattern)`, never `new DecimalFormat(pattern)` — the bare constructor binds
+  the JVM default locale, and on a comma-decimal one (de, fr, es, pt, ru) it writes `D 1,50000`
+  into the model file, which the solver's `Double.parseDouble` cannot read. For the same reason
+  the code reads numbers with `Double.parseDouble(sc.next())` rather than `Scanner.nextDouble()`,
+  which resolves the decimal separator against the default locale. `CommaLocaleRoundTripTest` and
+  `IOHelpTest` guard both halves; the suite passes under en_US, de_DE and fr_FR.

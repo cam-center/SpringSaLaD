@@ -11,19 +11,37 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class IOHelp {
 
-    public final static DecimalFormat [] DF = new DecimalFormat[]{new DecimalFormat("0."),
-        new DecimalFormat("0.0"), new DecimalFormat("0.00"), new DecimalFormat("0.000"),
-        new DecimalFormat("0.0000"), new DecimalFormat("0.00000"),
-        new DecimalFormat("0.000000"), new DecimalFormat("0.0000000"),
-        new DecimalFormat("0.00000000")
+    /**
+     * Decimal separator for every number this program writes.
+     * <p>
+     * Pinned, not left to the JVM default: these formatters feed the model file, which the
+     * LangevinNoVis01 solver parses with Double.parseDouble, and that only ever accepts '.'. On a
+     * comma-decimal locale (de, fr, es, pt, ru...) an unpinned DecimalFormat writes "D 1,50000"
+     * and the solver cannot read the file the user just saved.
+     */
+    private final static DecimalFormatSymbols DOT = DecimalFormatSymbols.getInstance(Locale.ROOT);
+
+    /** DF[i] formats a double with i digits after the decimal point. */
+    public final static DecimalFormat [] DF = new DecimalFormat[]{decimalFormat("0."),
+        decimalFormat("0.0"), decimalFormat("0.00"), decimalFormat("0.000"),
+        decimalFormat("0.0000"), decimalFormat("0.00000"),
+        decimalFormat("0.000000"), decimalFormat("0.0000000"),
+        decimalFormat("0.00000000")
     };
     
-    public final static DecimalFormat scientificFormat = new DecimalFormat("0.00#E0");
+    public final static DecimalFormat scientificFormat = decimalFormat("0.00#E0");
+
+    /** A formatter that always writes '.' as the decimal separator, whatever the JVM locale. */
+    public static DecimalFormat decimalFormat(String pattern) {
+        return new DecimalFormat(pattern, DOT);
+    }
     
     public final static String ERROR = "ERROR";
     public final static String SEPARATOR = System.getProperty("file.separator");

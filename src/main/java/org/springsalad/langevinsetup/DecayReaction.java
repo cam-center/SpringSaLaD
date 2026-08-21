@@ -65,9 +65,9 @@ public class DecayReaction extends Reaction {
     public void loadReaction(Global g, Scanner sc){
         // Skip kcreate
         sc.next();
-        kcreate = sc.nextDouble();
+        kcreate = Double.parseDouble(sc.next());
         sc.next();
-        kdecay = sc.nextDouble();
+        kdecay = Double.parseDouble(sc.next());
         sc.close();
     }
     

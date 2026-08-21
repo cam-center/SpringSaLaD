@@ -194,7 +194,7 @@ public class AllostericReaction extends Reaction {
         sc.next();
         finalState = type.getState(IOHelp.getNameInQuotes(sc));
         sc.next();
-        rate = sc.nextDouble();
+        rate = Double.parseDouble(sc.next());
         sc.next();
         allostericSite = molecule.getSite(sc.nextInt());
         sc.next();
