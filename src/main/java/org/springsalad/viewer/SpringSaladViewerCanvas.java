@@ -287,12 +287,11 @@ public class SpringSaladViewerCanvas extends JPanel {
 		}
 		if (!boundsValid) computeBounds();
 
-		SpringSaladTrajectory.Frame frame =
-				trajectory.getFrames().get(Math.max(0, Math.min(frameToPaint, trajectory.getFrameCount() - 1)));
+		SpringSaladTrajectory.Frame frame = frameAt(frameToPaint);
 		Affine rot = new Affine();
 		trackball.getMatrixGL(rot);
-		double pixelScale = SCREEN_FILL * Math.min(w, h) / viewRadius * zoom;
-		double ox = w / 2.0 + panX, oy = h / 2.0 + panY;
+		double pixelScale = pixelScale(w, h);
+		double ox = originX(w), oy = originY(h);
 
 		// project all sites for this frame
 		List<Glyph> glyphs = new ArrayList<>(frame.getSites().size());
@@ -355,6 +354,50 @@ public class SpringSaladViewerCanvas extends JPanel {
 
 		drawables.sort((p, q) -> Double.compare(p.depth, q.depth)); // far first
 		for (Drawable d : drawables) d.paint.accept(g2);
+	}
+
+	private SpringSaladTrajectory.Frame frameAt(int index) {
+		return trajectory.getFrames().get(Math.max(0, Math.min(index, trajectory.getFrameCount() - 1)));
+	}
+
+	private double pixelScale(int w, int h) { return SCREEN_FILL * Math.min(w, h) / viewRadius * zoom; }
+	private double originX(int w) { return w / 2.0 + panX; }
+	private double originY(int h) { return h / 2.0 + panY; }
+
+	/**
+	 * The site drawn at a screen point, or {@code null} for empty space -- the frontmost one when
+	 * sprites overlap, matching what the user sees.
+	 *
+	 * <p>This is the inverse of what {@code paintScene} does, and it deliberately goes through the
+	 * same projection: a viewer can rotate perfectly while its screen-to-world mapping is wrong, and
+	 * the only thing that catches that is asking which object is under the cursor. Hidden site types
+	 * are not pickable, for the same reason they are not drawn.
+	 */
+	public SpringSaladTrajectory.Site pickSite(int screenX, int screenY, int w, int h) {
+		if (trajectory == null || trajectory.getFrameCount() == 0) {
+			return null;
+		}
+		if (!boundsValid) computeBounds();
+		Affine rot = new Affine();
+		trackball.getMatrixGL(rot);
+		double pixelScale = pixelScale(w, h);
+		double ox = originX(w), oy = originY(h);
+
+		SpringSaladTrajectory.Site best = null;
+		double bestDepth = Double.NEGATIVE_INFINITY;
+		for (SpringSaladTrajectory.Site site : frameAt(frameIndex).getSites()) {
+			if (hiddenSiteTypes.contains(trajectory.siteTypeKey(site))) {
+				continue;
+			}
+			double[] p = project(rot, site.getX(), site.getY(), site.getZ(), pixelScale, ox, oy);
+			double r = Math.max(1.0, site.getRadius() * pixelScale);
+			double dx = screenX - p[0], dy = screenY - p[1];
+			if (dx * dx + dy * dy <= r * r && p[2] > bestDepth) {   // nearer = larger depth
+				bestDepth = p[2];
+				best = site;
+			}
+		}
+		return best;
 	}
 
 	/** Project a world point to {screenX, screenY, cameraDepth} using the current rotation/zoom/pan. */

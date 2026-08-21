@@ -220,6 +220,13 @@ is what `IOHelp.getNameInQuotes` is for), so a printable separator is ambiguous 
 written as the escape `'\0'`; typed as a raw control byte it makes the `.java` register as
 binary to `grep` and `file(1)`. Matches VCell.
 
+`SpringSaladViewerCanvas.pickSite` is the inverse of what `paintScene` draws, and both take
+their projection from the same helpers deliberately. Picking is the only check that catches an
+inconsistent screen-to-world mapping: a viewer can rotate perfectly and shade correctly while
+clicks land on the wrong object, and no screenshot review sees it. `PickConsistencyTest` closes
+the loop — it renders, finds where each site actually landed in pixels, picks there, and
+requires the same site back, across rotate/zoom/pan and with one ball squarely behind another.
+
 Two things to know before changing it:
 
 - **`SiteIDs.csv` is not beside the trajectory.** The trajectory is in
