@@ -88,6 +88,25 @@ GUI behaviour is still verified by hand: run against `example_files/example.txt`
 - `.github/workflows/release.yml` — **stale.** It uploads `./SpringSalad_<tag>.jar`, which
   no part of the build produces. Superseded by `deploy-installers.yml`; don't extend it.
 
+**Building an installer locally**: use install4j **10.x** — that is what `SpringSaLaDAll.install4j`
+and CI target. A machine may have more than one install, so check which you are running before
+concluding anything about licences:
+
+```bash
+plutil -extract CFBundleShortVersionString raw "/Applications/install4j.app/Contents/Info.plist"
+"/Applications/install4j.app/Contents/Resources/app/bin/install4jc" \
+  --disable-signing --disable-notarization --faster --disable-bundling -m unixArchive \
+  -D mavenRootDir="$PWD",macKeystore=none,windowsKeystore=none,springSaladVersion=0.0.0-test \
+  "$PWD/SpringSaLaDAll.install4j"
+```
+
+An install4j 11 *evaluation* reports an expired licence, which reads as a licensing problem when
+it is really the wrong install: the v11 preferences (`com.install4j.v11.plist`) hold only
+`eval=true`, and the organisation's licence is a v10 one.
+
+Build one after changing anything about dependencies or the launcher — `target/dependency` is
+bundled wholesale, so a scope mistake ships to users and nothing else catches it.
+
 `generate_client_installers.sh` drives install4j. It `source`s a gitignored `install4j.env`
 for local use, and otherwise takes `CONFIG_DIR MAVEN_ROOT_DIR INSTALL4J_PATH [LICENSE]` as
 positional arguments (how CI calls it), with keystore passwords and the version `TAG` coming
