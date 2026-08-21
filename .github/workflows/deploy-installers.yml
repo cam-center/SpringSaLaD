@@ -16,6 +16,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: set global environment variables
@@ -74,13 +75,17 @@ jobs:
           path: installers
           retention-days: 1
 
+      # Only on manual dispatch, and time-boxed. Left unconditional it holds a failed release
+      # open waiting for someone to connect -- for up to the 6 hour job limit, on a macOS runner.
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: ${{ failure() }}
+        if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
+        timeout-minutes: 15
 
   notarize-and-release:
     name: Notarize the macOS installer, then publish the release
     runs-on: macos-latest
+    timeout-minutes: 45
     needs: build
     steps:
       - name: set global environment variables
@@ -146,6 +151,9 @@ jobs:
           files: |
             installers/*
 
+      # Only on manual dispatch, and time-boxed. Left unconditional it holds a failed release
+      # open waiting for someone to connect -- for up to the 6 hour job limit, on a macOS runner.
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        if: ${{ failure() }}
+        if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
+        timeout-minutes: 15
