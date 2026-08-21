@@ -266,16 +266,26 @@ Two traps when working on drag behaviour:
 - `TrackballDirectionTest` calls `rotate_xy` directly, so it pins the *math* convention and not
   the mouse path. A test of what the user actually feels has to go through the canvas's y-flip.
 
-### Java3D is still a dependency
+### Java3D is gone; only pure-Java vecmath remains
 
-Replacing the trajectory viewer did **not** remove Java3D, and the jogamp repos and
-`--add-exports java.desktop/sun.awt=ALL-UNNAMED` all have to stay. Two other places still use it:
+Nothing renders with Java3D any more. `java3d-core` and `java3d-utils` are removed, and with them
+the native artifacts they dragged in (`gluegen-rt`, `jogl-all`, `joal`). Two jogamp repositories
+went too — everything now resolves from `central` plus `jogamp-Java3d`, which serves only
+`vecmath`. **`--add-exports java.desktop/sun.awt=ALL-UNNAMED` is no longer needed** and is gone
+from both `run.sh` and the install4j launcher; it existed for jogl reaching into AWT internals.
 
-- `langevinsetup` — `DrawPanel3D`, `DrawPanel3DPanel`, `SiteSphere`, `LinkCylinder` (~1,310
-  lines): the molecule editor's *interactive* 3D preview, with picking and selection sync to
-  `MoleculeEditor`. This is a separate application from the trajectory viewer and VCell has no
-  equivalent to port — replacing it means writing one.
-- `jmolintegration` — imports `org.jogamp.vecmath.Matrix3f`.
+`org.jogamp.java3d:vecmath` stays as a direct dependency. It is pure Java with no natives, and
+supplies `Matrix3f`, which carries the molecule editor's orientation across to the Jmol view
+(`RotationUpdateEvent` → `jmolintegration.Integration`).
+
+Two viewers were rewritten in Java2D:
+
+- `viewer/` — the trajectory viewer, ported from VCell.
+- `langevinsetup.DrawPanel3D` — the molecule editor's interactive structure view. Written fresh;
+  VCell has no equivalent. Same class name and public API as the Java3D version, so `MainGUI` and
+  `DrawPanel3DPanel` were untouched. There is no scene graph now: every paint renders straight
+  from the molecule, so `addSite`/`addLink`/`removeLink` just repaint, and the `SiteSphere` and
+  `LinkCylinder` wrappers are deleted.
 
 `ViewerIsJava2dOnlyTest` fails if anything in `viewer/` or `render/` imports jogamp again.
 

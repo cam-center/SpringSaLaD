@@ -38,17 +38,10 @@
 	</build>
 
 	<repositories>
-		<repository>
-			<id>jogamp-remote</id>
-			<url>https://www.jogamp.org/deployment/maven/</url>
-		</repository>
+		<!-- Serves org.jogamp.java3d:vecmath; everything else resolves from central. -->
 		<repository>
 			<id>jogamp-Java3d</id>
 			<url>https://jogamp.org/deployment/maven-java3d/</url>
-		</repository>
-		<repository>
-			<id>jogamp-test</id>
-			<url>https://jogamp.org/deployment/maven/</url>
 		</repository>
 	</repositories>
 
@@ -73,17 +66,16 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- https://jogamp.org/deployment/maven-java3d/org/jogamp/java3d/java3d-core/ -->
+		<!--
+			vecmath only: pure Java, no native bindings. java3d-core and java3d-utils used to be
+			here and pulled gluegen-rt, jogl-all and joal, which ship platform natives; nothing
+			renders with Java3D any more. Matrix3f is still used to hand the molecule editor's
+			orientation to the Jmol view, and Vector3d for the axis constants.
+			https://jogamp.org/deployment/maven-java3d/org/jogamp/java3d/vecmath/
+		-->
 		<dependency>
 			<groupId>org.jogamp.java3d</groupId>
-			<artifactId>java3d-core</artifactId>
-			<version>1.7.2</version>
-		</dependency>
-
-		<!-- https://jogamp.org/deployment/maven-java3d/org/jogamp/java3d/java3d-core/ -->
-		<dependency>
-			<groupId>org.jogamp.java3d</groupId>
-			<artifactId>java3d-utils</artifactId>
+			<artifactId>vecmath</artifactId>
 			<version>1.7.2</version>
 		</dependency>
 

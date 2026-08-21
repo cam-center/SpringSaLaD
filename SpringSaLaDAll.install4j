@@ -35,7 +35,7 @@
   <launchers>
     <launcher name="SpringSaLaD" id="25">
       <executable name="SpringSaLaD" iconSet="true" executableMode="gui" />
-      <java mainClass="org.springsalad.langevinsetup.MainGUI" vmParameters="--add-exports java.desktop/sun.awt=ALL-UNNAMED">
+      <java mainClass="org.springsalad.langevinsetup.MainGUI">
         <classPath>
           <archive location="springsalad-0.0.1-SNAPSHOT.jar" failOnError="false" />
           <scanDirectory location="dependent_jars" failOnError="false" />

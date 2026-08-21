@@ -6,7 +6,6 @@
 
 package org.springsalad.helpersetup;
 
-import org.jogamp.vecmath.Color3f;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -90,48 +89,6 @@ public class Colors {
         DARKVIOLET, VIOLET, SLATEBLUE, LIGHTCYAN, DARKCYAN, LIGHTGRAY,
         DARKGRAY, WHITE, BLACK};
     
-    public final static Color3f RED3D = RED.getColor3f();
-    public final static Color3f BLUE3D = BLUE.getColor3f();
-    public final static Color3f LIME3D = LIME.getColor3f();
-    public final static Color3f ORANGE3D = ORANGE.getColor3f();
-    public final static Color3f CYAN3D = CYAN.getColor3f();
-    public final static Color3f MAGENTA3D = MAGENTA.getColor3f();
-    public final static Color3f PINK3D = PINK.getColor3f();
-    public final static Color3f YELLOW3D = YELLOW.getColor3f();
-    public final static Color3f GRAY3D = GRAY.getColor3f();
-    public final static Color3f PURPLE3D = PURPLE.getColor3f();;
-    public final static Color3f GREEN3D = GREEN.getColor3f();;
-    public final static Color3f MAROON3D = MAROON.getColor3f();;
-    public final static Color3f NAVY3D = NAVY.getColor3f();;
-    public final static Color3f OLIVE3D = OLIVE.getColor3f();;
-    public final static Color3f TEAL3D = TEAL.getColor3f();;
-    public final static Color3f LIMEGREEN3D = LIMEGREEN.getColor3f();;
-    public final static Color3f GOLD3D = GOLD.getColor3f();;
-    public final static Color3f DARKGREEN3D = DARKGREEN.getColor3f();;
-    public final static Color3f CRIMSON3D = CRIMSON.getColor3f();;
-    public final static Color3f DARKVIOLET3D = DARKVIOLET.getColor3f();;
-    public final static Color3f VIOLET3D = VIOLET.getColor3f();;
-    public final static Color3f SLATEBLUE3D = SLATEBLUE.getColor3f();;
-    public final static Color3f LIGHTCYAN3D = LIGHTCYAN.getColor3f();;
-    public final static Color3f DARKCYAN3D = DARKCYAN.getColor3f();;
-    
-    public final static Color3f LIGHTGRAY3D = LIGHTGRAY.getColor3f();
-    public final static Color3f DARKGRAY3D = DARKGRAY.getColor3f();
-    public final static Color3f WHITE3D = WHITE.getColor3f();
-    public final static Color3f BLACK3D = BLACK.getColor3f();
-    
-    public final static Color3f [] COLOR3FARRAY = {RED3D, BLUE3D, LIME3D, 
-        ORANGE3D, CYAN3D, MAGENTA3D, PINK3D, YELLOW3D, GRAY3D, PURPLE3D,
-        GREEN3D, MAROON3D, NAVY3D, OLIVE3D, TEAL3D, LIMEGREEN3D, GOLD3D,
-        DARKGREEN3D, CRIMSON3D, DARKVIOLET3D, VIOLET3D, SLATEBLUE3D, 
-        LIGHTCYAN3D, DARKCYAN3D, LIGHTGRAY3D, DARKGRAY3D, WHITE3D, BLACK3D};
-  
-    public final static HashMap<String, Color3f> COLORMAP3D = new HashMap<>(100);
-    static{
-        for(int i=0;i<COLORNAMES.length;i++){
-            COLORMAP3D.put(COLORNAMES[i], COLOR3FARRAY[i]);
-        }
-    }
     
     public static NamedColor getColorByName(String name){
         // <editor-fold defaultstate="collapsed" desc="Method Code">
@@ -146,44 +103,7 @@ public class Colors {
         // </editor-fold>
     }
     
-    public static Color3f getColor3fByName(String name){
-        // <editor-fold defaultstate="collapsed" desc="Method Code">
-        Color3f color = null;
-        for(int i=0;i<COLORNAMES.length;i++){
-            String colorName = COLORNAMES[i];
-            if(name.equals(colorName)){
-                color = COLOR3FARRAY[i];
-                break;
-            }
-        }
-        return color;
-        // </editor-fold>
-    }
     
-    public static String getNameOfColor3f(Color3f color3f){
-        // <editor-fold defaultstate="collapsed" desc="Method Code">
-        String name = null;
-        for(int i=0;i<COLOR3FARRAY.length;i++){
-            if(COLOR3FARRAY[i] == color3f){
-                name = COLORNAMES[i];
-                break;
-            }
-        }
-        return name;
-        // </editor-fold>
-    }
 
-    public static Color3f getColor3fByColor(Color color){
-        // <editor-fold defaultstate="collapsed" desc="Method Code">
-        Color3f color3f = null;
-        for(int i=0;i<COLOR3FARRAY.length;i++){
-            if(color.equals(COLORARRAY[i].getColor())){
-                color3f = COLOR3FARRAY[i];
-                break;
-            }
-        }
-        return color3f;
-        // </editor-fold>
-    }
     
 }

@@ -1,0 +1,230 @@
+package org.springsalad.langevinsetup;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * The molecule editor's structure view, which used to be a Java3D {@code Canvas3D} over a
+ * {@code SimpleUniverse} and is now Java2D.
+ *
+ * <p>The behaviour worth pinning is the same as for the trajectory viewer: that it draws, that
+ * clicking selects what is actually drawn at that point, and that selection round-trips with the
+ * rest of the editor. Rendering correctness beyond "something got drawn" is a matter for the eye.
+ */
+class DrawPanel3DTest {
+
+    private static final int W = 320, H = 320;
+
+    private Molecule molecule;
+    private Site a, b, c;
+
+    @BeforeEach
+    void buildMolecule() {
+        molecule = new Molecule("MT0");
+        molecule.setLocation(SystemGeometry.INSIDE);
+        a = site("Site0", "RED", -12, 0, 0, 3.0);
+        b = site("Site1", "BLUE", 12, 0, 0, 3.0);
+        c = site("Site2", "LIME", 0, 14, 0, 3.0);
+        molecule.addSite(a);
+        molecule.addSite(b);
+        molecule.addSite(c);
+        molecule.addLink(new Link(a, b));
+    }
+
+    private Site site(String typeName, String color, double x, double y, double z, double radius) {
+        SiteType type = new SiteType(molecule, typeName);
+        type.setColor(color);
+        type.setRadius(radius);
+        Site s = new Site(molecule, type);
+        s.setLocation(SystemGeometry.INSIDE);
+        s.setX(x);
+        s.setY(y);
+        s.setZ(z);
+        return s;
+    }
+
+    private DrawPanel3D panel() {
+        DrawPanel3D p = new DrawPanel3D(molecule);
+        p.setSize(W, H);
+        return p;
+    }
+
+    private static int drawnPixels(BufferedImage img) {
+        int bg = img.getRGB(0, 0), n = 0;
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
+                if (img.getRGB(x, y) != bg) n++;
+            }
+        }
+        return n;
+    }
+
+    /** Screen position where a site is actually drawn, found by rendering. */
+    private static int[] where(DrawPanel3D p, Site site) {
+        for (int y = 0; y < H; y += 1) {
+            for (int x = 0; x < W; x += 1) {
+                if (p.siteAt(x, y) == site) {   // identity: Site.equals(null) throws
+                    return new int[]{x, y};
+                }
+            }
+        }
+        return null;
+    }
+
+    private static void click(DrawPanel3D p, int x, int y) {
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false));
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_RELEASED, 0, 0, x, y, 1, false));
+    }
+
+    @Test
+    @DisplayName("renders the molecule headless, with no Java3D")
+    void rendersHeadless() {
+        assertTrue(java.awt.GraphicsEnvironment.isHeadless());
+        BufferedImage img = panel().renderToImage(W, H);
+        assertTrue(drawnPixels(img) > 100, "nothing was drawn");
+    }
+
+    @Test
+    @DisplayName("each site's colour reaches the screen")
+    void sitesKeepTheirColours() {
+        BufferedImage img = panel().renderToImage(W, H);
+        Set<Integer> hues = new HashSet<>();
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                int rgb = img.getRGB(x, y), r = (rgb >> 16) & 255, g = (rgb >> 8) & 255, bl = rgb & 255;
+                if (r + g + bl < 40) continue;
+                if (r > g && r > bl) hues.add(0);
+                else if (g > r && g > bl) hues.add(1);
+                else if (bl > r && bl > g) hues.add(2);
+            }
+        }
+        assertEquals(Set.of(0, 1, 2), hues,
+                "expected a red, a blue and a green site; the site type colours are not being used");
+    }
+
+    @Test
+    @DisplayName("clicking a site picks the site drawn at that point")
+    void clickPicksWhatIsDrawn() {
+        DrawPanel3D p = panel();
+        for (Site s : List.of(a, b, c)) {
+            int[] at = where(p, s);
+            assertNotNull(at, "no pixel picks site " + s.getTypeName());
+            assertSame(s, p.siteAt(at[0], at[1]));
+        }
+    }
+
+    @Test
+    @DisplayName("a click selects, and notifies the rest of the editor")
+    void clickSelectsAndNotifies() {
+        DrawPanel3D p = panel();
+        List<MoleculeSelectionEvent> events = new ArrayList<>();
+        p.addMoleculeSelectionListener(events::add);
+
+        int[] at = where(p, a);
+        assertNotNull(at);
+        click(p, at[0], at[1]);
+
+        assertEquals(List.of(a), p.getSelectedSites());
+        assertTrue(events.size() >= 1, "no selection event was fired");
+        assertEquals(List.of(a), events.get(events.size() - 1).getSelectedSites());
+    }
+
+    @Test
+    @DisplayName("clicking the selected site again clears it; empty space clears too")
+    void clickingTogglesAndEmptySpaceClears() {
+        DrawPanel3D p = panel();
+        int[] at = where(p, a);
+        click(p, at[0], at[1]);
+        assertEquals(List.of(a), p.getSelectedSites());
+        click(p, at[0], at[1]);
+        assertEquals(List.of(), p.getSelectedSites(), "clicking a selected site should clear it");
+
+        click(p, at[0], at[1]);
+        click(p, 1, 1);
+        assertEquals(List.of(), p.getSelectedSites(), "clicking empty space should clear the selection");
+    }
+
+    @Test
+    @DisplayName("selection made elsewhere in the editor is mirrored here")
+    void incomingSelectionIsMirrored() {
+        DrawPanel3D p = panel();
+        p.selectionOccurred(new MoleculeSelectionEvent(
+                new ArrayList<>(List.of(b)), new ArrayList<>()));
+        assertEquals(List.of(b), p.getSelectedSites());
+    }
+
+    @Test
+    @DisplayName("a selected site is drawn differently from an unselected one")
+    void selectionIsVisible() {
+        DrawPanel3D p = panel();
+        int before = drawnPixels(p.renderToImage(W, H));
+        p.selectionOccurred(new MoleculeSelectionEvent(new ArrayList<>(List.of(a)), new ArrayList<>()));
+        assertNotEquals(before, drawnPixels(p.renderToImage(W, H)),
+                "selecting a site changed nothing on screen");
+    }
+
+    @Test
+    @DisplayName("dragging rotates instead of selecting")
+    void dragRotatesAndDoesNotSelect() {
+        DrawPanel3D p = panel();
+        String before = signature(p.renderToImage(W, H));
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_PRESSED, 0, 0, W / 2, H / 2, 1, false));
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_DRAGGED, 0, 0, W / 2 + 60, H / 2, 0, false));
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_RELEASED, 0, 0, W / 2 + 60, H / 2, 1, false));
+        assertNotEquals(before, signature(p.renderToImage(W, H)), "the drag did not rotate the view");
+        assertEquals(List.of(), p.getSelectedSites(), "a drag must not select");
+    }
+
+    private static String signature(BufferedImage img) {
+        StringBuilder sb = new StringBuilder();
+        for (int y = 0; y < img.getHeight(); y += 8) {
+            for (int x = 0; x < img.getWidth(); x += 8) {
+                sb.append(img.getRGB(x, y) == img.getRGB(0, 0) ? '.' : '#');
+            }
+        }
+        return sb.toString();
+    }
+
+    @Test
+    @DisplayName("flip mirrors non-anchor sites through the chosen plane")
+    void flipMirrorsCoordinates() {
+        DrawPanel3D p = panel();
+        double x = a.getX(), y = c.getY();
+        p.flip(0);
+        assertEquals(-x, a.getX(), 1e-12);
+        p.flip(1);
+        assertEquals(-y, c.getY(), 1e-12);
+    }
+
+    @Test
+    @DisplayName("overlapping sites are reported, non-overlapping ones are not")
+    void overlapsAreDetected() {
+        assertEquals(Set.of(), panel().getOverlaps().keySet(), "these sites do not overlap");
+        b.setX(a.getX() + 1);   // radii are 3.0 each, so now they intersect
+        assertEquals(Set.of(a, b), panel().getOverlaps().keySet());
+    }
+
+    @Test
+    @DisplayName("a molecule with no sites renders a message instead of throwing")
+    void emptyMoleculeIsSafe() {
+        DrawPanel3D p = new DrawPanel3D(new Molecule("empty"));
+        p.setSize(W, H);
+        assertTrue(drawnPixels(p.renderToImage(W, H)) > 0);
+        assertNull(p.siteAt(W / 2, H / 2));
+    }
+}
