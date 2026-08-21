@@ -80,7 +80,7 @@ class TrajectoryFilesTest {
         assertTrue(run.hasSiteIdentities());
         SpringSaladTrajectory t = run.load();
         assertTrue(t.hasSiteIdentities());
-        assertEquals("site:MT0 Site1", t.siteTypeKey(t.getFrames().get(0).getSites().get(0)));
+        assertEquals("site:MT0\0Site1", t.siteTypeKey(t.getFrames().get(0).getSites().get(0)));
     }
 
     @Test

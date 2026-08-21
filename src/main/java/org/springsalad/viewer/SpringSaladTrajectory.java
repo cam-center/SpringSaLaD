@@ -186,15 +186,16 @@ public class SpringSaladTrajectory implements Serializable {
 	 * a color and radius are then indistinguishable, and collapse into one entry.
 	 */
 	public String siteTypeKey(Site site) {
-		// Deliberate divergence from VCell: this copy separates with a space, VCell with a NUL.
-		// VCell's had the NUL typed as a raw control byte, which made the .java register as binary
-		// to grep and file(1); upstream fixed that by writing it as the escape '\0' and keeping the
-		// character. So the two copies produce different keys -- harmless, since the key never
-		// leaves the process (map/set keys for the visibility toggles), but do not assume they
-		// match when comparing the files.
+		// The separator is a NUL, and it has to be a character that cannot occur in a name.
+		// Molecule and site type names may contain spaces -- they are quoted in the model file,
+		// which is why IOHelp.getNameInQuotes exists -- so a space separator is ambiguous:
+		// ("Actin B", "Site0") and ("Actin", "B Site0") both key to "site:Actin B Site0" and
+		// collapse into a single visibility toggle. Written as the escape '\0' rather than a raw
+		// control byte, which would make this .java register as binary to grep and file(1).
+		// Matches VCell; keep it that way.
 		SiteIdentity identity = getSiteIdentity(site.getId());
 		if (identity != null) {
-			return "site:" + identity.getMoleculeName() + ' ' + identity.getSiteTypeName();
+			return "site:" + identity.getMoleculeName() + '\0' + identity.getSiteTypeName();
 		}
 		String color = site.getColor() == null ? "" : site.getColor().trim().toUpperCase(Locale.ROOT);
 		return "color:" + color + '@' + String.format(Locale.ROOT, "%.5f", site.getRadius());

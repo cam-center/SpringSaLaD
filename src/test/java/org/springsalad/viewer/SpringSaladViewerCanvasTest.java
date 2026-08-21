@@ -180,13 +180,13 @@ class SpringSaladViewerCanvasTest {
         SpringSaladViewerCanvas c = syntheticCanvas();
         String before = signature(c.renderToImage(240, 200));
 
-        c.setSiteTypeVisible("site:MT0 Site0", false);
-        assertFalse(c.isSiteTypeVisible("site:MT0 Site0"));
+        c.setSiteTypeVisible("site:MT0\0Site0", false);
+        assertFalse(c.isSiteTypeVisible("site:MT0\0Site0"));
         assertNotEquals(before, signature(c.renderToImage(240, 200)),
                 "hiding a site type did not change the image");
 
         c.showAllSiteTypes();
-        assertTrue(c.isSiteTypeVisible("site:MT0 Site0"));
+        assertTrue(c.isSiteTypeVisible("site:MT0\0Site0"));
         assertEquals(before, signature(c.renderToImage(240, 200)), "showAll did not restore the view");
     }
 

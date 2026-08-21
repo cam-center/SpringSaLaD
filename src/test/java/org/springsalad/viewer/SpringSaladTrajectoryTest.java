@@ -9,12 +9,15 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -168,7 +171,7 @@ class SpringSaladTrajectoryTest {
         assertTrue(t.hasSiteIdentities());
         Set<String> keys = new LinkedHashSet<>();
         t.getFrames().get(0).getSites().forEach(s -> keys.add(t.siteTypeKey(s)));
-        assertEquals(Set.of("site:MT0 Site0", "site:MT0 Site1"), keys);
+        assertEquals(Set.of("site:MT0\0Site0", "site:MT0\0Site1"), keys);
     }
 
     @Test
@@ -180,5 +183,38 @@ class SpringSaladTrajectoryTest {
         assertFalse(bare.hasSiteIdentities(), "receiver was mutated");
         assertTrue(enriched.hasSiteIdentities());
         assertEquals(bare.getFrameCount(), enriched.getFrameCount());
+    }
+
+    @Test
+    @DisplayName("names containing spaces still key to distinct site types")
+    void namesWithSpacesDoNotCollide() {
+        // Molecule and site type names may contain spaces -- they are quoted in the model file.
+        // With a space separator these two pairs both key to "site:Actin B Site0" and collapse
+        // into one visibility toggle, hiding both at once. That is why the separator is a NUL.
+        List<SpringSaladTrajectory.Site> sites = new ArrayList<>(List.of(
+                new SpringSaladTrajectory.Site(1, 1.0, "RED", 0, 0, 0),
+                new SpringSaladTrajectory.Site(2, 1.0, "BLUE", 5, 0, 0)));
+        SpringSaladTrajectory t = new SpringSaladTrajectory(1e-3, 1e-4, 50, 50, 10, 90,
+                List.of(new SpringSaladTrajectory.Frame(0, 0, sites, new ArrayList<>())),
+                Map.of(1, new SpringSaladTrajectory.SiteIdentity("Actin B", 0, "Site0"),
+                       2, new SpringSaladTrajectory.SiteIdentity("Actin", 0, "B Site0")));
+
+        assertNotEquals(t.siteTypeKey(sites.get(0)), t.siteTypeKey(sites.get(1)),
+                "two distinct site types share a key; they would share one visibility toggle");
+    }
+
+    @Test
+    @DisplayName("the separator is a character no name can contain")
+    void separatorIsNotPrintable() {
+        // Pins the choice itself: any printable separator is a name a user could type.
+        SpringSaladTrajectory t = new SpringSaladTrajectory(1e-3, 1e-4, 50, 50, 10, 90,
+                List.of(new SpringSaladTrajectory.Frame(0, 0,
+                        new ArrayList<>(List.of(new SpringSaladTrajectory.Site(1, 1.0, "RED", 0, 0, 0))),
+                        new ArrayList<>())),
+                Map.of(1, new SpringSaladTrajectory.SiteIdentity("MT0", 0, "Site0")));
+        String key = t.siteTypeKey(t.getFrames().get(0).getSites().get(0));
+        assertEquals("site:MT0\0Site0", key);
+        assertTrue(key.chars().anyMatch(Character::isISOControl),
+                "separator must be a control character, unreachable from a name field");
     }
 }

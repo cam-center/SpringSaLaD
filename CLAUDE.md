@@ -213,6 +213,13 @@ same solver file with an independently written parser. Ported files carry a prov
 `Colors`/`NamedColor` were deliberately *not* ported — VCell's are a verbatim copy of this
 project's `helpersetup` versions, so the canvas imports ours.
 
+`SpringSaladTrajectory.siteTypeKey` joins the molecule and site type names with a **NUL**, and
+that is not stylistic: both names may contain spaces (they are quoted in the model file, which
+is what `IOHelp.getNameInQuotes` is for), so a printable separator is ambiguous — `("Actin B",
+"Site0")` and `("Actin", "B Site0")` would key the same and share one visibility toggle. It is
+written as the escape `'\0'`; typed as a raw control byte it makes the `.java` register as
+binary to `grep` and `file(1)`. Matches VCell.
+
 Two things to know before changing it:
 
 - **`SiteIDs.csv` is not beside the trajectory.** The trajectory is in
