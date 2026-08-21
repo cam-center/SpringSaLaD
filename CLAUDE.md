@@ -118,8 +118,12 @@ from the environment.
 `NO-MAVEN-DIR`. It bundles `target/springsalad-0.0.1-SNAPSHOT.jar`, `target/dependency` (as
 `dependent_jars`), the icon resources, and `localsolvers`, with a JBR 17 JRE.
 
-macOS notarization is implemented in `.github/mac_notarize.sh` but the job that calls it is
-commented out in `deploy-installers.yml`, so released DMGs are signed but **not** notarized.
+macOS notarization runs in `deploy-installers.yml`'s `notarize-and-release` job, on a macOS
+runner, using `.github/mac_notarize.sh`. **The release is published from that job, not from
+`build`** — notarizing after publishing would staple a file nobody downloads. It needs three
+secrets the repository must hold: `MAC_TEAM_ID`, `MAC_ID` and `MAC_PASSWORD` (an app-specific
+password). If any is missing the job fails rather than skipping: a signed-but-unnotarized
+installer looks fine until a user's Gatekeeper refuses it, which is exactly how 2.5.0 shipped.
 
 The Maven artifact version is permanently `0.0.1-SNAPSHOT`. The *product* version (currently
 2.5.0) comes from the git tag at release time via `springSaladVersion`, so install4j no longer
