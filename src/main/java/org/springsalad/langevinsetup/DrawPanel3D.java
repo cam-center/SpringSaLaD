@@ -218,10 +218,29 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
             addMembraneQuad(rot, scale, ox, oy, drawables);
         }
         for (Link link : molecule.getLinkArray()) {
-            double[] a = projected.get(link.getSite1()), b = projected.get(link.getSite2());
-            if (a == null || b == null) {
+            Site s1 = link.getSite1(), s2 = link.getSite2();
+            if (!projected.containsKey(s1) || !projected.containsKey(s2)) {
                 continue;   // a site was removed but the link has not been cleaned up yet
             }
+            // Truncate the link in WORLD space by each sphere's radius, then project -- so the
+            // segment stops where it actually leaves the sphere's surface rather than running to
+            // its centre. Trimming in screen space by the drawn radius instead would push the
+            // endpoint out to the silhouette edge, which is wrong for a link angled toward the
+            // camera: there the exit point is foreshortened and projects *inside* the silhouette.
+            double dx = s2.getX() - s1.getX(), dy = s2.getY() - s1.getY(), dz = s2.getZ() - s1.getZ();
+            double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (dist <= s1.getRadius() + s2.getRadius()) {
+                continue;   // the spheres touch or overlap: no length of link is visible
+            }
+            double ux = dx / dist, uy = dy / dist, uz = dz / dist;
+            double[] a = project(rot,
+                    s1.getX() + ux * s1.getRadius(),
+                    s1.getY() + uy * s1.getRadius(),
+                    s1.getZ() + uz * s1.getRadius(), scale, ox, oy);
+            double[] b = project(rot,
+                    s2.getX() - ux * s2.getRadius(),
+                    s2.getY() - uy * s2.getRadius(),
+                    s2.getZ() - uz * s2.getRadius(), scale, ox, oy);
             boolean on = selectedLinks.contains(link);
             Line2D line = new Line2D.Double(a[0], a[1], b[0], b[1]);
             drawables.add(new Drawable((a[2] + b[2]) / 2, gg -> {
@@ -431,8 +450,18 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
         Link best = null;
         double bestDist = 5.0;   // pixels
         for (Link link : molecule.getLinkArray()) {
-            double[] a = project(rot, link.getX1(), link.getY1(), link.getZ1(), scale, ox, oy);
-            double[] b = project(rot, link.getX2(), link.getY2(), link.getZ2(), scale, ox, oy);
+            Site s1 = link.getSite1(), s2 = link.getSite2();
+            double dx = s2.getX() - s1.getX(), dy = s2.getY() - s1.getY(), dz = s2.getZ() - s1.getZ();
+            double dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            if (dist <= s1.getRadius() + s2.getRadius()) {
+                continue;   // nothing drawn, so nothing to pick
+            }
+            double ux = dx / dist, uy = dy / dist, uz = dz / dist;
+            // Hit-test the segment that is actually drawn, not the centre-to-centre line.
+            double[] a = project(rot, s1.getX() + ux * s1.getRadius(), s1.getY() + uy * s1.getRadius(),
+                    s1.getZ() + uz * s1.getRadius(), scale, ox, oy);
+            double[] b = project(rot, s2.getX() - ux * s2.getRadius(), s2.getY() - uy * s2.getRadius(),
+                    s2.getZ() - uz * s2.getRadius(), scale, ox, oy);
             double d = Line2D.ptSegDist(a[0], a[1], b[0], b[1], mx, my);
             if (d < bestDist) {
                 bestDist = d;

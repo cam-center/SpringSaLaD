@@ -279,4 +279,58 @@ class DrawPanel3DTest {
         assertEquals(List.of(link), p.getSelectedLinks());
         assertEquals(List.of(), p.getSelectedSites(), "a link click should not also select a site");
     }
+
+    // ---- links stop at the sphere surface, not at the centre ----
+
+    /** Screen position of a site's centre: the pixel where it picks that is furthest inside it. */
+    private static int[] centreOf(DrawPanel3D p, Site site) {
+        long sx = 0, sy = 0, n = 0;
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                if (p.siteAt(x, y) == site) { sx += x; sy += y; n++; }
+            }
+        }
+        return n == 0 ? null : new int[]{(int) (sx / n), (int) (sy / n)};
+    }
+
+    @Test
+    @DisplayName("a link is cropped to the endpoint radii, so it never reaches a site's centre")
+    void linkIsTruncatedAtTheSphereSurface() {
+        // Cropping happens in WORLD space before projection. Drawn centre-to-centre instead, the
+        // segment runs through both spheres and the centre of each is right on top of it.
+        DrawPanel3D p = panel();
+        Link link = molecule.getLinkArray().get(0);
+
+        for (Site end : List.of(a, b)) {
+            int[] centre = centreOf(p, end);
+            assertNotNull(centre);
+            assertNull(p.linkAt(centre[0], centre[1]),
+                    "the link is still drawn through the centre of " + end.getTypeName()
+                            + "; it is not being cropped to the sphere radius");
+        }
+
+        boolean pickableSomewhere = false;
+        for (int y = 0; y < H && !pickableSomewhere; y++) {
+            for (int x = 0; x < W; x++) {
+                if (p.linkAt(x, y) == link) { pickableSomewhere = true; break; }
+            }
+        }
+        assertTrue(pickableSomewhere, "cropping removed the whole link");
+    }
+
+    @Test
+    @DisplayName("no link is drawn between spheres that touch or overlap")
+    void overlappingSpheresDrawNoLink() {
+        // Radii are 3.0 each, so 1.0 apart leaves no visible length of link between them.
+        b.setX(a.getX() + 1);
+        b.setY(a.getY());
+        b.setZ(a.getZ());
+        DrawPanel3D p = panel();
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                assertNull(p.linkAt(x, y),
+                        "a link was drawn between overlapping spheres at (" + x + "," + y + ")");
+            }
+        }
+    }
 }
