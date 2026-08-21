@@ -266,4 +266,51 @@ class SpringSaladViewerCanvasTest {
         assertEquals(withLinks, signature(c.renderToImage(200, 160)),
                 "a bond was drawn between spheres that overlap");
     }
+
+    // ---- depth shading ----
+
+    @Test
+    @DisplayName("the depth ramp spans the scene, so it does not stretch to whatever is visible")
+    void shadingRampIsScaledToTheScene() {
+        // It used to be normalised against the nearest and furthest glyph on screen. With a
+        // trajectory of many molecules that is close to the box extent and looks fine, but hide
+        // all but a couple of site types -- or load a run with only a few molecules -- and the
+        // nearer is always fully lit while the further sits at the floor, swapping abruptly as the
+        // view turns. The molecule editor showed the same fault far more obviously.
+        SpringSaladViewerCanvas c = syntheticCanvas();
+        c.renderToImage(120, 120);   // force the bounds to be computed
+
+        double previous = c.brightness(-1000);
+        double biggestStep = 0;
+        for (double d = -20; d <= 20; d += 0.4) {
+            double now = c.brightness(d);
+            assertTrue(now >= previous - 1e-9, "the ramp must not go backwards as depth increases");
+            biggestStep = Math.max(biggestStep, Math.abs(now - c.brightness(d - 0.4)));
+            previous = now;
+        }
+        assertTrue(biggestStep < 0.08, "the ramp jumps by " + biggestStep + " over a small step");
+        assertTrue(c.brightness(-1e6) > 0.1, "the far end must stay visible");
+        assertTrue(c.brightness(1e6) <= 1.0 + 1e-9, "the near end must not blow out");
+    }
+
+    @Test
+    @DisplayName("hiding every site type still leaves the box drawn sanely")
+    void boxSurvivesEverythingBeingHidden() {
+        // The old ramp had to special-case this: with no glyphs there was no depth range to
+        // normalise against, so the box shading had to be given a made-up one. Scaling to the
+        // scene instead means there is nothing to special-case.
+        SpringSaladViewerCanvas c = syntheticCanvas();
+        SpringSaladTrajectory t = c.getTrajectory();
+        for (SpringSaladTrajectory.Site s : t.getFrames().get(0).getSites()) {
+            c.setSiteTypeVisible(t.siteTypeKey(s), false);
+        }
+        BufferedImage img = c.renderToImage(240, 200);
+        int background = img.getRGB(0, 0), drawn = 0;
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
+                if (img.getRGB(x, y) != background) drawn++;
+            }
+        }
+        assertTrue(drawn > 0, "with every site hidden the box and membrane should still be drawn");
+    }
 }

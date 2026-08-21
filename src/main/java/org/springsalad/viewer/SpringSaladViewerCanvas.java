@@ -315,7 +315,6 @@ public class SpringSaladViewerCanvas extends JPanel {
 
 		// project all sites for this frame
 		List<Glyph> glyphs = new ArrayList<>(frame.getSites().size());
-		double minD = Double.POSITIVE_INFINITY, maxD = Double.NEGATIVE_INFINITY;
 		Map<Integer, Glyph> byId = new HashMap<>();
 		for (SpringSaladTrajectory.Site s : frame.getSites()) {
 			// Hidden sites are dropped before projection; links to them then find no glyph in byId
@@ -330,16 +329,13 @@ public class SpringSaladViewerCanvas extends JPanel {
 			gl.color = colorForName(s.getColor());
 			glyphs.add(gl);
 			byId.put(gl.id, gl);
-			minD = Math.min(minD, gl.depth); maxD = Math.max(maxD, gl.depth);
 		}
-		if (glyphs.isEmpty()) { minD = 0; maxD = 1; } // every site type hidden: keep the box shading sane
-		double span = (maxD - minD) < 1e-12 ? 1 : (maxD - minD);
 
 		// unified depth-sorted draw list (painter's algorithm): membrane quads + links + glyph sprites,
 		// so the membrane composites correctly with glyphs on either side of it.
 		List<Drawable> drawables = new ArrayList<>();
 		if (showMembrane) addMembrane(rot, pixelScale, ox, oy, drawables);
-		if (showBox) addBox(rot, pixelScale, ox, oy, minD, span, drawables);
+		if (showBox) addBox(rot, pixelScale, ox, oy, drawables);
 		if (showLinks) {
 			for (int[] link : frame.getLinks()) {
 				Glyph a = byId.get(link[0]), b = byId.get(link[1]);
@@ -365,7 +361,7 @@ public class SpringSaladViewerCanvas extends JPanel {
 			}
 		}
 		for (Glyph gl : glyphs) {
-			double bright = MIN_BRIGHT + (1 - MIN_BRIGHT) * ((gl.depth - minD) / span); // nearer = brighter
+			double bright = brightness(gl.depth);
 			BufferedImage sprite = getSprite(gl.color, bright);
 			int d = (int) Math.round(gl.screenR * 2);
 			int px = (int) Math.round(gl.sx - gl.screenR), py = (int) Math.round(gl.sy - gl.screenR);
@@ -381,6 +377,20 @@ public class SpringSaladViewerCanvas extends JPanel {
 	}
 
 	private double pixelScale(int w, int h) { return SCREEN_FILL * Math.min(w, h) / viewRadius * zoom; }
+
+	/**
+	 * How lit something at this camera depth is, on a ramp spanning the scene.
+	 *
+	 * <p>Measured against the scene's own radius rather than against the nearest and furthest
+	 * glyph on screen. Normalising by that range makes contrast depend on what happens to be
+	 * visible: a run with only a couple of molecules, or one where the user has hidden all but two
+	 * site types, gets the nearer always fully lit and the further always at the floor, and the two
+	 * swap abruptly as the view turns. It also needed a special case to keep the box shading sane
+	 * when every site type was hidden and there was no range at all.
+	 */
+	double brightness(double depth) {   // package-private: pinned by SpringSaladViewerCanvasTest
+		return MIN_BRIGHT + (1 - MIN_BRIGHT) * clamp01(0.5 + depth / (2 * Math.max(1e-9, viewRadius)));
+	}
 	private double originX(int w) { return w / 2.0 + panX; }
 	private double originY(int h) { return h / 2.0 + panY; }
 
@@ -477,7 +487,7 @@ public class SpringSaladViewerCanvas extends JPanel {
 	 * behind the (opaque) membrane and the glyphs — essential under parallel projection, which has no
 	 * perspective depth cue. Segments are also depth-dimmed (nearer = brighter) for extra perception.
 	 */
-	private void addBox(Affine rot, double pixelScale, double ox, double oy, double minD, double span, List<Drawable> out) {
+	private void addBox(Affine rot, double pixelScale, double ox, double oy, List<Drawable> out) {
 		double xs = trajectory.getXSize(), ys = trajectory.getYSize();
 		double zo = trajectory.getZOutside(), zi = trajectory.getZInside();
 		if (xs <= 0 || ys <= 0) return;
@@ -501,7 +511,7 @@ public class SpringSaladViewerCanvas extends JPanel {
 				double[] cur = project(rot, p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t,
 						p0[2] + (p1[2] - p0[2]) * t, pixelScale, ox, oy);
 				double depth = (prev[2] + cur[2]) / 2;
-				double bright = MIN_BRIGHT + (1 - MIN_BRIGHT) * clamp01((depth - minD) / span);
+				double bright = brightness(depth);
 				Color col = new Color(clamp255(BOX_COLOR.getRed() * bright),
 						clamp255(BOX_COLOR.getGreen() * bright), clamp255(BOX_COLOR.getBlue() * bright));
 				double x0 = prev[0], y0 = prev[1], x1 = cur[0], y1 = cur[1];

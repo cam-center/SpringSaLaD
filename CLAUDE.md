@@ -234,6 +234,11 @@ Two things to know before changing it:
   `TrajectoryFiles` handles both. Without that file the viewer can only group sites by colour and
   radius, and types that share both collapse into one visibility toggle — which is exactly what
   happens on the shipped example, where every site is RED at radius 1.0.
+- **Depth shading is scaled to the scene, not to what is on screen.** Both canvases ramp
+  brightness from `viewRadius`/`sceneRadius`, never from the nearest and furthest thing currently
+  visible: that makes contrast depend on how many sites happen to be shown, so two sites a hair
+  apart come out fully lit and fully dark and swap abruptly as the view turns. The ramp tints the
+  sprite's colour — applying it as alpha makes distant sites translucent instead of dark.
 - **The example trajectory is a poor test subject for rendering.** Its paired sites sit ~0.2
   apart at radius 1.0, so the canvas correctly suppresses their bonds as overlapping and hiding
   one site type leaves an identical-looking site on the same pixels. Renderer tests use a
