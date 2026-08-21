@@ -25,6 +25,19 @@
 				</configuration>
 			</plugin>
 			<plugin>
+				<!--
+					dependency:copy-dependencies feeds both run.sh and the install4j bundle, and it
+					takes test scope by default, which shipped eight JUnit jars to end users.
+					Configured here rather than as a command line flag, so that every existing
+					invocation (README, both CI workflows, generate_client_installers.sh) keeps
+					working unchanged.
+				-->
+				<artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<includeScope>runtime</includeScope>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${maven-surefire.version}</version>
 				<configuration>
