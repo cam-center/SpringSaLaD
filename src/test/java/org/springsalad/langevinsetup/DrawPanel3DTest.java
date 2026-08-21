@@ -87,8 +87,16 @@ class DrawPanel3DTest {
     }
 
     private static void click(DrawPanel3D p, int x, int y) {
-        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_PRESSED, 0, 0, x, y, 1, false));
-        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_RELEASED, 0, 0, x, y, 1, false));
+        clickWith(p, x, y, 0);
+    }
+
+    private static void ctrlClick(DrawPanel3D p, int x, int y) {
+        clickWith(p, x, y, MouseEvent.CTRL_DOWN_MASK);
+    }
+
+    private static void clickWith(DrawPanel3D p, int x, int y, int mods) {
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_PRESSED, 0, mods, x, y, 1, false));
+        p.dispatchEvent(new MouseEvent(p, MouseEvent.MOUSE_RELEASED, 0, mods, x, y, 1, false));
     }
 
     @Test
@@ -226,5 +234,49 @@ class DrawPanel3DTest {
         p.setSize(W, H);
         assertTrue(drawnPixels(p.renderToImage(W, H)) > 0);
         assertNull(p.siteAt(W / 2, H / 2));
+    }
+
+    @Test
+    @DisplayName("ctrl-click adds to the selection instead of replacing it")
+    void ctrlClickAccumulates() {
+        // The Java3D version tracked ctrl with a KeyListener, which only sees the key while this
+        // component has focus -- and leaves it stuck down if you release it elsewhere. The
+        // modifier is read from the mouse event instead, so this works regardless of focus.
+        DrawPanel3D p = panel();
+        click(p, where(p, a)[0], where(p, a)[1]);
+        assertEquals(List.of(a), p.getSelectedSites());
+
+        ctrlClick(p, where(p, b)[0], where(p, b)[1]);
+        assertEquals(List.of(a, b), p.getSelectedSites(), "ctrl-click replaced instead of adding");
+
+        ctrlClick(p, where(p, b)[0], where(p, b)[1]);
+        assertEquals(List.of(a), p.getSelectedSites(), "ctrl-click did not toggle the site back off");
+    }
+
+    @Test
+    @DisplayName("ctrl-click on empty space keeps the selection")
+    void ctrlClickOnEmptySpaceKeepsSelection() {
+        DrawPanel3D p = panel();
+        click(p, where(p, a)[0], where(p, a)[1]);
+        ctrlClick(p, 1, 1);
+        assertEquals(List.of(a), p.getSelectedSites(),
+                "ctrl-click on empty space should not clear an in-progress selection");
+    }
+
+    @Test
+    @DisplayName("clicking a link selects the link and nothing else")
+    void clickSelectsLink() {
+        DrawPanel3D p = panel();
+        Link link = molecule.getLinkArray().get(0);
+        int[] on = null;
+        for (int y = 0; y < H && on == null; y++) {
+            for (int x = 0; x < W; x++) {
+                if (p.linkAt(x, y) == link && p.siteAt(x, y) == null) { on = new int[]{x, y}; break; }
+            }
+        }
+        assertNotNull(on, "the link is not pickable anywhere clear of its end sites");
+        click(p, on[0], on[1]);
+        assertEquals(List.of(link), p.getSelectedLinks());
+        assertEquals(List.of(), p.getSelectedSites(), "a link click should not also select a site");
     }
 }

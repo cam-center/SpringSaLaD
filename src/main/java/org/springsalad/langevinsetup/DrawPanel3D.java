@@ -77,7 +77,6 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
     private double zoom = 1.0, panX = 0, panY = 0;
     private int lastX, lastY;
     private boolean panning, dragged;
-    private boolean ctrlPressed;
 
     private boolean showMembrane;
     private float xsize = 25, ysize = 25;   // half the membrane extent
@@ -130,7 +129,10 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
                 if (dragged) {
                     publishRotation();      // keep Jmol in step with the view
                 } else {
-                    pickAt(e.getX(), e.getY());
+                    // Take the modifier from the event itself, not from tracked key state: a
+                    // KeyListener only sees ctrl while this component has focus, and leaves it
+                    // stuck down if the user releases it elsewhere.
+                    pickAt(e.getX(), e.getY(), e.isControlDown() || e.isMetaDown());
                 }
             }
             @Override public void mouseWheelMoved(MouseWheelEvent e) {
@@ -358,10 +360,10 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
      * click on an already-selected thing clears it, and a click on empty space clears unless ctrl
      * is held.
      */
-    private void pickAt(int mx, int my) {
+    private void pickAt(int mx, int my, boolean add) {
         Site site = siteAt(mx, my);
         if (site != null) {
-            if (ctrlPressed) {
+            if (add) {
                 if (!selectedSites.remove(site)) {
                     selectedSites.add(site);
                 }
@@ -377,7 +379,7 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
         }
         Link link = linkAt(mx, my);
         if (link != null) {
-            if (ctrlPressed) {
+            if (add) {
                 if (!selectedLinks.remove(link)) {
                     selectedLinks.add(link);
                 }
@@ -391,7 +393,7 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
             repaint();
             return;
         }
-        if (!ctrlPressed) {
+        if (!add) {
             clearSelection();
             notifyListeners();
             repaint();
@@ -612,17 +614,9 @@ public class DrawPanel3D extends JPanel implements KeyListener, MoleculeSelectio
 
     @Override public void keyTyped(KeyEvent e) { }
 
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_CONTROL || e.getKeyCode() == KeyEvent.VK_META) {
-            ctrlPressed = true;
-        }
-    }
+    // KeyListener is kept because the class has always implemented it, but ctrl is read from the
+    // mouse event at click time rather than tracked here.
+    @Override public void keyPressed(KeyEvent e) { }
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_CONTROL || e.getKeyCode() == KeyEvent.VK_META) {
-            ctrlPressed = false;
-        }
-    }
+    @Override public void keyReleased(KeyEvent e) { }
 }
