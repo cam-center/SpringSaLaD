@@ -232,18 +232,17 @@ Two things to know before changing it:
   one site type leaves an identical-looking site on the same pixels. Renderer tests use a
   synthetic trajectory instead; both behaviours are pinned by their own tests.
 
-### The render math is right-handed here; upstream it is a setting
+### Handedness is a required argument to the Trackball
 
-`org.springsalad.render` is vendored from VCell's `cbit.vcell.render`. `projectToSphere_xy`
-returns `+z` here, which is the right-handed convention.
+`org.springsalad.render` is vendored from VCell's `cbit.vcell.render`, and now matches it:
+`new Trackball(camera, Handedness)` takes the caller's depth convention explicitly, with no
+default. `projectToSphere_xy` returns `+z` for `RIGHT_HANDED` and `-z` for `LEFT_HANDED`.
 
-VCell's original was **left-handed on purpose** — screen y downward, depth to match — and the
-`-z` encoded that. Its geometry viewers are left-handed throughout and feed the trackball raw
-screen y, while `SpringSaladViewerCanvas` converts to right-handed math convention
-(`p1y = 1.0 - 2.0 * lastY / h`) and so needs the matching `+z`. Upstream has since put a
-handedness setting on the `Trackball` (left-handed `-z`, right-handed `+z`) rather than picking
-one, so the two codebases no longer disagree — this copy is just the un-parameterized version
-of the right-handed choice.
+This viewer is `RIGHT_HANDED` — `SpringSaladViewerCanvas` projects with +z toward the camera,
+shades "nearer = brighter" off the same axis, and converts the mouse to math convention
+(`p1y = 1.0 - 2.0 * lastY / h`). VCell's geometry and PDE surface viewers are `LEFT_HANDED` and
+feed raw screen y. Ask for the wrong one and the scene turns backwards on **both** axes while
+looking perfectly fine in a still image, which is why the constructor makes you decide.
 
 **Handedness is not a free choice upstream, because VCell picks with this math**:
 `SurfaceRenderer` builds projected screen polygons from `unProjectPoint(0,0,1)`, `SurfaceCanvas`

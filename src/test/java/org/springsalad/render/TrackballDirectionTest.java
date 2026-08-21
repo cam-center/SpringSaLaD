@@ -28,7 +28,7 @@ class TrackballDirectionTest {
     }
 
     private static Trackball identityTrackball() {
-        Trackball tb = new Trackball(new Camera());
+        Trackball tb = new Trackball(new Camera(), Trackball.Handedness.RIGHT_HANDED);
         tb.setRotation(0, 0, 0); // look straight down -z; +x right, +y up, +z toward the camera
         return tb;
     }
@@ -118,5 +118,67 @@ class TrackballDirectionTest {
     void verticalDragDoesNotRoll() {
         assertTrue(viewAxisMotion(0.0, 0.0, 0.0, 0.20, new Vect3d(1, 0, 0)) < 1e-9,
                 "a vertical drag moved the view's horizontal axis: the scene is rolling");
+    }
+
+    // ---- handedness: the setting must actually switch which face the drag grabs ----
+
+    private static Vect3d seenBy(Trackball tb, Vect3d world) {
+        Affine m = new Affine();
+        tb.getMatrixGL(m);
+        return m.mult(world);
+    }
+
+    private static Trackball trackball(Trackball.Handedness handedness) {
+        Trackball tb = new Trackball(new Camera(), handedness);
+        tb.setRotation(0, 0, 0);
+        return tb;
+    }
+
+    @Test
+    @DisplayName("LEFT_HANDED grabs the opposite face, so the same drag turns the other way")
+    void handednessSwitchesTheGrabbedFace() {
+        // Mirrors VCell's TrackballHandednessTest. This viewer is right-handed (+z toward the
+        // camera); the geometry viewers upstream are left-handed. Asking for the wrong one turns
+        // the scene backwards on both axes and looks fine in a still image.
+        Vect3d front = new Vect3d(0, 0, 1);
+
+        Trackball right = trackball(Trackball.Handedness.RIGHT_HANDED);
+        double rx0 = seenBy(right, front).getX();
+        right.rotate_xy(0.0, 0.0, 0.30, 0.0);
+        double rightDx = seenBy(right, front).getX() - rx0;
+
+        Trackball left = trackball(Trackball.Handedness.LEFT_HANDED);
+        double lx0 = seenBy(left, front).getX();
+        left.rotate_xy(0.0, 0.0, 0.30, 0.0);
+        double leftDx = seenBy(left, front).getX() - lx0;
+
+        assertTrue(rightDx > 0, "right-handed: +z should follow the mouse");
+        assertTrue(leftDx < 0, "left-handed: +z should be carried the other way");
+    }
+
+    @Test
+    @DisplayName("the canvas asks for the handedness it actually draws with")
+    void canvasDeclaresRightHanded() {
+        // The canvas projects with +z toward the camera and shades "nearer = brighter" off the
+        // same axis, so RIGHT_HANDED is the only consistent choice. There is no default on the
+        // constructor precisely so this cannot be left unconsidered.
+        assertTrue(new SpringSaladViewerCanvasProbe().isRightHanded(),
+                "SpringSaladViewerCanvas must construct its Trackball as RIGHT_HANDED");
+    }
+
+    /** Reads the canvas source rather than its private field; cheap and needs no API change. */
+    private static final class SpringSaladViewerCanvasProbe {
+        boolean isRightHanded() {
+            java.nio.file.Path direct = java.nio.file.Paths.get(
+                    "src/main/java/org/springsalad/viewer/SpringSaladViewerCanvas.java");
+            java.nio.file.Path path = java.nio.file.Files.exists(direct)
+                    ? direct : java.nio.file.Paths.get("..").resolve(direct);
+            try {
+                String src = java.nio.file.Files.readString(path);
+                return src.contains("Trackball.Handedness.RIGHT_HANDED");
+            } catch (java.io.IOException e) {
+                throw new AssertionError(e);
+            }
+        }
     }
 }

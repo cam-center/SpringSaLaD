@@ -74,7 +74,7 @@ public class SpringSaladViewerCanvas extends JPanel {
 	private SpringSaladTrajectory trajectory;
 	private int frameIndex = 0;
 
-	private final Trackball trackball = new Trackball(new Camera());
+	private final Trackball trackball = new Trackball(new Camera(), Trackball.Handedness.RIGHT_HANDED);
 	private double zoom = 1.0;
 	private double panX = 0, panY = 0;
 	private boolean showLinks = true;

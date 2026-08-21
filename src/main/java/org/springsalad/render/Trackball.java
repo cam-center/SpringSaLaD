@@ -53,8 +53,44 @@ public class Trackball {
     private TrackballState trackballState[] = new TrackballState[MAX_STATES];
     private int       numStates;
     private int       currState;
+    private final Handedness handedness;
 
-public Trackball(Camera cam) {
+/**
+ * The handedness of the <em>caller's coordinate system</em> -- which way depth runs in the space
+ * this trackball drives, and so which face of the virtual ball a drag grabs.
+ * <p>
+ * <b>This has nothing to do with the user.</b> It is not a left-handed-mouse preference and not a
+ * choice about how anyone grips anything: it is whether the caller's +z points toward the viewer
+ * or away, which is fixed by how that viewer projects and depth-sorts, not by who is using it.
+ */
+public enum Handedness {
+	/**
+	 * +z points away from the viewer, so the grab point has negative z.
+	 * <p>
+	 * The geometry viewer and the PDE surface viewer are both this way, so that they agree with how
+	 * the slice viewer displays data, and they are internally consistent with this trackball as it
+	 * stands. Their picking rides the same convention -- SurfaceRenderer projects screen polygons
+	 * through {@link Camera#unProjectPoint}, SurfaceCanvas hit-tests clicks against those polygons
+	 * -- so a scene can keep looking right while clicks select the wrong surface if it is changed.
+	 */
+	LEFT_HANDED,
+	/**
+	 * +z points toward the viewer, so the grab point has positive z. A viewer that draws this way
+	 * and asks for {@link #LEFT_HANDED} grabs the far side of the ball, and the scene turns the
+	 * wrong way on both axes.
+	 */
+	RIGHT_HANDED
+}
+
+/**
+ * @param cam the camera to drive
+ * @param handedness which way depth runs in the caller's space. There is deliberately no default:
+ *                   a caller that has not decided this has a fifty-fifty chance of a viewer whose
+ *                   drags turn the scene backwards, and it does not show in a still image.
+ *                   See {@link Handedness}.
+ */
+public Trackball(Camera cam, Handedness handedness) {
+    this.handedness = handedness;
     camera = cam;
     bAnimate = false;
     currQuat.zero();
@@ -229,16 +265,7 @@ double distance_xy, t, z;
       z = t*t / distance_xy;
 //System.out.println("Trackball.projectToSphere("+x+","+y+") 'hyperbola' --> z = "+z);
    }
-   // +z, not -z: the grab point belongs on the hemisphere FACING the camera. Returning -z puts
-   // it on the back of the ball, which mirrors the rotation axis for every drag -- drag right and
-   // the scene turns left. (The p2.cross(p1) and setAxis(axis,-phi) below negate each other, so
-   // they are a no-op and do not compensate for this.)
-   //
-   // This copy is hard-coded right-handed. Upstream now carries a handedness setting on the
-   // Trackball instead -- left-handed keeps the -z, right-handed uses +z -- so the two are
-   // no longer in conflict; this is just the un-parameterized version of the same choice.
-   // See the handedness section in CLAUDE.md before changing it.
-   return new Vect3d(x,y,z);
+   return new Vect3d(x,y,handedness == Handedness.RIGHT_HANDED ? z : -z);
 }
 
 
