@@ -8,7 +8,19 @@
       <variable name="windowsKeystore" value="NO-WINDOWS-KEY-STORE" />
       <variable name="springSaladVersion" value="NO_VALUE" />
     </variables>
-    <codeSigning macEnabled="true" macPkcs12File="${compiler:macKeystore}" windowsEnabled="true" windowsPkcs12File="${compiler:windowsKeystore}" />
+    <codeSigning macEnabled="true" macPkcs12File="${compiler:macKeystore}" windowsEnabled="true" windowsPkcs12File="${compiler:windowsKeystore}">
+      <!--
+        The solver executables are copied in as plain files, so install4j does not know they are
+        Mach-O and leaves them alone: they arrive from LangevinNoVis01 either unsigned or ad-hoc
+        linker-signed. Notarization then rejects the whole bundle, because Apple requires every
+        executable in it to carry a Developer ID signature with the hardened runtime and a secure
+        timestamp. Naming them here makes install4j sign them too, as VCell does for its solvers.
+      -->
+      <macAdditionalBinaries>
+        <entry>langevin_arm64</entry>
+        <entry>langevin_x64</entry>
+      </macAdditionalBinaries>
+    </codeSigning>
     <jreBundles jdkProviderId="JBR" release="17/17.0.7-b1000.6" />
   </application>
   <files>
