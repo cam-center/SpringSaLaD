@@ -64,12 +64,76 @@ jobs:
           
           ./generate_client_installers.sh $(pwd) $(pwd) ${INSTALL4J_HOME}/bin/install4jc ${{ secrets.INSTALL4J_V10 }}
 
-#      - name: upload generated installers
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: installers
-#          path: installers
-#          retention-days: 1
+      # Hand the installers to the notarize job rather than releasing from here. The macOS
+      # installer has to be notarized and stapled BEFORE it is published, or users download the
+      # un-stapled one and Gatekeeper still refuses it.
+      - name: upload generated installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers
+          path: installers
+          retention-days: 1
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
+
+  notarize-and-release:
+    name: Notarize the macOS installer, then publish the release
+    runs-on: macos-latest
+    needs: build
+    steps:
+      - name: set global environment variables
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          else
+            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+          fi
+
+      - name: checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          ref: ${{ env.TAG }}
+
+      - name: download generated installers
+        uses: actions/download-artifact@v4
+        with:
+          name: installers
+          path: installers
+
+      # Fail here rather than publishing something Gatekeeper will refuse. Silently skipping is
+      # how the release ended up signed-but-not-notarized in the first place: the installer is
+      # correctly signed, so nothing looks wrong until a user downloads it and macOS blocks it.
+      - name: check notarization credentials are present
+        run: |
+          missing=""
+          [ -z "${{ secrets.MAC_TEAM_ID }}" ] && missing="$missing MAC_TEAM_ID"
+          [ -z "${{ secrets.MAC_ID }}" ]      && missing="$missing MAC_ID"
+          [ -z "${{ secrets.MAC_PASSWORD }}" ] && missing="$missing MAC_PASSWORD"
+          if [ -n "$missing" ]; then
+            echo "::error::Cannot notarize: missing repository secret(s):$missing"
+            echo "MAC_ID is the Apple ID, MAC_PASSWORD an app-specific password for it, and"
+            echo "MAC_TEAM_ID the Developer Team ID (RZKH46R3ZM for the signing certificate)."
+            exit 1
+          fi
+
+      - name: notarize and staple the mac installer
+        run: |
+          export MAC_INSTALLER=$(ls installers/*.dmg)
+          echo "notarizing $MAC_INSTALLER"
+          ./.github/mac_notarize.sh "${{ secrets.MAC_TEAM_ID }}" "${{ secrets.MAC_ID }}" "${{ secrets.MAC_PASSWORD }}" "${MAC_INSTALLER}"
+
+      # Proof that the published artifact is the stapled one, in the build log.
+      - name: verify Gatekeeper accepts the stapled installer
+        run: |
+          MAC_INSTALLER=$(ls installers/*.dmg)
+          xcrun stapler validate "$MAC_INSTALLER"
+          MP=$(hdiutil attach "$MAC_INSTALLER" -nobrowse -readonly | tail -1 | awk '{$1="";$2="";sub(/^ */,"");print}')
+          spctl -a -vvv -t exec "$MP"/*.app
+          hdiutil detach "$MP" -quiet
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -80,42 +144,8 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            installers/*  
+            installers/*
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         if: ${{ failure() }}
-
-#  notarize:
-#    name: Notarize the MacOS client
-#    runs-on: macos-latest
-#    needs: build
-#    steps:
-#      - name: set global environment variables
-#        run: |
-#          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-#            echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
-#          else
-#            echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
-#          fi
-#
-#      - name: download generated installers
-#        uses: actions/download-artifact@v4
-#
-#      - name: checkout code
-#        uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0
-#          fetch-tags: true
-#          ref: ${{ env.TAG }}
-
-#      - name: notarize mac installer
-#        run: |
-#          export MAC_INSTALLER=$(ls installers/*.dmg)
-#          ./.github/mac_notarize.sh "${{ secrets.MAC_TEAM_ID }}" "${{ secrets.MAC_ID }}" "${{ secrets.MAC_PASSWORD }}" "${MAC_INSTALLER}"
-
-
-
-#      - name: Setup tmate session
-#        uses: mxschmitt/action-tmate@v3
-#        if: ${{ failure() }}
