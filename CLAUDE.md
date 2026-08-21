@@ -225,23 +225,26 @@ Two things to know before changing it:
   one site type leaves an identical-looking site on the same pixels. Renderer tests use a
   synthetic trajectory instead; both behaviours are pinned by their own tests.
 
-### The render math is left-handed upstream, right-handed here
+### The render math is right-handed here; upstream it is a setting
 
-`org.springsalad.render` is vendored from VCell's `cbit.vcell.render`, and the two copies now
-differ by one deliberate sign: `projectToSphere_xy` returns `+z` here and `-z` upstream.
+`org.springsalad.render` is vendored from VCell's `cbit.vcell.render`. `projectToSphere_xy`
+returns `+z` here, which is the right-handed convention.
 
-Upstream is **left-handed on purpose** — screen y downward, depth to match — and the `-z`
-encodes that. VCell's geometry viewers are left-handed throughout and feed the trackball raw
-screen y; `SpringSaladViewerCanvas` converts to right-handed math convention
-(`p1y = 1.0 - 2.0 * lastY / h`) and so needs the matching `+z`.
+VCell's original was **left-handed on purpose** — screen y downward, depth to match — and the
+`-z` encoded that. Its geometry viewers are left-handed throughout and feed the trackball raw
+screen y, while `SpringSaladViewerCanvas` converts to right-handed math convention
+(`p1y = 1.0 - 2.0 * lastY / h`) and so needs the matching `+z`. Upstream has since put a
+handedness setting on the `Trackball` (left-handed `-z`, right-handed `+z`) rather than picking
+one, so the two codebases no longer disagree — this copy is just the un-parameterized version
+of the right-handed choice.
 
-**Do not send this change upstream.** VCell *picks* with this math: `SurfaceRenderer` builds
-projected screen polygons from `unProjectPoint(0,0,1)`, `SurfaceCanvas` hit-tests clicks
-against them, and `DataValueSurfaceViewer.pickPolygon` hangs off `mouseClicked`. Change the
-screen-to-world mapping there and the scene can still look correct while clicks select the
-wrong surface — a silent failure this repo would never notice. Nothing in this viewer picks
-today, which is what makes the convention free to adopt here; that stops being true the moment
-someone adds "click a site to identify it".
+**Handedness is not a free choice upstream, because VCell picks with this math**:
+`SurfaceRenderer` builds projected screen polygons from `unProjectPoint(0,0,1)`, `SurfaceCanvas`
+hit-tests clicks against them, and `DataValueSurfaceViewer.pickPolygon` hangs off
+`mouseClicked`. Get the screen-to-world mapping wrong there and the scene still looks correct
+while clicks select the wrong surface — a silent failure this repo would never notice. Nothing
+in this viewer picks today, which is what makes right-handed free to adopt here; that stops
+being true the moment someone adds "click a site to identify it".
 
 Two traps when working on drag behaviour:
 

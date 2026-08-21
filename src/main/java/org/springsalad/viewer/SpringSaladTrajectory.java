@@ -186,9 +186,12 @@ public class SpringSaladTrajectory implements Serializable {
 	 * a color and radius are then indistinguishable, and collapse into one entry.
 	 */
 	public String siteTypeKey(Site site) {
-		// NOTE: VCell's copy has a literal NUL here ("site:MT0\0Site0") rather than a space. It is
-		// latent there -- the key is only ever used as an opaque map/set key -- but this copy uses a
-		// real space so the key is printable. Worth fixing upstream; see the PR.
+		// Deliberate divergence from VCell: this copy separates with a space, VCell with a NUL.
+		// VCell's had the NUL typed as a raw control byte, which made the .java register as binary
+		// to grep and file(1); upstream fixed that by writing it as the escape '\0' and keeping the
+		// character. So the two copies produce different keys -- harmless, since the key never
+		// leaves the process (map/set keys for the visibility toggles), but do not assume they
+		// match when comparing the files.
 		SiteIdentity identity = getSiteIdentity(site.getId());
 		if (identity != null) {
 			return "site:" + identity.getMoleculeName() + ' ' + identity.getSiteTypeName();

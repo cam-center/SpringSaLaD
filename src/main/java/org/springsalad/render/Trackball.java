@@ -232,7 +232,12 @@ double distance_xy, t, z;
    // +z, not -z: the grab point belongs on the hemisphere FACING the camera. Returning -z puts
    // it on the back of the ball, which mirrors the rotation axis for every drag -- drag right and
    // the scene turns left. (The p2.cross(p1) and setAxis(axis,-phi) below negate each other, so
-   // they are a no-op and do not compensate for this.) VCell's copy still has the -z.
+   // they are a no-op and do not compensate for this.)
+   //
+   // This copy is hard-coded right-handed. Upstream now carries a handedness setting on the
+   // Trackball instead -- left-handed keeps the -z, right-handed uses +z -- so the two are
+   // no longer in conflict; this is just the un-parameterized version of the same choice.
+   // See the handedness section in CLAUDE.md before changing it.
    return new Vect3d(x,y,z);
 }
 
