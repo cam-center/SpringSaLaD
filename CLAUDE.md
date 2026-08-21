@@ -225,6 +225,31 @@ Two things to know before changing it:
   one site type leaves an identical-looking site on the same pixels. Renderer tests use a
   synthetic trajectory instead; both behaviours are pinned by their own tests.
 
+### The render math is left-handed upstream, right-handed here
+
+`org.springsalad.render` is vendored from VCell's `cbit.vcell.render`, and the two copies now
+differ by one deliberate sign: `projectToSphere_xy` returns `+z` here and `-z` upstream.
+
+Upstream is **left-handed on purpose** — screen y downward, depth to match — and the `-z`
+encodes that. VCell's geometry viewers are left-handed throughout and feed the trackball raw
+screen y; `SpringSaladViewerCanvas` converts to right-handed math convention
+(`p1y = 1.0 - 2.0 * lastY / h`) and so needs the matching `+z`.
+
+**Do not send this change upstream.** VCell *picks* with this math: `SurfaceRenderer` builds
+projected screen polygons from `unProjectPoint(0,0,1)`, `SurfaceCanvas` hit-tests clicks
+against them, and `DataValueSurfaceViewer.pickPolygon` hangs off `mouseClicked`. Change the
+screen-to-world mapping there and the scene can still look correct while clicks select the
+wrong surface — a silent failure this repo would never notice. Nothing in this viewer picks
+today, which is what makes the convention free to adopt here; that stops being true the moment
+someone adds "click a site to identify it".
+
+Two traps when working on drag behaviour:
+
+- **A horizontal drag across the midline is identical under either y convention**, so a sign
+  error hides there and shows up only on vertical drags. Test both axes.
+- `TrackballDirectionTest` calls `rotate_xy` directly, so it pins the *math* convention and not
+  the mouse path. A test of what the user actually feels has to go through the canvas's y-flip.
+
 ### Java3D is still a dependency
 
 Replacing the trajectory viewer did **not** remove Java3D, and the jogamp repos and
