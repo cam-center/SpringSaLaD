@@ -229,8 +229,11 @@ double distance_xy, t, z;
       z = t*t / distance_xy;
 //System.out.println("Trackball.projectToSphere("+x+","+y+") 'hyperbola' --> z = "+z);
    }
-//   vect.set(x,y,-z);
-   return new Vect3d(x,y,-z);
+   // +z, not -z: the grab point belongs on the hemisphere FACING the camera. Returning -z puts
+   // it on the back of the ball, which mirrors the rotation axis for every drag -- drag right and
+   // the scene turns left. (The p2.cross(p1) and setAxis(axis,-phi) below negate each other, so
+   // they are a no-op and do not compensate for this.) VCell's copy still has the -z.
+   return new Vect3d(x,y,z);
 }
 
 
