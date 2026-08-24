@@ -7,9 +7,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<solvers-langevin-mac.version>1.4.2</solvers-langevin-mac.version>
-		<solvers-langevin-windows.version>1.4.2</solvers-langevin-windows.version>
-		<solvers-langevin-linux.version>1.4.2</solvers-langevin-linux.version>
+		<solvers-langevin-mac.version>1.4.13</solvers-langevin-mac.version>
+		<solvers-langevin-windows.version>1.4.13</solvers-langevin-windows.version>
+		<solvers-langevin-linux.version>1.4.13</solvers-langevin-linux.version>
 		<junit-jupiter.version>5.10.2</junit-jupiter.version>
 		<maven-surefire.version>3.2.5</maven-surefire.version>
 	</properties>
@@ -156,7 +156,7 @@
 									<goal>wget</goal>
 								</goals>
 								<configuration>
-									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-13</url>
+									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-15-intel</url>
 									<outputDirectory>localsolvers/macos_x86_64</outputDirectory>
 									<outputFileName>langevin_x64</outputFileName>
 								</configuration>
@@ -224,7 +224,7 @@
 									<goal>wget</goal>
 								</goals>
 								<configuration>
-									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-13</url>
+									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-15-intel</url>
 									<outputDirectory>localsolvers/macos_x86_64</outputDirectory>
 									<outputFileName>langevin_x64</outputFileName>
 								</configuration>
@@ -311,7 +311,7 @@
 									<goal>wget</goal>
 								</goals>
 								<configuration>
-									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-13</url>
+									<url>https://github.com/cam-center/LangevinNoVis01/releases/download/${solvers-langevin-mac.version}/langevin-macos-15-intel</url>
 									<outputDirectory>localsolvers/macos_x86_64</outputDirectory>
 									<outputFileName>langevin_x64</outputFileName>
 								</configuration>

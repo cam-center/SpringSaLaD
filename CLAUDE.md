@@ -37,7 +37,7 @@ the directory containing `localsolvers/`.
 OS-activated Maven profiles (`macprofile` / `winprofile` / `unixprofile`) each download **all
 four** platform solvers into `localsolvers/{linux64,win64,macos_x86_64,macos_arm64}` during
 `generate-test-resources`, then `chmod 755` the macOS ones. Bumping the solver is a matter of
-changing the three `solvers-langevin-*.version` properties in `pom.xml` (currently `1.4.2`,
+changing the three `solvers-langevin-*.version` properties in `pom.xml` (currently `1.4.13`,
 kept in lockstep) — the profiles are otherwise near-duplicates, so edit all three.
 
 `localsolvers/`, `installers/`, and `install4j_output/` are gitignored build outputs, but the
