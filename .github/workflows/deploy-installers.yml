@@ -87,13 +87,21 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 45
     needs: build
+    # Exposed so the Zenodo job can name the tag. A reusable workflow is invoked at
+    # job level, where the `env` context is not available, so `env.TAG` cannot be
+    # passed to it directly.
+    outputs:
+      tag: ${{ steps.vars.outputs.tag }}
     steps:
       - name: set global environment variables
+        id: vars
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
           else
             echo "TAG=${GITHUB_REF_NAME}" >> $GITHUB_ENV
+            echo "tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
           fi
 
       - name: checkout code
@@ -157,3 +165,18 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
         timeout-minutes: 15
+
+  # Archive from here rather than relying on zenodo-archive.yml's `on: release`.
+  # The release above is published with the default GITHUB_TOKEN, and GitHub does not
+  # raise workflow-triggering events for actions taken with that token -- so the
+  # `release: published` event never fires and zenodo-archive.yml had never run once,
+  # leaving 2.5.2 unarchived while its installers shipped perfectly fine.
+  # Calling the reusable workflow directly does not depend on that event at all.
+  archive-to-zenodo:
+    name: Archive the published release to Zenodo
+    needs: notarize-and-release
+    uses: virtualcell/zenodo-maint/.github/workflows/archive.reusable.yml@v1
+    with:
+      tag: ${{ needs.notarize-and-release.outputs.tag }}
+    secrets:
+      ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}

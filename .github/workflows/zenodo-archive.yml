@@ -1,5 +1,14 @@
 name: Archive release to Zenodo
 
+# Safety net for a release published BY HAND. It cannot cover the normal path:
+# deploy-installers.yml publishes with the default GITHUB_TOKEN, and GitHub
+# suppresses workflow-triggering events for that token, so `release: published`
+# never fires for an automated release. That workflow therefore calls
+# archive.reusable.yml itself, in its archive-to-zenodo job.
+#
+# Both paths are safe to keep: they are mutually exclusive today, and archiving
+# is idempotent -- an already-archived tag is skipped rather than duplicated.
+
 on:
   release:
     types: [published]
